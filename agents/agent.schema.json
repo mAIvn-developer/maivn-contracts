@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/agents/agent.schema.json",
+  "title": "Deployed Agent",
+  "description": "Identity-only deployed-agent record for the mAIvn Platform v2 agent registry.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_id",
+    "project_id",
+    "name",
+    "latest_version",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable deployed-agent identifier."
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project that owns this deployed agent."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable deployed-agent name."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional human-readable deployed-agent description."
+    },
+    "latest_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Latest immutable version number deployed for this agent."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when the agent identity was created."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when the agent identity was last updated."
+    }
+  }
+}

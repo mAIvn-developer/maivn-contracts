@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/verified_export_publication_request.schema.json",
+  "title": "VerifiedExportPublicationRequest",
+  "x-maivn-verified-export-validation": "publication-request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operation_id", "manifest"],
+  "properties": {
+    "schema_version": {"const": "verified-export-publication-v1"},
+    "operation_id": {"$ref": "#/$defs/token"},
+    "manifest": {"$ref": "https://schemas.maivn.dev/artifacts/verified_export_manifest.schema.json"}
+  },
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"}
+  }
+}

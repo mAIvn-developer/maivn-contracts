@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/tools/tool_callback.schema.json",
+  "title": "ToolCallback",
+  "description": "JSON-only external tool result envelope. It never carries callable code, source, modules, artifacts, images, commands, pickles, packages, or secret fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "dispatch_id", "attempt_id", "session_id", "call_id", "completed_at", "outcome"],
+  "properties": {"schema_version": {"const": 1}, "dispatch_id": {"type": "string", "minLength": 1}, "attempt_id": {"type": "string", "minLength": 1}, "session_id": {"type": "string", "minLength": 1}, "call_id": {"type": "string", "minLength": 1}, "completed_at": {"type": "string", "format": "date-time"}, "outcome": {"$ref": "https://schemas.maivn.dev/tools/tool_outcome.schema.json"}}
+}

@@ -1,0 +1,59 @@
+[
+  {
+    "call_id": "call-both",
+    "status": "ok",
+    "duration_ms": 5,
+    "result": {
+      "ok": true
+    },
+    "error": {
+      "code": "unexpected",
+      "message": "Both result and error were set.",
+      "retryable": false
+    }
+  },
+  {
+    "call_id": "call-missing-status",
+    "duration_ms": 5,
+    "result": {
+      "ok": true
+    }
+  },
+  {
+    "call_id": "call-unknown-status",
+    "status": "pending",
+    "duration_ms": 5,
+    "result": {
+      "ok": true
+    }
+  },
+  {
+    "call_id": "call-ok-missing-result",
+    "status": "ok",
+    "duration_ms": 5
+  },
+  {
+    "call_id": "call-error-missing-error",
+    "status": "error",
+    "duration_ms": 5
+  },
+  {
+    "call_id": "call-legacy-storage-artifact",
+    "status": "ok",
+    "duration_ms": 5,
+    "result": {},
+    "artifact_refs": [
+      {
+        "artifact_id": "art-legacy-001",
+        "kind": "document",
+        "mime_type": "application/pdf",
+        "storage_ref": {
+          "bucket": "invocation-artifacts",
+          "path": "legacy.pdf",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ]
+  }
+]

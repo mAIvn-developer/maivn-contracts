@@ -1,0 +1,39 @@
+[
+  {
+    "call_id": "call-lookup-001",
+    "spec_ref": {
+      "tool_id": "tool-lookup-case",
+      "namespace": "support",
+      "version": "2026-07-03"
+    },
+    "arguments": {
+      "case_id": "case-1001"
+    },
+    "lineage": {
+      "session_id": "ses-support-001",
+      "invocation_id": "inv-support-001",
+      "message_id": "msg-assistant-tool-use-001",
+      "root_call_id": "call-lookup-001"
+    }
+  },
+  {
+    "call_id": "call-gmail-send-001",
+    "spec_ref": {
+      "tool_id": "tool-gmail-send",
+      "namespace": "connectors.gmail",
+      "version": "2026-07-03"
+    },
+    "arguments": {
+      "to": "customer@example.com",
+      "subject": "Case update",
+      "body": "We are reviewing your case."
+    },
+    "lineage": {
+      "session_id": "ses-support-001",
+      "invocation_id": "inv-support-001",
+      "message_id": "msg-assistant-tool-use-002",
+      "parent_call_id": "call-lookup-001",
+      "root_call_id": "call-lookup-001"
+    }
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/vault_value_map_handle.schema.json",
+  "title": "VaultValueMapHandle",
+  "x-maivn-vault-value-map-handle-validation": true,
+  "description": "Opaque Vault routing identities for one immutable value-map generation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_handle", "generation_handle"],
+  "properties": {
+    "record_handle": {"$ref": "#/$defs/token"},
+    "generation_handle": {"$ref": "#/$defs/token"}
+  },
+  "$defs": {
+    "token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    }
+  }
+}

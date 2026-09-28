@@ -1,0 +1,135 @@
+[
+  {
+    "tool_id": "tool-lookup-case",
+    "kind": "function",
+    "namespace": "support",
+    "version": "2026-07-03",
+    "idempotency": "idempotent",
+    "timeout_ms": 5000,
+    "name": "lookup_case",
+    "description": "Look up a support case by id.",
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "description": "Support case identifier."
+        }
+      },
+      "required": ["case_id"]
+    },
+    "output_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "priority": {
+          "type": "string"
+        }
+      },
+      "required": ["priority"]
+    }
+  },
+  {
+    "tool_id": "tool-gmail-send",
+    "kind": "mcp",
+    "namespace": "connectors.gmail",
+    "version": "2026-07-03",
+    "idempotency": "non_idempotent",
+    "timeout_ms": 10000,
+    "auth": {
+      "scheme": "oauth",
+      "secret_ref": "vault://projects/prj-support/connections/gmail"
+    },
+    "server_ref": {
+      "kind": "registry",
+      "name": "gmail"
+    },
+    "tool_name": "send_email",
+    "schema_policy": "passthrough",
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "to": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": ["to", "subject", "body"]
+    },
+    "output_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "message_id": {
+          "type": "string"
+        }
+      },
+      "required": ["message_id"]
+    }
+  },
+  {
+    "tool_id": "tool-mcp-filesystem-read",
+    "kind": "mcp",
+    "namespace": "connectors.files",
+    "version": "2026-07-03",
+    "idempotency": "idempotent",
+    "timeout_ms": 3000,
+    "server_ref": {
+      "kind": "url",
+      "url_ref": "vault://mcp/servers/filesystem/url"
+    },
+    "tool_name": "read_file",
+    "schema_policy": "passthrough",
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": ["path"]
+    }
+  },
+  {
+    "tool_id": "tool-system-compose-artifact",
+    "kind": "system",
+    "namespace": "system",
+    "version": "2026-07-03",
+    "idempotency": "non_idempotent",
+    "timeout_ms": 30000,
+    "name": "compose_artifact",
+    "description": "Create a returnable artifact from structured content.",
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["pdf", "docx", "xlsx", "png"]
+        }
+      },
+      "required": ["title", "format"]
+    },
+    "output_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "type": "string"
+        }
+      },
+      "required": ["artifact_id"]
+    }
+  }
+]

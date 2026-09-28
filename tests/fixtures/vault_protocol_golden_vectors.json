@@ -1,0 +1,122 @@
+{
+  "http_request": {
+    "method": "post",
+    "path": "/v1/vault/work-intents?b=2&a=1",
+    "body_utf8": "{\"plan\": {}}\n",
+    "public_headers": {
+      "Content-Type": " \tapplication/json\t ",
+      "X-Maivn-Operation-Id": "operation_0001",
+      "X-Maivn-Session-Id": "session_0001"
+    },
+    "client_header_digests": {
+      "x-maivn-grant-credential": "4e99a97677c9a4eaee5fa9982a3b9cf58a3cf56f2970671794035d4c23d27975",
+      "x-maivn-client-proof": "9cced89ad038fc3dbaa5710f2e140c74aab1ff9e11988253e0882ddb4386d629",
+      "x-maivn-session-credential": "a538804ed9da0606ffb7fa72a847f0a67ddbf4052d2cc63305eed32d65920d07"
+    },
+    "actual_headers": {
+      "Content-Type": " \tapplication/json\t ",
+      "X-Maivn-Operation-Id": "operation_0001",
+      "X-Maivn-Session-Id": "session_0001",
+      "X-Maivn-Grant-Credential": "Z3JhbnQtc2VjcmV0LTAwMDE",
+      "X-Maivn-Client-Proof": "cHJvb2Ytc2VjcmV0LTAwMDE",
+      "X-Maivn-Session-Credential": "c2Vzc2lvbi1zZWNyZXQtMDAwMQ",
+      "X-Maivn-Sender-Assertion": "excluded-assertion",
+      "X-Maivn-Sender-Signature": "excluded-signature"
+    },
+    "canonical_utf8": "{\"body_sha256\":\"cf107feec9024eda8e97108e6fda8b2cd57cadab582ae548e252ea9b71ac449e\",\"client_header_digests\":{\"x-maivn-client-proof\":\"9cced89ad038fc3dbaa5710f2e140c74aab1ff9e11988253e0882ddb4386d629\",\"x-maivn-grant-credential\":\"4e99a97677c9a4eaee5fa9982a3b9cf58a3cf56f2970671794035d4c23d27975\",\"x-maivn-session-credential\":\"a538804ed9da0606ffb7fa72a847f0a67ddbf4052d2cc63305eed32d65920d07\"},\"domain\":\"maivn-vault-request-v1\",\"method\":\"POST\",\"path\":\"/v1/vault/work-intents?b=2&a=1\",\"public_headers\":{\"content-type\":\"application/json\",\"x-maivn-operation-id\":\"operation_0001\",\"x-maivn-session-id\":\"session_0001\"}}",
+    "actual_request_digest": "85b3196080076f409d786da86ab110af9030858f7d09cabd5ed30057e05baad5"
+  },
+  "assertion": {
+    "issuer": "data_plane",
+    "key_id": "key_0001",
+    "audience": "vault_plane",
+    "actor": "actor_0001",
+    "tenant_id": "tenant_0001",
+    "surface": "surface_0001",
+    "surface_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "actual_request_digest": "85b3196080076f409d786da86ab110af9030858f7d09cabd5ed30057e05baad5",
+    "issued_at": "2026-08-11T11:59:00Z",
+    "nonce": "nonce_0001",
+    "expires_at": "2026-08-11T12:00:00Z"
+  },
+  "assertion_json_utf8": "{\"actor\":\"actor_0001\",\"actual_request_digest\":\"85b3196080076f409d786da86ab110af9030858f7d09cabd5ed30057e05baad5\",\"audience\":\"vault_plane\",\"expires_at\":\"2026-08-11T12:00:00Z\",\"issued_at\":\"2026-08-11T11:59:00Z\",\"issuer\":\"data_plane\",\"key_id\":\"key_0001\",\"nonce\":\"nonce_0001\",\"surface\":\"surface_0001\",\"surface_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"tenant_id\":\"tenant_0001\"}",
+  "assertion_signing_base64url": "bWFpdm4tdmF1bHQtYXNzZXJ0aW9uLXYxAHsiYWN0b3IiOiJhY3Rvcl8wMDAxIiwiYWN0dWFsX3JlcXVlc3RfZGlnZXN0IjoiODViMzE5NjA4MDA3NmY0MDlkNzg2ZGE4NmFiMTEwYWY5MDMwODU4ZjdkMDljYWJkNWVkMzAwNTdlMDViYWFkNSIsImF1ZGllbmNlIjoidmF1bHRfcGxhbmUiLCJleHBpcmVzX2F0IjoiMjAyNi0wOC0xMVQxMjowMDowMFoiLCJpc3N1ZWRfYXQiOiIyMDI2LTA4LTExVDExOjU5OjAwWiIsImlzc3VlciI6ImRhdGFfcGxhbmUiLCJrZXlfaWQiOiJrZXlfMDAwMSIsIm5vbmNlIjoibm9uY2VfMDAwMSIsInN1cmZhY2UiOiJzdXJmYWNlXzAwMDEiLCJzdXJmYWNlX2RpZ2VzdCI6ImJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmIiLCJ0ZW5hbnRfaWQiOiJ0ZW5hbnRfMDAwMSJ9",
+  "ticket_transport": {
+    "sender_assertion_base64url": "eyJhY3RvciI6ImFjdG9yXzAwMDEiLCJhY3R1YWxfcmVxdWVzdF9kaWdlc3QiOiI4NWIzMTk2MDgwMDc2ZjQwOWQ3ODZkYTg2YWIxMTBhZjkwMzA4NThmN2QwOWNhYmQ1ZWQzMDA1N2UwNWJhYWQ1IiwiYXVkaWVuY2UiOiJ2YXVsdF9wbGFuZSIsImV4cGlyZXNfYXQiOiIyMDI2LTA4LTExVDEyOjAwOjAwWiIsImlzc3VlZF9hdCI6IjIwMjYtMDgtMTFUMTE6NTk6MDBaIiwiaXNzdWVyIjoiZGF0YV9wbGFuZSIsImtleV9pZCI6ImtleV8wMDAxIiwibm9uY2UiOiJub25jZV8wMDAxIiwic3VyZmFjZSI6InN1cmZhY2VfMDAwMSIsInN1cmZhY2VfZGlnZXN0IjoiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsInRlbmFudF9pZCI6InRlbmFudF8wMDAxIn0",
+    "sender_signature_base64url": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0-Pw",
+    "body_base64url": "eyJwbGFuIjoge319Cg",
+    "body_hex": "7b22706c616e223a207b7d7d0a"
+  },
+  "identity": {
+    "issuer": "data_plane",
+    "actor": "actor_0001",
+    "tenant_id": "tenant_0001",
+    "surface": "surface_0001"
+  },
+  "work": {
+    "schema_version": "vault-work-v1",
+    "intent_id": "intent_0001",
+    "idempotency_key": "idempotency_0001",
+    "operation": "delete",
+    "scope": {
+      "organization_id": "organization_0001",
+      "project_id": "project_0001"
+    },
+    "surface": {
+      "root_invocation_id": "invocation_0001",
+      "session_id": "session_0001",
+      "checkpoint_id": "checkpoint_0001",
+      "caller_id": "caller_0001"
+    },
+    "input_handles": [
+      {
+        "local_id": "source_1",
+        "record_handle": "record_0001",
+        "generation_handle": "generation_0001",
+        "role": "source_artifact"
+      }
+    ],
+    "bounds": {
+      "max_output_bytes": 1024
+    },
+    "retention_policy_id": "retention_policy_0001",
+    "deletion_scope": {
+      "mode": "include_redacted_exports"
+    },
+    "expires_at": "2026-08-11T12:00:00Z"
+  },
+  "derived_identity": {
+    "tenant_claim": "b4e91b7aef2b2f7582a1c515a2073cb84112bd679fc65d9460fa94c75d7961dc",
+    "surface_identity_digest": "b75abbeae191e656d5a77c15ef6ce128eb251d512eb57244a8572832b2524982",
+    "work_json_utf8": "{\"bounds\":{\"max_output_bytes\":1024},\"deletion_scope\":{\"mode\":\"include_redacted_exports\"},\"expires_at\":\"2026-08-11T12:00:00Z\",\"idempotency_key\":\"idempotency_0001\",\"input_handles\":[{\"generation_handle\":\"generation_0001\",\"local_id\":\"source_1\",\"record_handle\":\"record_0001\",\"role\":\"source_artifact\"}],\"intent_id\":\"intent_0001\",\"operation\":\"delete\",\"retention_policy_id\":\"retention_policy_0001\",\"schema_version\":\"vault-work-v1\",\"scope\":{\"organization_id\":\"organization_0001\",\"project_id\":\"project_0001\"},\"surface\":{\"caller_id\":\"caller_0001\",\"checkpoint_id\":\"checkpoint_0001\",\"root_invocation_id\":\"invocation_0001\",\"session_id\":\"session_0001\"}}"
+  },
+  "status_request": {
+    "payload": {
+      "schema_version": "vault-intent-status-request-v1",
+      "server_intent_id": "intent_server_0001"
+    },
+    "canonical_utf8": "{\"schema_version\":\"vault-intent-status-request-v1\",\"server_intent_id\":\"intent_server_0001\"}"
+  },
+  "admission_fingerprint": "293254f0b3ad85b8176f617049cc15eb501db7dae0a1dae8b03d750d5a49ac92",
+  "stored_intent": {
+    "intent_id": "11111111-1111-4111-8111-111111111111",
+    "issuer": "data_plane",
+    "actor": "actor_0001",
+    "tenant_id": "tenant_0001",
+    "surface": "surface_0001",
+    "operation": "delete",
+    "admission_fingerprint": "293254f0b3ad85b8176f617049cc15eb501db7dae0a1dae8b03d750d5a49ac92",
+    "deletion_scope": "include_redacted_exports"
+  },
+  "operation_binding_digest": "5a703d9e8fe89c6568dc7319b736a4d1e3b107790dabe058bc856f6fc5e131d2",
+  "capabilities": {
+    "grant_credential": "Z3JhbnQtc2VjcmV0LTAwMDE",
+    "grant_header_digest": "4e99a97677c9a4eaee5fa9982a3b9cf58a3cf56f2970671794035d4c23d27975",
+    "grant_salt_hex": "000102030405060708090a0b0c0d0e0f",
+    "grant_verifier": "7f3b8d90b765cf600ac13fad771f81a7c66ccc9c5a3c0d5d1e4edb2774042d4a",
+    "client_proof": "cHJvb2Ytc2VjcmV0LTAwMDE",
+    "client_proof_digest": "9cced89ad038fc3dbaa5710f2e140c74aab1ff9e11988253e0882ddb4386d629",
+    "session_credential": "c2Vzc2lvbi1zZWNyZXQtMDAwMQ",
+    "session_credential_digest": "a538804ed9da0606ffb7fa72a847f0a67ddbf4052d2cc63305eed32d65920d07"
+  }
+}

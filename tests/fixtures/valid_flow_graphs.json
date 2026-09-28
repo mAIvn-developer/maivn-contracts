@@ -1,0 +1,68 @@
+[
+  {
+    "schema_version": 1,
+    "nodes": [
+      {"node_id": "trigger", "kind": "trigger"},
+      {
+        "node_id": "scope",
+        "kind": "scope",
+        "scope_kind": "agent",
+        "runtime_ref": {"agent_id": "agent-support", "version": 3},
+        "component_ref": {
+          "component_id": "cmp-support",
+          "version": 7,
+          "component_kind": "agent"
+        }
+      },
+      {"node_id": "output", "kind": "output"},
+      {
+        "node_id": "tool.crm",
+        "kind": "resource",
+        "relationship": "capability",
+        "component_ref": {
+          "component_id": "cmp-crm",
+          "version": 2,
+          "component_kind": "tool"
+        }
+      }
+    ],
+    "edges": [
+      {"edge_id": "start", "kind": "control", "source": "trigger", "target": "scope"},
+      {"edge_id": "finish", "kind": "result", "source": "scope", "target": "output"},
+      {"edge_id": "use.crm", "kind": "capability", "source": "scope", "target": "tool.crm"}
+    ],
+    "layout": {
+      "node_positions": {
+        "trigger": {"x": 80, "y": 120},
+        "scope": {"x": 320, "y": 120},
+        "output": {"x": 560, "y": 120},
+        "tool.crm": {"x": 320, "y": 300}
+      }
+    }
+  },
+  {
+    "schema_version": 1,
+    "nodes": [
+      {"node_id": "trigger", "kind": "trigger"},
+      {
+        "node_id": "scope",
+        "kind": "scope",
+        "scope_kind": "nested_flow",
+        "runtime_ref": {"agent_id": "agent-leaf", "version": 4},
+        "nested_flow_ref": {"flow_id": "flow-child", "version": 2}
+      },
+      {"node_id": "output", "kind": "output"}
+    ],
+    "edges": [
+      {"edge_id": "start", "kind": "control", "source": "trigger", "target": "scope"},
+      {"edge_id": "finish", "kind": "result", "source": "scope", "target": "output"}
+    ],
+    "layout": {
+      "node_positions": {
+        "trigger": {"x": 80.5, "y": 120},
+        "scope": {"x": 320, "y": 120.5},
+        "output": {"x": 560, "y": 120}
+      }
+    }
+  }
+]

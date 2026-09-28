@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/artifact_error.schema.json",
+  "title": "ArtifactError", "type": "object", "additionalProperties": false,
+  "required": ["code", "error_class", "retryable"],
+  "properties": {
+    "code": {"enum": ["artifact_type_not_allowed", "artifact_too_large", "artifact_quota_exceeded", "artifact_upload_expired", "artifact_hash_mismatch", "artifact_validation_failed", "artifact_scan_rejected", "artifact_storage_unavailable", "artifact_publish_conflict", "artifact_revision_conflict", "artifact_not_available", "artifact_expired", "artifact_deleted", "artifact_selection_invalid", "artifact_custody_violation", "artifact_delete_incomplete", "vault_authorization_required", "vault_grant_expired", "vault_grant_consumed", "vault_unavailable"]},
+    "error_class": {"enum": ["policy", "validation", "availability", "conflict", "lifecycle", "authorization"]}, "retryable": {"type": "boolean"}
+  },
+  "allOf": [
+    {"if":{"properties":{"code":{"const":"artifact_type_not_allowed"}}},"then":{"properties":{"error_class":{"const":"policy"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"const":"artifact_too_large"}}},"then":{"properties":{"error_class":{"const":"policy"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"const":"artifact_quota_exceeded"}}},"then":{"properties":{"error_class":{"const":"policy"},"retryable":{"const":true}}}},
+    {"if":{"properties":{"code":{"const":"artifact_upload_expired"}}},"then":{"properties":{"error_class":{"const":"lifecycle"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"enum":["artifact_hash_mismatch","artifact_validation_failed","artifact_scan_rejected"]}}},"then":{"properties":{"error_class":{"const":"validation"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"const":"artifact_storage_unavailable"}}},"then":{"properties":{"error_class":{"const":"availability"},"retryable":{"const":true}}}},
+    {"if":{"properties":{"code":{"enum":["artifact_publish_conflict","artifact_revision_conflict"]}}},"then":{"properties":{"error_class":{"const":"conflict"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"const":"artifact_not_available"}}},"then":{"properties":{"error_class":{"const":"availability"},"retryable":{"const":true}}}},
+    {"if":{"properties":{"code":{"enum":["artifact_expired","artifact_deleted"]}}},"then":{"properties":{"error_class":{"const":"lifecycle"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"enum":["artifact_selection_invalid","artifact_custody_violation"]}}},"then":{"properties":{"error_class":{"const":"policy"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"const":"artifact_delete_incomplete"}}},"then":{"properties":{"error_class":{"const":"lifecycle"},"retryable":{"const":true}}}},
+    {"if":{"properties":{"code":{"enum":["vault_authorization_required","vault_grant_expired","vault_grant_consumed"]}}},"then":{"properties":{"error_class":{"const":"authorization"},"retryable":{"const":false}}}},
+    {"if":{"properties":{"code":{"const":"vault_unavailable"}}},"then":{"properties":{"error_class":{"const":"availability"},"retryable":{"const":true}}}}
+  ]
+}

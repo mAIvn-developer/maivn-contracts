@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = [".uv-cache/"]
+skip-excluded-dirs = true
+
+[project]
+name = "maivn-contracts"
+version = "0.1.0"
+description = "Canonical schema contracts for mAIvn Platform v2."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = [
+  "jsonschema",
+  "pydantic>=2.13.5",
+  "rfc8785==0.1.4",
+  # typing_extensions.Self: typing.Self needs 3.11 and this package floors at 3.10.
+  "typing-extensions>=4.12",
+]
+
+[dependency-groups]
+dev = [
+  "basedpyright",
+  "pytest",
+  "ruff",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/maivn_contracts"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--import-mode=importlib",
+]
+pythonpath = [
+  "src",
+]
+testpaths = [
+  "tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "single"
+
+# LF on every platform. The default, "auto", keeps whatever ending a file
+# already carries, which is how CRLF kept arriving from Windows editors.
+line-ending = "lf"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "A003",
+  "ANN401",
+  "COM812",
+  # No source file in this repository carries a copyright header.
+  "CPY001",
+  "D203",
+  "D213",
+  "INP001",
+  "ISC001",
+]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.lint.per-file-ignores]
+"evals/**/*.py" = ["PERF203", "T201"]
+"tests/**/*.py" = ["S101"]
+
+# basedpyright is configured in pyrightconfig.json because that file takes
+# precedence over a pyproject section. Keep its Python version aligned with the
+# `requires-python` floor so type checks cover the oldest supported interpreter.

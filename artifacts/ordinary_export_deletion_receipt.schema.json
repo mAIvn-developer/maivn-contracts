@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/ordinary_export_deletion_receipt.schema.json",
+  "title": "OrdinaryExportDeletionReceipt",
+  "x-maivn-verified-export-validation": "deletion-receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "receipt_id", "state", "updated_at"],
+  "properties": {
+    "schema_version": {"const": "ordinary-export-deletion-receipt-v1"},
+    "receipt_id": {"$ref": "#/$defs/token"},
+    "state": {"enum": ["requested", "draining", "deleting", "delete_incomplete", "deleted"]},
+    "updated_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+  },
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "rfc3339UtcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+    }
+  }
+}

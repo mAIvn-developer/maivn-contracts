@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/events/event.schema.json",
+  "title": "Canonical Event",
+  "description": "Canonical immutable event record for the mAIvn Platform v2 event spine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "ordinal",
+    "type",
+    "session_id",
+    "root_event_id",
+    "trigger_chain_depth",
+    "job_depth",
+    "job_index",
+    "actor",
+    "mode",
+    "payload",
+    "ts"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable unique identifier for this event record."
+    },
+    "ordinal": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Per-producer monotonic or hybrid-logical-clock token; it is not a global gapless database sequence."
+    },
+    "type": {
+      "type": "string",
+      "description": "Canonical event type from the event taxonomy.",
+      "enum": [
+        "tool_event",
+        "interrupt_request",
+        "interrupt_required",
+        "assignment_received",
+        "assignment_completed",
+        "model_tool_complete",
+        "heartbeat",
+        "update",
+        "progress_update",
+        "model_routing",
+        "status_message",
+        "status_message_chunk",
+        "final",
+        "error",
+        "system_tool_start",
+        "system_tool_chunk",
+        "system_tool_complete",
+        "system_tool_error",
+        "hook_fired",
+        "enrichment",
+        "evaluating",
+        "planning",
+        "searching_tools",
+        "loading_tools",
+        "planning_assignments",
+        "executing_assignments",
+        "executing_actions",
+        "synthesizing",
+        "finalizing",
+        "reevaluate_accrued",
+        "memory_summarizing",
+        "memory_summarized",
+        "memory_retrieving",
+        "memory_retrieved",
+        "memory_indexing",
+        "memory_indexed",
+        "memory_graph_extracting",
+        "memory_skill_extracting",
+        "memory_insight_extracting",
+        "memory_skill_extracted",
+        "memory_insight_extracted",
+        "redaction_previewed",
+        "message_redaction_applied",
+        "resource_registering",
+        "resource_registered",
+        "resource_dedup_reused",
+        "resource_version_superseded",
+        "resource_extracting",
+        "resource_extracted",
+        "document_analysis_selected",
+        "document_evidence_coverage",
+        "trigger.fired",
+        "trigger.skipped",
+        "trigger.failed",
+        "trigger.disabled",
+        "trigger.enabled",
+        "connection.event_received",
+        "email.received",
+        "conversation.reply_received",
+        "memory.record_changed",
+        "storage.object_uploaded",
+        "trigger.fire_requested",
+        "agent.thinking",
+        "agent.tool_selected",
+        "tool.dispatch_started",
+        "tool.dispatch_completed",
+        "agent.responded",
+        "session.completed",
+        "artifact.reserved", "artifact.uploaded", "artifact.validation_started", "artifact.validated", "artifact.available", "artifact.rejected", "artifact.failed", "artifact.selected", "artifact.delivery_queued", "artifact.delivery_started", "artifact.delivery_succeeded", "artifact.delivery_failed", "artifact.expired", "artifact.deletion_requested", "artifact.deletion_started", "artifact.deletion_pending_backup_expiry", "artifact.deleted", "artifact.delete_incomplete", "artifact.vault_authorization_pending", "artifact.vault_authorization_denied", "artifact.vault_render_started", "artifact.vault_render_failed"
+      ]
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Invocation or session identifier that owns this event."
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional scenario identifier when the event belongs to a deployed scenario."
+    },
+    "trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional trigger identifier when the event was caused by a trigger fire."
+    },
+    "root_event_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Root event identifier for cross-fire lineage and trigger-chain correlation."
+    },
+    "parent_session_id": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "description": "Optional parent session identifier for chained or nested invocations."
+    },
+    "parent_trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent trigger identifier for chained trigger invocations."
+    },
+    "trigger_chain_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Depth of the trigger chain used for amplification guards and trace correlation."
+    },
+    "parent_assignment_uuid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent assignment UUID for faithful swarm and nested-job reconstruction."
+    },
+    "job_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Execution-tree depth carried from build_config for nested assignment replay."
+    },
+    "job_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Execution-tree sibling index carried from build_config for causal ordering."
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Agent, node, trigger, or tool that emitted the event."
+    },
+    "mode": {
+      "type": "string",
+      "description": "Execution mode used for tool dispatch and canvas painting.",
+      "enum": ["worker", "webhook", "hosted"]
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional per-tool correlation identifier assigned at dispatch."
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$",
+      "not": {
+        "const": "00000000000000000000000000000000"
+      },
+      "description": "Optional W3C/OpenTelemetry trace identifier for internal span correlation."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Type-specific open payload for inspector rendering, inputs, outputs, and schemas.",
+      "additionalProperties": true
+    },
+    "latency_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional elapsed latency in milliseconds for connector animation and observability."
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when the event was emitted."
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"pattern": "^artifact\\."}}, "required": ["type"]}, "then": {"properties": {"payload": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_lifecycle_event.schema.json"}}}},
+    {"oneOf": [
+      {"properties":{"type":{"const":"artifact.reserved"},"payload":{"properties":{"event_type":{"const":"artifact.reserved"}}}}},{"properties":{"type":{"const":"artifact.uploaded"},"payload":{"properties":{"event_type":{"const":"artifact.uploaded"}}}}},{"properties":{"type":{"const":"artifact.validation_started"},"payload":{"properties":{"event_type":{"const":"artifact.validation_started"}}}}},{"properties":{"type":{"const":"artifact.validated"},"payload":{"properties":{"event_type":{"const":"artifact.validated"}}}}},{"properties":{"type":{"const":"artifact.available"},"payload":{"properties":{"event_type":{"const":"artifact.available"}}}}},{"properties":{"type":{"const":"artifact.rejected"},"payload":{"properties":{"event_type":{"const":"artifact.rejected"}}}}},{"properties":{"type":{"const":"artifact.failed"},"payload":{"properties":{"event_type":{"const":"artifact.failed"}}}}},{"properties":{"type":{"const":"artifact.selected"},"payload":{"properties":{"event_type":{"const":"artifact.selected"}}}}},{"properties":{"type":{"const":"artifact.delivery_queued"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_queued"}}}}},{"properties":{"type":{"const":"artifact.delivery_started"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_started"}}}}},{"properties":{"type":{"const":"artifact.delivery_succeeded"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_succeeded"}}}}},{"properties":{"type":{"const":"artifact.delivery_failed"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_failed"}}}}},{"properties":{"type":{"const":"artifact.expired"},"payload":{"properties":{"event_type":{"const":"artifact.expired"}}}}},{"properties":{"type":{"const":"artifact.deletion_requested"},"payload":{"properties":{"event_type":{"const":"artifact.deletion_requested"}}}}},{"properties":{"type":{"const":"artifact.deletion_started"},"payload":{"properties":{"event_type":{"const":"artifact.deletion_started"}}}}},{"properties":{"type":{"const":"artifact.deletion_pending_backup_expiry"},"payload":{"properties":{"event_type":{"const":"artifact.deletion_pending_backup_expiry"}}}}},{"properties":{"type":{"const":"artifact.deleted"},"payload":{"properties":{"event_type":{"const":"artifact.deleted"}}}}},{"properties":{"type":{"const":"artifact.delete_incomplete"},"payload":{"properties":{"event_type":{"const":"artifact.delete_incomplete"}}}}},{"properties":{"type":{"const":"artifact.vault_authorization_pending"},"payload":{"properties":{"event_type":{"const":"artifact.vault_authorization_pending"}}}}},{"properties":{"type":{"const":"artifact.vault_authorization_denied"},"payload":{"properties":{"event_type":{"const":"artifact.vault_authorization_denied"}}}}},{"properties":{"type":{"const":"artifact.vault_render_started"},"payload":{"properties":{"event_type":{"const":"artifact.vault_render_started"}}}}},{"properties":{"type":{"const":"artifact.vault_render_failed"},"payload":{"properties":{"event_type":{"const":"artifact.vault_render_failed"}}}}},
+      {"properties":{"type":{"not":{"pattern":"^artifact\\."}}}}
+    ]}
+  ]
+}

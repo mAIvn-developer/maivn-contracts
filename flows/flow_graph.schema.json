@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/flows/flow_graph.schema.json",
+  "title": "FlowGraph",
+  "description": "Closed version-one authoring topology for one executable mAIvn Flow.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "nodes", "edges", "layout"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "nodes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 256,
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 512,
+      "items": {"$ref": "#/$defs/edge"}
+    },
+    "layout": {"$ref": "#/$defs/layout"}
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$"
+    },
+    "positiveVersion": {"type": "integer", "minimum": 1},
+    "runtimeRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "version"],
+      "properties": {
+        "agent_id": {"$ref": "#/$defs/id"},
+        "version": {"$ref": "#/$defs/positiveVersion"}
+      }
+    },
+    "componentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component_id", "version", "component_kind"],
+      "properties": {
+        "component_id": {"$ref": "#/$defs/id"},
+        "version": {"$ref": "#/$defs/positiveVersion"},
+        "component_kind": {
+          "enum": ["agent", "swarm", "tool", "toolset", "skill", "skillset"]
+        }
+      }
+    },
+    "nestedFlowRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flow_id", "version"],
+      "properties": {
+        "flow_id": {"$ref": "#/$defs/id"},
+        "version": {"$ref": "#/$defs/positiveVersion"}
+      }
+    },
+    "triggerNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "kind"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/id"},
+        "kind": {"const": "trigger"}
+      }
+    },
+    "directScopeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "kind", "scope_kind", "runtime_ref"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/id"},
+        "kind": {"const": "scope"},
+        "scope_kind": {"enum": ["agent", "swarm"]},
+        "runtime_ref": {"$ref": "#/$defs/runtimeRef"},
+        "component_ref": {"$ref": "#/$defs/componentRef"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"scope_kind": {"const": "agent"}}},
+          "then": {
+            "properties": {
+              "component_ref": {
+                "allOf": [
+                  {"$ref": "#/$defs/componentRef"},
+                  {"properties": {"component_kind": {"const": "agent"}}}
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"scope_kind": {"const": "swarm"}}},
+          "then": {
+            "properties": {
+              "component_ref": {
+                "allOf": [
+                  {"$ref": "#/$defs/componentRef"},
+                  {"properties": {"component_kind": {"const": "swarm"}}}
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "nestedFlowScopeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "kind", "scope_kind", "runtime_ref", "nested_flow_ref"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/id"},
+        "kind": {"const": "scope"},
+        "scope_kind": {"const": "nested_flow"},
+        "runtime_ref": {"$ref": "#/$defs/runtimeRef"},
+        "nested_flow_ref": {"$ref": "#/$defs/nestedFlowRef"}
+      }
+    },
+    "resourceNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "kind", "relationship", "component_ref"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/id"},
+        "kind": {"const": "resource"},
+        "relationship": {"enum": ["capability", "knowledge", "delegate"]},
+        "component_ref": {"$ref": "#/$defs/componentRef"}
+      }
+    },
+    "outputNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "kind"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/id"},
+        "kind": {"const": "output"}
+      }
+    },
+    "node": {
+      "oneOf": [
+        {"$ref": "#/$defs/triggerNode"},
+        {"$ref": "#/$defs/directScopeNode"},
+        {"$ref": "#/$defs/nestedFlowScopeNode"},
+        {"$ref": "#/$defs/resourceNode"},
+        {"$ref": "#/$defs/outputNode"}
+      ],
+      "discriminator": {"propertyName": "kind"}
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["edge_id", "kind", "source", "target"],
+      "properties": {
+        "edge_id": {"$ref": "#/$defs/id"},
+        "kind": {
+          "enum": ["control", "result", "capability", "knowledge", "delegation"]
+        },
+        "source": {"$ref": "#/$defs/id"},
+        "target": {"$ref": "#/$defs/id"}
+      }
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"}
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_positions"],
+      "properties": {
+        "node_positions": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 256,
+          "propertyNames": {"$ref": "#/$defs/id"},
+          "additionalProperties": {"$ref": "#/$defs/position"}
+        }
+      }
+    }
+  }
+}

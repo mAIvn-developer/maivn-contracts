@@ -1,0 +1,50 @@
+[
+  {
+    "thread_id": "thr-support-001",
+    "run_id": "run-support-001",
+    "status": "running",
+    "values": {
+      "phase": "planning"
+    },
+    "ts": "2026-07-02T17:00:04Z"
+  },
+  {
+    "thread_id": "thr-support-001",
+    "run_id": "run-support-001",
+    "status": "interrupted",
+    "interrupt": {
+      "checkpoint_id": "chk-approval-001",
+      "reason": "approval_required",
+      "payload": {
+        "question": "Send the drafted support reply?"
+      }
+    },
+    "values": {
+      "phase": "waiting_for_approval"
+    },
+    "ts": "2026-07-02T17:00:05Z"
+  },
+  {
+    "thread_id": "thr-support-002",
+    "run_id": "run-support-002",
+    "status": "interrupted",
+    "interrupt": {
+      "checkpoint_id": "chk-followup-001",
+      "reason": "human_input_required",
+      "payload": {},
+      "kind": "agent_followup",
+      "prompt_source": "agent_generated",
+      "question": "Which deployment region should I use?",
+      "response_schema": {
+        "type": "string",
+        "enum": ["us-east-1", "us-west-2"]
+      },
+      "thread_id": "thr-support-002",
+      "session_id": "session-support-002"
+    },
+    "values": {
+      "phase": "waiting_for_input"
+    },
+    "ts": "2026-07-02T17:00:06Z"
+  }
+]

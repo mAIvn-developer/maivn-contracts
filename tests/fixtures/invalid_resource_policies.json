@@ -1,0 +1,13 @@
+[
+  {
+    "resource": "res-policy-knob",
+    "tier": "indexed",
+    "persist": true,
+    "ocr_engine": "hosted-fast"
+  },
+  {
+    "resource": "res-policy-unknown",
+    "tier": "extract",
+    "persist": true
+  }
+]

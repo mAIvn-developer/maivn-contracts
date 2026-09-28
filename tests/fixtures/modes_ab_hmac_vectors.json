@@ -1,0 +1,9 @@
+[
+  {
+    "name": "mode_b_exact_body_v1",
+    "secret": "mode-ab-hmac-test-secret",
+    "timestamp": 1763164800,
+    "body": "{\"dispatch_id\":\"dsp-001\",\"attempt_id\":\"att-001\"}",
+    "signature": "t=1763164800,v1=3a9277c255d62bcfc585394d38e371844cd26e9aaf34a7fa04a80808367cdccd"
+  }
+]

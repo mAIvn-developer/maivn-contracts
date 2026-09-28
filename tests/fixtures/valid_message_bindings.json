@@ -1,0 +1,15 @@
+[
+  {
+    "kind": "template",
+    "messages": [
+      "New support case {{event.case.id}} from {{event.customer.email}}.",
+      "Priority: {{event.case.priority}}"
+    ]
+  },
+  {
+    "kind": "callable",
+    "module_path": "support.triggers.bindings",
+    "qualified_name": "build_customer_triage_messages",
+    "content_hash": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  }
+]

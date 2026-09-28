@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/vault_intent_status_request.schema.json",
+  "title": "VaultIntentStatusRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "server_intent_id"],
+  "properties": {
+    "schema_version": {"const": "vault-intent-status-request-v1"},
+    "server_intent_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    }
+  }
+}

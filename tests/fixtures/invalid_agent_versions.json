@@ -1,0 +1,238 @@
+[
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 1,
+    "execution_mode": "hosted",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Invalid mode."
+    },
+    "tools_snapshot": [],
+    "created_at": "2026-07-01T16:01:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 2,
+    "execution_mode": "webhook",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Raw secrets must not be accepted."
+    },
+    "tools_snapshot": [],
+    "webhook_endpoint": {
+      "url": "https://tools.example.com/maivn",
+      "secret": "do-not-store-raw-secrets"
+    },
+    "created_at": "2026-07-01T16:15:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 3,
+    "execution_mode": "hosted_only",
+    "model": {
+      "response": {
+        "tier": "fast"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Extra top-level properties are forbidden."
+    },
+    "tools_snapshot": [],
+    "created_at": "2026-07-01T16:30:00Z",
+    "created_by": "usr-platform-owner",
+    "unexpected": true
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 0,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Version zero is invalid."
+    },
+    "tools_snapshot": [],
+    "created_at": "2026-07-01T16:01:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": -1,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Negative versions are invalid."
+    },
+    "tools_snapshot": [],
+    "created_at": "2026-07-01T16:01:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 4,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Memory policy extras are invalid."
+    },
+    "tools_snapshot": [],
+    "memory": {
+      "enabled": true,
+      "level": "focus",
+      "persistence_mode": "vector_only",
+      "retrieval": {
+        "skills_enabled": true,
+        "insights_enabled": true,
+        "resources_enabled": true,
+        "max_skills": 3,
+        "max_insights": 3,
+        "max_resources": 3,
+        "max_context_chars": 4000,
+        "unexpected": true
+      },
+      "skill_extraction": {
+        "enabled": true,
+        "max_count": 2
+      },
+      "insight_extraction": {
+        "enabled": true,
+        "max_count": 2
+      }
+    },
+    "created_at": "2026-07-01T16:31:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 5,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Memory limits are bounded."
+    },
+    "tools_snapshot": [],
+    "memory": {
+      "enabled": true,
+      "level": "clarity",
+      "persistence_mode": "vector_plus_graph",
+      "retrieval": {
+        "skills_enabled": true,
+        "insights_enabled": true,
+        "resources_enabled": true,
+        "max_skills": 17,
+        "max_insights": 3,
+        "max_resources": 3,
+        "max_context_chars": 4000
+      },
+      "skill_extraction": {
+        "enabled": true,
+        "max_count": 2
+      },
+      "insight_extraction": {
+        "enabled": true,
+        "max_count": 2
+      }
+    },
+    "created_at": "2026-07-01T16:32:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 6,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Output schema names are portable."
+    },
+    "tools_snapshot": [],
+    "output_schema": {
+      "name": "not portable",
+      "schema": {
+        "type": "object"
+      }
+    },
+    "created_at": "2026-07-01T16:33:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 7,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Output schema is closed."
+    },
+    "tools_snapshot": [],
+    "output_schema": {
+      "name": "result",
+      "schema": {
+        "type": "object"
+      },
+      "unexpected": true
+    },
+    "created_at": "2026-07-01T16:34:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "flow-runtime-empty-swarm",
+    "version": 1,
+    "execution_mode": "hosted_only",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "An empty roster cannot execute."
+    },
+    "tools_snapshot": [],
+    "agents_snapshot": [],
+    "agent_tool_dependencies": [],
+    "swarm_roster": true,
+    "created_at": "2026-07-21T20:00:00Z",
+    "created_by": "usr-platform-owner"
+  }
+]

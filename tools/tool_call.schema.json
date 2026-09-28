@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/tools/tool_call.schema.json",
+  "title": "ToolCall",
+  "description": "Model-emitted request to invoke one tool spec. Arguments are validated by executors against the referenced ToolSpec.input_schema before execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["call_id", "spec_ref", "arguments", "lineage"],
+  "properties": {
+    "call_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Provider/model tool-call identifier. This is the same id carried by tool-role Message.metadata.tool_call_id."
+    },
+    "spec_ref": {
+      "$ref": "#/$defs/toolSpecRef"
+    },
+    "arguments": {
+      "type": "object",
+      "description": "JSON object supplied by the model. Executors validate this object against the referenced ToolSpec.input_schema.",
+      "additionalProperties": true
+    },
+    "lineage": {
+      "$ref": "#/$defs/toolCallLineage"
+    },
+    "retained_dependencies": {
+      "type": "object",
+      "description": "Server-bound prior results by consuming argument; never model-authored.",
+      "additionalProperties": { "$ref": "#/$defs/retainedToolResult" }
+    }
+  },
+  "$defs": {
+    "retainedToolResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["thread_id", "source_session_id", "source_call_id", "producer", "result"],
+      "properties": {
+        "thread_id": { "type": "string", "minLength": 1 },
+        "source_session_id": { "type": "string", "minLength": 1 },
+        "source_call_id": { "type": "string", "minLength": 1 },
+        "producer": { "$ref": "#/$defs/toolSpecRef" },
+        "result": {}
+      }
+    },
+    "toolSpecRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool_id", "namespace", "version"],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Referenced ToolSpec.tool_id."
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "toolCallLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["session_id", "invocation_id"],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Assistant message or provider event that emitted this call."
+        },
+        "parent_call_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "root_call_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "dependency_revision"
+          ],
+          "description": "Explicit relation for an SDK-local dependency reconstruction call."
+        }
+      }
+    }
+  }
+}

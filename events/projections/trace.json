@@ -1,0 +1,337 @@
+{
+  "_meta": {
+    "name": "trace",
+    "version": "0.1.0",
+    "lossy": true,
+    "note": "User-facing trace projection: the curated feed for the Portal/Studio trace UI. It shows WHAT happened (runs, agents, tools, public user prompts and assistant responses, timings, status), never HOW the platform decides. System/internal prompts and orchestration mechanics remain excluded, and sensitive values are scrubbed."
+  },
+  "target_events": [
+    "trace.run_started",
+    "trace.run_completed",
+    "trace.run_failed",
+    "trace.tool_started",
+    "trace.tool_completed",
+    "trace.tool_failed",
+    "trace.working",
+    "trace.memory",
+    "trace.resource",
+    "trace.shield",
+    "trace.interrupt",
+    "trace.trigger_fired",
+    "trace.trigger_failed",
+    "trace.trigger_skipped",
+    "trace.hook",
+    "trace.routing",
+    "trace.model_stream"
+  ],
+  "mappings": {
+    "connection.event_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Provider receipt data stays out of user-facing traces."
+    },
+    "email.received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Email content stays out of user-facing traces."
+    },
+    "conversation.reply_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Conversation content stays out of user-facing traces."
+    },
+    "memory.record_changed": {
+      "target": "trace.memory",
+      "note": "Metadata-only durable memory change; record contents stay private."
+    },
+    "storage.object_uploaded": {
+      "target": "trace.resource",
+      "note": "Metadata-only private resource upload."
+    },
+    "trigger.fire_requested": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "The system-tool node already represents the request; admission lifecycle is authoritative."
+    },
+    "model_routing": { "target": "trace.routing" },
+    "assignment_received": {
+      "target": "trace.run_started",
+      "note": "A run (root or delegated child) enters the tree as a run node."
+    },
+    "assignment_completed": {
+      "target": "trace.run_completed",
+      "note": "A delegated run closes its node in the parent tree."
+    },
+    "final": {
+      "target": "trace.run_completed",
+      "note": "The run node completes with status success."
+    },
+    "session.completed": {
+      "target": "trace.run_completed",
+      "note": "Projected completion closes the run node."
+    },
+    "error": {
+      "target": "trace.run_failed",
+      "note": "The run node completes with status failed."
+    },
+    "system_tool_start": {
+      "target": "trace.tool_started",
+      "note": "A tool node opens; correlation_id pairs it with completion."
+    },
+    "tool.dispatch_started": {
+      "target": "trace.tool_started",
+      "note": "Projected dispatch start opens the tool node."
+    },
+    "system_tool_complete": {
+      "target": "trace.tool_completed",
+      "note": "The tool node closes with status success and latency."
+    },
+    "model_tool_complete": {
+      "target": "trace.tool_completed",
+      "note": "Deterministic model-tool completion closes its tool node."
+    },
+    "tool_event": {
+      "target": "trace.tool_completed",
+      "note": "Legacy paired tool event closes the tool node."
+    },
+    "tool.dispatch_completed": {
+      "target": "trace.tool_completed",
+      "note": "Projected dispatch completion closes the tool node."
+    },
+    "system_tool_error": {
+      "target": "trace.tool_failed",
+      "note": "The tool node closes with status failed; the message is redacted upstream."
+    },
+    "interrupt_request": {
+      "target": "trace.interrupt",
+      "note": "The run is waiting on a human; the node shows the pause, not the question."
+    },
+    "interrupt_required": {
+      "target": "trace.interrupt",
+      "note": "Interrupt-required marker; same curated pause node."
+    },
+    "trigger.fired": {
+      "target": "trace.trigger_fired",
+      "note": "The trigger that started this run heads the tree."
+    },
+    "evaluating": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "planning": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "searching_tools": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "loading_tools": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "planning_assignments": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "executing_assignments": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "executing_actions": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "synthesizing": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "finalizing": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "reevaluate_accrued": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "enrichment": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "agent.thinking": {
+      "target": "trace.working",
+      "note": "Curated by design: internal processing phases collapse into one working aspect - the trace shows THAT the platform was working, never how it decides."
+    },
+    "memory_summarizing": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_summarized": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_retrieving": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_retrieved": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "document_analysis_selected": {
+      "target": "trace.resource",
+      "note": "Document-analysis strategy and bounded measurements surface; document contents stay private."
+    },
+    "document_evidence_coverage": {
+      "target": "trace.resource",
+      "note": "Aggregate evidence coverage and budget counters surface; source identity and evidence stay private."
+    },
+    "memory_indexing": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_indexed": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_graph_extracting": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_skill_extracting": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_insight_extracting": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_skill_extracted": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "memory_insight_extracted": {
+      "target": "trace.memory",
+      "note": "Memory activity surfaces as one aspect; contents stay private."
+    },
+    "resource_registering": {
+      "target": "trace.resource",
+      "note": "Resource processing surfaces as one aspect."
+    },
+    "resource_registered": {
+      "target": "trace.resource",
+      "note": "Resource processing surfaces as one aspect."
+    },
+    "resource_dedup_reused": {
+      "target": "trace.resource",
+      "note": "Resource processing surfaces as one aspect."
+    },
+    "resource_version_superseded": {
+      "target": "trace.resource",
+      "note": "Resource processing surfaces as one aspect."
+    },
+    "resource_extracting": {
+      "target": "trace.resource",
+      "note": "Resource processing surfaces as one aspect."
+    },
+    "resource_extracted": {
+      "target": "trace.resource",
+      "note": "Resource processing surfaces as one aspect."
+    },
+    "redaction_previewed": {
+      "target": "trace.shield",
+      "note": "Privacy shield activity is shown as an aspect; values never appear."
+    },
+    "message_redaction_applied": {
+      "target": "trace.shield",
+      "note": "Privacy shield activity is shown as an aspect; values never appear."
+    },
+    "tool_result_redaction_applied": {
+      "target": "trace.shield",
+      "note": "Tool-result privacy activity shows affected field names, never values."
+    },
+    "heartbeat": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Transport keepalive; no user-facing meaning."
+    },
+    "update": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Internal state delta; contents are inner workings."
+    },
+    "progress_update": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Internal progress accounting; usage lands on the run node instead."
+    },
+    "status_message": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Streaming narration; the trace is structural, not textual."
+    },
+    "status_message_chunk": {
+      "target": "trace.model_stream",
+      "note": "Client-safe final-response chunks contribute response text and streaming metrics to the model exchange."
+    },
+    "system_tool_chunk": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Intra-tool streaming; the tool node carries start/completion."
+    },
+    "hook_fired": {
+      "target": "trace.hook",
+      "note": "Developer-registered hook callback as run structure: which hook ran, at which stage, and whether it succeeded. Names and status only; nothing that passed through the hook."
+    },
+    "trigger.skipped": {
+      "target": "trace.trigger_skipped",
+      "note": "A trigger that declined to fire explains why an expected run never happened, which is the hardest thing to debug from absence alone. Carries no user content."
+    },
+    "trigger.failed": {
+      "target": "trace.trigger_failed",
+      "note": "A trigger that failed is why the owner's automation did not run. That is their answer, not operational noise. Carries no user content."
+    },
+    "trigger.disabled": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Trigger admin lifecycle; not part of a run."
+    },
+    "trigger.enabled": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Trigger admin lifecycle; not part of a run."
+    },
+    "agent.tool_selected": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas paint hint; the tool nodes carry the structure."
+    },
+    "artifact.reserved": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.uploaded": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.validation_started": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.validated": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.available": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.rejected": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.failed": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.selected": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.delivery_queued": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.delivery_started": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.delivery_succeeded": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.delivery_failed": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.expired": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.deletion_requested": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.deletion_started": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.deletion_pending_backup_expiry": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.deleted": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.delete_incomplete": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.vault_authorization_pending": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.vault_authorization_denied": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.vault_render_started": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "artifact.vault_render_failed": {"target":"trace.resource","note":"Metadata-only artifact lifecycle transition."},
+    "agent.responded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas paint hint; run completion carries the structure."
+    }
+  }
+}

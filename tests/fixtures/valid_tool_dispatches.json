@@ -1,0 +1,23 @@
+[
+  {
+    "schema_version": 1,
+    "dispatch_id": "dsp-001",
+    "attempt_id": "att-001",
+    "attempt": 1,
+    "organization_id": "org-support",
+    "project_id": "prj-support",
+    "agent_id": "agt-support",
+    "agent_version": 2,
+    "execution_mode": "webhook",
+    "session_id": "ses-001",
+    "call_id": "call-001",
+    "tool_id": "tool-lookup-case",
+    "tool_name": "lookup_case",
+    "arguments": {"case_id": "case-1001"},
+    "idempotency": "idempotent",
+    "timeout_ms": 5000,
+    "created_at": "2026-07-15T00:00:00Z",
+    "deadline_at": "2026-07-15T00:00:05Z",
+    "response_mode": "sync"
+  }
+]

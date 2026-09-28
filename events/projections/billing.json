@@ -1,0 +1,131 @@
+{
+  "_meta": {
+    "name": "billing",
+    "version": "0.1.0",
+    "lossy": true,
+    "note": "Billing retains only org/project scope, canonical lineage, unit kinds, integer quantities, timestamps, and source event ids. Event payload content, messages, prompts, values, model names, and arbitrary metadata never enter the billing projection.",
+    "reserved_future_actions": [
+      "storage.bytes_stored"
+    ],
+    "reserved_note": "Storage is present in the control-plane usage taxonomy, but no canonical spine event currently states a billable storage action. Add the vocabulary event first, then promote the mapping out of this list."
+  },
+  "target_events": [
+    "billing.unit"
+  ],
+  "mappings": {
+    "connection.event_received": { "target": null, "drop": true, "drop_reason": "Connection receipt is not billable until trigger admission creates a fire." },
+    "email.received": { "target": null, "drop": true, "drop_reason": "Email receipt is not billable until trigger admission creates a fire." },
+    "conversation.reply_received": { "target": null, "drop": true, "drop_reason": "Conversation receipt is not billable until trigger admission creates a fire." },
+    "memory.record_changed": { "target": null, "drop": true, "drop_reason": "Memory mutation routing is not billable usage." },
+    "storage.object_uploaded": { "target": null, "drop": true, "drop_reason": "Storage mutation routing is not billable usage." },
+    "trigger.fire_requested": { "target": null, "drop": true, "drop_reason": "A request is not billable until ordinary trigger admission creates a fire." },
+    "tool_event": { "target": null, "drop": true, "drop_reason": "Tool payloads can carry user content and do not establish a billable unit." },
+    "interrupt_request": { "target": null, "drop": true, "drop_reason": "An interrupt request is a run state, not a billable unit." },
+    "interrupt_required": { "target": null, "drop": true, "drop_reason": "An interrupt marker is a run state, not a billable unit." },
+    "assignment_received": {
+      "target": "billing.unit",
+      "units": [{ "unit_kind": "requests", "quantity": 1 }],
+      "payload_fields": []
+    },
+    "assignment_completed": { "target": null, "drop": true, "drop_reason": "Run admission is billed once at assignment receipt; completion would double-count the run." },
+    "model_tool_complete": { "target": null, "drop": true, "drop_reason": "Tool completion is operational activity, not a usage unit." },
+    "heartbeat": { "target": null, "drop": true, "drop_reason": "Transport keepalive is not billable usage." },
+    "update": { "target": null, "drop": true, "drop_reason": "State deltas can carry user content and do not establish a billable unit." },
+    "progress_update": { "target": null, "drop": true, "drop_reason": "Streaming progress is not billable; terminal usage is authoritative." },
+    "model_routing": { "target": null, "drop": true, "drop_reason": "Routing decisions are not a billable unit and may carry model metadata." },
+    "status_message": { "target": null, "drop": true, "drop_reason": "Status messages can carry user content." },
+    "status_message_chunk": { "target": null, "drop": true, "drop_reason": "Streaming chunks can carry user content." },
+    "final": {
+      "target": "billing.unit",
+      "units": [
+        { "unit_kind": "tokens", "quantity_fields": ["usage.input_tokens", "usage.output_tokens", "usage.cache_read_input_tokens", "usage.cache_creation_input_tokens"] }
+      ],
+      "payload_fields": ["usage.input_tokens", "usage.output_tokens", "usage.cache_read_input_tokens", "usage.cache_creation_input_tokens"]
+    },
+    "error": {
+      "target": "billing.unit",
+      "units": [
+        { "unit_kind": "tokens", "quantity_fields": ["usage.input_tokens", "usage.output_tokens", "usage.cache_read_input_tokens", "usage.cache_creation_input_tokens"] }
+      ],
+      "payload_fields": ["usage.input_tokens", "usage.output_tokens", "usage.cache_read_input_tokens", "usage.cache_creation_input_tokens"]
+    },
+    "system_tool_start": { "target": null, "drop": true, "drop_reason": "Tool arguments and payloads are not billable usage." },
+    "system_tool_chunk": { "target": null, "drop": true, "drop_reason": "Tool chunks can carry user content and are not billable usage." },
+    "system_tool_complete": { "target": null, "drop": true, "drop_reason": "Tool completion is operational activity, not a usage unit." },
+    "system_tool_error": { "target": null, "drop": true, "drop_reason": "Tool failures can carry provider messages and are not a usage unit." },
+    "hook_fired": { "target": null, "drop": true, "drop_reason": "Developer hook internals are not billable usage." },
+    "enrichment": { "target": null, "drop": true, "drop_reason": "Enrichment payloads can carry user content and are not billable usage." },
+    "evaluating": { "target": null, "drop": true, "drop_reason": "Processing internals are not billable usage." },
+    "planning": { "target": null, "drop": true, "drop_reason": "Processing internals are not billable usage." },
+    "searching_tools": { "target": null, "drop": true, "drop_reason": "Tool-search internals are not billable usage." },
+    "loading_tools": { "target": null, "drop": true, "drop_reason": "Tool-loading internals are not billable usage." },
+    "planning_assignments": { "target": null, "drop": true, "drop_reason": "Assignment planning is not a billable run." },
+    "executing_assignments": { "target": null, "drop": true, "drop_reason": "Assignment execution is counted at assignment receipt, not as a second run." },
+    "executing_actions": { "target": null, "drop": true, "drop_reason": "Action execution can carry user content and is not a usage unit." },
+    "synthesizing": { "target": null, "drop": true, "drop_reason": "Synthesis can carry user content and is not a usage unit." },
+    "finalizing": { "target": null, "drop": true, "drop_reason": "Finalization can carry user content and is not a usage unit." },
+    "reevaluate_accrued": { "target": null, "drop": true, "drop_reason": "Re-evaluation is orchestration internal activity." },
+    "memory_summarizing": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_summarized": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_retrieving": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_retrieved": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_indexing": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_indexed": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_graph_extracting": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_skill_extracting": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_insight_extracting": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_skill_extracted": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "memory_insight_extracted": { "target": null, "drop": true, "drop_reason": "Memory internals can carry user content and are not billable usage." },
+    "redaction_previewed": { "target": null, "drop": true, "drop_reason": "A redaction preview does not deplete billable redaction usage." },
+    "message_redaction_applied": {
+      "target": "billing.unit",
+      "units": [{ "unit_kind": "redaction", "quantity_field": "redaction_count" }],
+      "payload_fields": ["redaction_count"]
+    },
+    "resource_registering": { "target": null, "drop": true, "drop_reason": "Resource registration has no billable storage action on the spine." },
+    "resource_registered": { "target": null, "drop": true, "drop_reason": "Resource registration has no billable storage action on the spine." },
+    "resource_dedup_reused": { "target": null, "drop": true, "drop_reason": "Resource reuse has no billable storage action on the spine." },
+    "resource_version_superseded": { "target": null, "drop": true, "drop_reason": "Resource versioning has no billable storage action on the spine." },
+    "resource_extracting": { "target": null, "drop": true, "drop_reason": "Resource extraction has no billable storage action on the spine." },
+    "resource_extracted": { "target": null, "drop": true, "drop_reason": "Resource extraction has no billable storage action on the spine." },
+    "document_analysis_selected": { "target": null, "drop": true, "drop_reason": "Document strategy selection has no independently billable unit." },
+    "document_evidence_coverage": { "target": null, "drop": true, "drop_reason": "Evidence coverage telemetry has no independently billable unit." },
+    "trigger.fired": {
+      "target": "billing.unit",
+      "units": [{ "unit_kind": "fires", "quantity": 1 }],
+      "payload_fields": []
+    },
+    "trigger.skipped": { "target": null, "drop": true, "drop_reason": "A skipped trigger does not consume an admitted fire." },
+    "trigger.failed": { "target": null, "drop": true, "drop_reason": "A failed trigger does not consume an admitted fire." },
+    "trigger.disabled": { "target": null, "drop": true, "drop_reason": "Trigger administration is not billable usage." },
+    "trigger.enabled": { "target": null, "drop": true, "drop_reason": "Trigger administration is not billable usage." },
+    "agent.thinking": { "target": null, "drop": true, "drop_reason": "Canvas activity is not billable usage." },
+    "agent.tool_selected": { "target": null, "drop": true, "drop_reason": "Tool selection is not billable usage." },
+    "tool.dispatch_started": { "target": null, "drop": true, "drop_reason": "Tool dispatch is not billable usage." },
+    "tool.dispatch_completed": { "target": null, "drop": true, "drop_reason": "Tool dispatch is not billable usage." },
+    "agent.responded": { "target": null, "drop": true, "drop_reason": "Canvas response activity is not billable usage." },
+    "session.completed": { "target": null, "drop": true, "drop_reason": "This is a derived canvas terminal vocabulary value; final or error is the canonical terminal source." },
+    "artifact.reserved": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle does not establish a billable storage unit."},
+    "artifact.uploaded": {"target": null, "drop": true, "drop_reason": "Artifact upload is not billable until a storage-unit contract exists."},
+    "artifact.validation_started": {"target": null, "drop": true, "drop_reason": "Artifact validation has no billable unit contract."},
+    "artifact.validated": {"target": null, "drop": true, "drop_reason": "Artifact validation has no billable unit contract."},
+    "artifact.available": {"target": null, "drop": true, "drop_reason": "Artifact availability does not establish a billable storage unit."},
+    "artifact.rejected": {"target": null, "drop": true, "drop_reason": "Rejected artifact work is not billable usage."},
+    "artifact.failed": {"target": null, "drop": true, "drop_reason": "Failed artifact work is not billable usage."},
+    "artifact.selected": {"target": null, "drop": true, "drop_reason": "Artifact selection is not billable usage."},
+    "artifact.delivery_queued": {"target": null, "drop": true, "drop_reason": "Artifact delivery has no billable unit contract."},
+    "artifact.delivery_started": {"target": null, "drop": true, "drop_reason": "Artifact delivery has no billable unit contract."},
+    "artifact.delivery_succeeded": {"target": null, "drop": true, "drop_reason": "Artifact delivery has no billable unit contract."},
+    "artifact.delivery_failed": {"target": null, "drop": true, "drop_reason": "Artifact delivery has no billable unit contract."},
+    "artifact.expired": {"target": null, "drop": true, "drop_reason": "Artifact expiry is not billable usage."},
+    "artifact.deletion_requested": {"target": null, "drop": true, "drop_reason": "Artifact deletion has no billable unit contract."},
+    "artifact.deletion_started": {"target": null, "drop": true, "drop_reason": "Artifact deletion has no billable unit contract."},
+    "artifact.deletion_pending_backup_expiry": {"target": null, "drop": true, "drop_reason": "Vault backup expiry is not platform billable usage."},
+    "artifact.deleted": {"target": null, "drop": true, "drop_reason": "Artifact deletion is not billable usage."},
+    "artifact.delete_incomplete": {"target": null, "drop": true, "drop_reason": "Incomplete deletion is not billable usage."},
+    "artifact.vault_authorization_pending": {"target": null, "drop": true, "drop_reason": "Vault authorization is not platform billable usage."},
+    "artifact.vault_authorization_denied": {"target": null, "drop": true, "drop_reason": "Denied vault authorization is not billable usage."},
+    "artifact.vault_render_started": {"target": null, "drop": true, "drop_reason": "Vault rendering is not platform billable usage."},
+    "artifact.vault_render_failed": {"target": null, "drop": true, "drop_reason": "Failed vault rendering is not billable usage."}
+  }
+}

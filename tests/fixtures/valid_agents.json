@@ -1,0 +1,11 @@
+[
+  {
+    "agent_id": "agt-customer-triage",
+    "project_id": "prj-support",
+    "name": "Customer triage",
+    "description": "Classifies incoming customer requests and drafts next steps.",
+    "latest_version": 3,
+    "created_at": "2026-07-01T16:00:00Z",
+    "updated_at": "2026-07-01T16:30:00Z"
+  }
+]

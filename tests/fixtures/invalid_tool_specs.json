@@ -1,0 +1,65 @@
+[
+  {
+    "tool_id": "tool-raw-secret",
+    "kind": "mcp",
+    "namespace": "connectors.gmail",
+    "version": "2026-07-03",
+    "idempotency": "non_idempotent",
+    "timeout_ms": 10000,
+    "auth": {
+      "scheme": "oauth",
+      "secret": "raw-token-value"
+    },
+    "server_ref": {
+      "kind": "registry",
+      "name": "gmail"
+    },
+    "tool_name": "send_email",
+    "schema_policy": "passthrough",
+    "input_schema": {
+      "type": "object"
+    }
+  },
+  {
+    "tool_id": "tool-missing-kind",
+    "namespace": "support",
+    "version": "2026-07-03",
+    "idempotency": "idempotent",
+    "timeout_ms": 5000,
+    "name": "lookup_case",
+    "description": "Look up a support case by id.",
+    "input_schema": {
+      "type": "object"
+    }
+  },
+  {
+    "tool_id": "tool-unknown-kind",
+    "kind": "database",
+    "namespace": "support",
+    "version": "2026-07-03",
+    "idempotency": "idempotent",
+    "timeout_ms": 5000,
+    "name": "lookup_case",
+    "description": "Look up a support case by id.",
+    "input_schema": {
+      "type": "object"
+    }
+  },
+  {
+    "tool_id": "tool-url-raw",
+    "kind": "mcp",
+    "namespace": "connectors.files",
+    "version": "2026-07-03",
+    "idempotency": "idempotent",
+    "timeout_ms": 3000,
+    "server_ref": {
+      "kind": "url",
+      "url_ref": "https://mcp.example.com"
+    },
+    "tool_name": "read_file",
+    "schema_policy": "passthrough",
+    "input_schema": {
+      "type": "object"
+    }
+  }
+]

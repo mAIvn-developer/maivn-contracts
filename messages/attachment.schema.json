@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/messages/attachment.schema.json",
+  "title": "Attachment",
+  "description": "Real attachment entity for mAIvn Platform v2 messages. Source bytes are either a storage reference or bounded inline base64; raw secrets are not fields in this contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "attachment_id",
+    "filename",
+    "mime_type",
+    "size_bytes",
+    "content_hash"
+  ],
+  "properties": {
+    "attachment_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable attachment identifier within the owning message or resource record."
+    },
+    "filename": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Sanitized display filename for the attachment."
+    },
+    "mime_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "IANA media type used for provider content-block routing."
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Attachment payload size in bytes before base64 encoding."
+    },
+    "storage_ref": {
+      "$ref": "#/$defs/storageRef"
+    },
+    "inline_base64": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 69905068,
+      "contentEncoding": "base64",
+      "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+      "description": "Bounded base64 payload for small inline attachments. Large or reusable resources use storage_ref."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hex digest of the attachment bytes."
+    },
+    "resource_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional back-reference to the registered resource row that owns this attachment."
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["storage_ref"],
+      "not": {
+        "required": ["inline_base64"]
+      }
+    },
+    {
+      "required": ["inline_base64"],
+      "not": {
+        "required": ["storage_ref"]
+      }
+    }
+  ],
+  "$defs": {
+    "storageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bucket", "path", "sha256"],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Object-storage bucket containing the attachment bytes."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Object-storage path for the attachment bytes."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 hex digest pinned on the storage object reference."
+        }
+      }
+    }
+  }
+}

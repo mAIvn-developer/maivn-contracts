@@ -1,0 +1,890 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/scenarios/trigger.schema.json",
+  "title": "Trigger",
+  "description": "Project-scoped trigger definition. Agent execution mode lives on the agent version, never on the trigger.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trigger_id",
+    "project_id",
+    "name",
+    "status",
+    "source",
+    "binding",
+    "agent",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable trigger identifier."
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project that owns this trigger."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable trigger name."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["enabled", "paused", "disabled"],
+      "description": "Operational trigger status."
+    },
+    "source": {
+      "$ref": "#/$defs/triggerSource"
+    },
+    "filter": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional JSONPath predicate. JSONPath is the only runtime filter language."
+    },
+    "binding": {
+      "$ref": "https://schemas.maivn.dev/agents/message_binding.schema.json"
+    },
+    "agent": {
+      "$ref": "#/$defs/triggerAgent"
+    },
+    "options": {
+      "$ref": "#/$defs/triggerOptions"
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent scenario back-reference for Alpha-authored triggers."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when this trigger was created."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when this trigger was last updated."
+    }
+  },
+  "$defs": {
+    "sourceKind": {
+      "type": "string",
+      "description": "Reserved trigger source vocabulary by platform phase. Phase 1 kinds are fully specified in this schema; later-phase names are reserved only.",
+      "enum": [
+        "schedule",
+        "webhook",
+        "manual",
+        "external_connection_event",
+        "email_to_invoke",
+        "memory_event",
+        "storage_event",
+        "chained_event",
+        "sla_timer",
+        "reply_conversation",
+        "fire_trigger_tool"
+      ]
+    },
+    "triggerSource": {
+      "description": "Implemented trigger sources through the Phase 4 fire-trigger tool. Other names remain reserved in sourceKind without accepted wire shapes.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/scheduleSource"
+        },
+        {
+          "$ref": "#/$defs/webhookSource"
+        },
+        {
+          "$ref": "#/$defs/manualSource"
+        },
+        {
+          "$ref": "#/$defs/chainedEventSource"
+        },
+        {
+          "$ref": "#/$defs/externalConnectionEventSource"
+        },
+        {
+          "$ref": "#/$defs/emailToInvokeSource"
+        },
+        {
+          "$ref": "#/$defs/slaTimerSource"
+        },
+        {
+          "$ref": "#/$defs/memoryEventSource"
+        },
+        {
+          "$ref": "#/$defs/storageEventSource"
+        },
+        {
+          "$ref": "#/$defs/replyConversationSource"
+        },
+        {
+          "$ref": "#/$defs/fireTriggerToolSource"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "kind"
+      }
+    },
+    "scheduleSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 1 schedule source: exactly one cron expression or interval.",
+      "required": ["kind", "phase"],
+      "properties": {
+        "kind": {
+          "const": "schedule"
+        },
+        "phase": {
+          "const": "phase_1",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "cron": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Cron expression for scheduled firing."
+        },
+        "interval_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31536000,
+          "description": "Fixed interval in seconds for scheduled firing."
+        },
+        "jitter_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600,
+          "default": 60,
+          "description": "Creation-time jitter window in seconds; default is plus or minus 60 seconds."
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["cron"],
+          "not": {
+            "required": ["interval_seconds"]
+          }
+        },
+        {
+          "required": ["interval_seconds"],
+          "not": {
+            "required": ["cron"]
+          }
+        }
+      ]
+    },
+    "webhookSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 1 inbound webhook source with HMAC secret stored by vault reference only.",
+      "required": ["kind", "phase", "secret_ref"],
+      "properties": {
+        "kind": {
+          "const": "webhook"
+        },
+        "phase": {
+          "const": "phase_1",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "secret_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^vault://",
+          "description": "Vault reference for the inbound webhook HMAC secret. Raw secret values are not part of this wire shape."
+        }
+      }
+    },
+    "manualSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 1 manual run source; it uses the same launcher path as other sources.",
+      "required": ["kind", "phase"],
+      "properties": {
+        "kind": {
+          "const": "manual"
+        },
+        "phase": {
+          "const": "phase_1",
+          "description": "Phase note for this fully specified source kind."
+        }
+      }
+    },
+    "chainedEventSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 3 same-project canonical completion-event source.",
+      "required": ["kind", "phase", "event_type"],
+      "properties": {
+        "kind": {
+          "const": "chained_event"
+        },
+        "phase": {
+          "const": "phase_3",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "event_type": {
+          "type": "string",
+          "enum": ["session.completed", "tool.dispatch_completed"],
+          "description": "Canonical completion event that can admit the child trigger."
+        },
+        "origin_trigger_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional same-project upstream trigger selector."
+        }
+      }
+    },
+    "externalConnectionEventSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 2 same-project normalized external connection event source.",
+      "required": [
+        "kind",
+        "phase",
+        "connection_id",
+        "event_type"
+      ],
+      "properties": {
+        "kind": {
+          "const": "external_connection_event"
+        },
+        "phase": {
+          "const": "phase_2",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$",
+          "description": "Opaque same-project connection selector."
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_.-]{0,127}$",
+          "description": "Normalized provider event machine identifier."
+        },
+        "table": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_$]{0,62}\\.[A-Za-z_][A-Za-z0-9_$]{0,62}$",
+          "description": "Optional exact schema-qualified table in the developer-owned database."
+        },
+        "selector": {
+          "description": "Optional typed preset predicate applied alongside the user filter.",
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "description": "Exact form identity inside a shared signed connection.",
+              "properties": {
+                "kind": {
+                  "const": "form",
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "form_id": {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$",
+                  "title": "Form Id",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "form_id"
+              ],
+              "title": "FormConnectionSelector",
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Exact local watcher identity, independent of the user filter.",
+              "properties": {
+                "kind": {
+                  "const": "local_file",
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "watch_id": {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$",
+                  "title": "Watch Id",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "watch_id"
+              ],
+              "title": "LocalFileConnectionSelector",
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Provider-specific repository and event-family predicates.",
+              "properties": {
+                "kind": {
+                  "const": "github",
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "repository": {
+                  "anyOf": [
+                    {
+                      "maxLength": 200,
+                      "minLength": 3,
+                      "pattern": "^[^/\\s]+/[^/\\s]+$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Repository"
+                },
+                "branch": {
+                  "anyOf": [
+                    {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Branch"
+                },
+                "workflow": {
+                  "anyOf": [
+                    {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Workflow"
+                },
+                "conclusion": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "success",
+                        "failure",
+                        "cancelled",
+                        "timed_out",
+                        "neutral",
+                        "skipped",
+                        "action_required",
+                        "stale",
+                        "startup_failure"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Conclusion"
+                },
+                "merged": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Merged"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "title": "GitHubConnectionSelector",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "table",
+              "selector"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "selector"
+            ],
+            "properties": {
+              "selector": {
+                "properties": {
+                  "kind": {
+                    "const": "form"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "event_type": {
+                "const": "form.submitted"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "selector"
+            ],
+            "properties": {
+              "selector": {
+                "properties": {
+                  "kind": {
+                    "const": "local_file"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "event_type": {
+                "enum": [
+                  "file.created",
+                  "file.modified"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "selector"
+            ],
+            "properties": {
+              "selector": {
+                "properties": {
+                  "kind": {
+                    "const": "github"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "event_type": {
+                "pattern": "^(pull_request\\..+|issues\\..+|push|workflow_run\\.completed)$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "selector"
+            ],
+            "properties": {
+              "selector": {
+                "properties": {
+                  "kind": {
+                    "const": "github"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "branch"
+                    ],
+                    "properties": {
+                      "branch": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "event_type": {
+                "pattern": "^(pull_request\\..+|push|workflow_run\\.completed)$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "selector"
+            ],
+            "properties": {
+              "selector": {
+                "properties": {
+                  "kind": {
+                    "const": "github"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "workflow"
+                    ],
+                    "properties": {
+                      "workflow": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "required": [
+                      "conclusion"
+                    ],
+                    "properties": {
+                      "conclusion": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "event_type": {
+                "const": "workflow_run.completed"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "selector"
+            ],
+            "properties": {
+              "selector": {
+                "properties": {
+                  "kind": {
+                    "const": "github"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "merged"
+                    ],
+                    "properties": {
+                      "merged": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "event_type": {
+                "pattern": "^pull_request\\..+"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "emailToInvokeSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 2 same-project project drop-zone email source.",
+      "required": ["kind", "phase", "connection_id", "sender_allowlist"],
+      "properties": {
+        "kind": {
+          "const": "email_to_invoke"
+        },
+        "phase": {
+          "const": "phase_2",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$",
+          "description": "Opaque same-project email connection selector."
+        },
+        "sender_allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "description": "Lowercase exact sender mailboxes or whole-domain wildcards authorized to fire this trigger.",
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 254,
+            "pattern": "^(?:[a-z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}|\\*)@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+          }
+        }
+      }
+    },
+    "slaTimerSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 4 durable named-condition SLA timer source.",
+      "required": ["kind", "phase", "condition", "fire_when", "deadline_seconds"],
+      "properties": {
+        "kind": {
+          "const": "sla_timer"
+        },
+        "phase": {
+          "const": "phase_4",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "condition": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_.-]{0,127}$",
+          "description": "Named condition machine identifier."
+        },
+        "fire_when": {
+          "type": "string",
+          "enum": ["condition_met", "condition_missing"],
+          "description": "Whether an on-time condition or its absence owes a fire."
+        },
+        "deadline_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31536000,
+          "description": "Seconds from arm time to the condition deadline."
+        }
+      }
+    },
+    "memoryEventSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 3 same-project durable memory-record change source.",
+      "required": ["kind", "phase", "record_kind", "operation"],
+      "properties": {
+        "kind": {
+          "const": "memory_event"
+        },
+        "phase": {
+          "const": "phase_3",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "record_kind": {
+          "type": "string",
+          "enum": ["skill", "insight", "resource_pointer", "thread_message"],
+          "description": "Durable memory record kind or canonical new-thread-message source."
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["inserted", "updated"],
+          "description": "Durable write operation that can admit the trigger."
+        }
+      }
+    },
+    "storageEventSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 3 same-project private resource-object upload source.",
+      "required": ["kind", "phase", "bucket", "object_kind", "operation"],
+      "properties": {
+        "kind": {
+          "const": "storage_event"
+        },
+        "phase": {
+          "const": "phase_3",
+          "description": "Phase note for this fully specified source kind."
+        },
+        "bucket": {
+          "const": "memory-resources",
+          "description": "Private canonical resource bucket."
+        },
+        "object_kind": {
+          "type": "string",
+          "enum": ["source", "artifact"],
+          "description": "Canonical resource object path kind."
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["inserted", "updated"],
+          "description": "Storage upload or upsert operation that can admit the trigger."
+        }
+      }
+    },
+    "replyConversationSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 4 database-owned conversation continuation source.",
+      "required": ["kind", "phase"],
+      "properties": {
+        "kind": {
+          "const": "reply_conversation"
+        },
+        "phase": {
+          "const": "phase_4",
+          "description": "Phase note for this fully specified source kind."
+        }
+      }
+    },
+    "fireTriggerToolSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Phase 4 same-project server-resident fire-trigger tool source.",
+      "required": ["kind", "phase"],
+      "properties": {
+        "kind": {
+          "const": "fire_trigger_tool"
+        },
+        "phase": {
+          "const": "phase_4",
+          "description": "Phase note for this fully specified source kind."
+        }
+      }
+    },
+    "triggerAgent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "version"],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent identity invoked by this trigger."
+        },
+        "version": {
+          "description": "Immutable agent version number or latest for deferred resolution at fire time.",
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "const": "latest"
+            }
+          ]
+        }
+      }
+    },
+    "retryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3,
+          "description": "Maximum launcher retry attempts before dead-letter handling."
+        },
+        "initial_delay_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600,
+          "default": 30,
+          "description": "Initial retry delay in seconds."
+        },
+        "max_delay_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400,
+          "default": 3600,
+          "description": "Maximum retry delay in seconds."
+        },
+        "backoff": {
+          "type": "string",
+          "enum": ["fixed", "exponential"],
+          "default": "exponential",
+          "description": "Retry delay strategy."
+        }
+      }
+    },
+    "triggerOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Bounded trigger guard options. Defaults come from the trigger-plane corpus guard policy.",
+      "properties": {
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 4,
+          "description": "Per-trigger concurrency cap. Corpus default: 4."
+        },
+        "retry_policy": {
+          "$ref": "#/$defs/retryPolicy"
+        },
+        "dedupe_window_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800,
+          "default": 86400,
+          "description": "Sliding idempotency window in seconds. Corpus default: 86400."
+        },
+        "depth_cap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32,
+          "default": 8,
+          "description": "Trigger-chain depth cap. Corpus default: 8."
+        },
+        "fanout_cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 100,
+          "description": "Runtime fanout cap per root event. Corpus default: 100."
+        },
+        "fire_budget": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 5,
+          "description": "Per-agent-invocation fire budget for the future fire-trigger tool source. Corpus default: 5."
+        },
+        "shadow": {
+          "type": "boolean",
+          "description": "Shadow mode: fires are admitted and recorded but never launch, bill, deliver outbound webhooks, or admit chained triggers."
+        }
+      }
+    }
+  }
+}

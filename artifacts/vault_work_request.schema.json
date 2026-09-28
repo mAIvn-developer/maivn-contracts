@@ -1,0 +1,436 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/vault_work_request.schema.json",
+  "title": "VaultWorkRequest",
+  "x-maivn-vault-work-request-validation": true,
+  "x-maivn-typescript-root-one-of": true,
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "intent_id", "idempotency_key", "operation", "scope", "surface", "input_handles", "bounds", "retention_policy_id", "expires_at"],
+  "properties": {
+    "schema_version": {"const": "vault-work-v1"},
+    "intent_id": {"$ref": "#/$defs/token"},
+    "idempotency_key": {"$ref": "#/$defs/token"},
+    "operation": {"enum": ["create", "rework", "ingest_file", "retrieve_session", "delete", "redacted_export"]},
+    "scope": {"$ref": "#/$defs/tenantScope"},
+    "surface": {"$ref": "#/$defs/surfaceIdentity"},
+    "input_handles": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/inputHandle"}},
+    "value_map_handle": {"$ref": "https://schemas.maivn.dev/artifacts/vault_value_map_handle.schema.json"},
+    "plan": {
+      "$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultArtifactPlan"
+    },
+    "patch": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_patch.schema.json#/$defs/vaultFullReplacementArtifactPatch"},
+    "bounds": {"$ref": "#/$defs/resourceBounds"},
+    "retention_policy_id": {"$ref": "#/$defs/token"},
+    "client_proof_digest": {"$ref": "#/$defs/sha256Hex"},
+    "export_filename": {"$ref": "#/$defs/exportFilename"},
+    "deletion_scope": {"$ref": "#/$defs/deletionScope"},
+    "file_intake": {"$ref": "#/$defs/fileIntakeManifest"},
+    "retrieval_part": {"const": "editable_source"},
+    "expires_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/createRequest"},
+    {"$ref": "#/$defs/reworkRequest"},
+    {"$ref": "#/$defs/ingestFileRequest"},
+    {"$ref": "#/$defs/retrieveSessionRequest"},
+    {"$ref": "#/$defs/deleteRequest"},
+    {"$ref": "#/$defs/redactedExportRequest"}
+  ],
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "sha256Hex": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "exportFilename": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._ ()-]{0,254}$",
+      "allOf": [
+        {"not": {"pattern": "[. ]$"}},
+        {"not": {"pattern": "^(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9]) *(?:\\.|$)"}}
+      ]
+    },
+    "deletionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {"mode": {"enum": ["private_only", "include_redacted_exports"]}}
+    },
+    "structuralId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "rfc3339UtcTimestamp": {"type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"},
+    "tenantScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organization_id", "project_id"],
+      "properties": {"organization_id": {"$ref": "#/$defs/token"}, "project_id": {"$ref": "#/$defs/token"}}
+    },
+    "surfaceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_invocation_id", "session_id", "checkpoint_id", "caller_id"],
+      "properties": {
+        "root_invocation_id": {"$ref": "#/$defs/token"},
+        "session_id": {"$ref": "#/$defs/token"},
+        "checkpoint_id": {"$ref": "#/$defs/token"},
+        "caller_id": {"$ref": "#/$defs/token"}
+      }
+    },
+    "inputHandle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_id", "record_handle", "generation_handle", "role"],
+      "properties": {
+        "local_id": {"$ref": "#/$defs/structuralId"},
+        "record_handle": {"$ref": "#/$defs/token"},
+        "generation_handle": {"$ref": "#/$defs/token"},
+        "role": {"enum": ["template", "source_artifact", "source_image", "source_file"]}
+      }
+    },
+    "createRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "intent_id", "idempotency_key", "operation", "scope", "surface", "input_handles", "value_map_handle", "plan", "bounds", "retention_policy_id", "expires_at"],
+      "properties": {
+        "schema_version": {"const": "vault-work-v1"}, "intent_id": {"$ref": "#/$defs/token"}, "idempotency_key": {"$ref": "#/$defs/token"}, "operation": {"const": "create"}, "scope": {"$ref": "#/$defs/tenantScope"}, "surface": {"$ref": "#/$defs/surfaceIdentity"}, "input_handles": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/inputHandle"}}, "value_map_handle": {"$ref": "https://schemas.maivn.dev/artifacts/vault_value_map_handle.schema.json"}, "plan": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultArtifactPlan"}, "bounds": {"$ref": "#/$defs/resourceBounds"}, "retention_policy_id": {"$ref": "#/$defs/token"}, "expires_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+      }
+    },
+    "reworkRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "intent_id", "idempotency_key", "operation", "scope", "surface", "input_handles", "value_map_handle", "patch", "bounds", "retention_policy_id", "expires_at"],
+      "properties": {
+        "schema_version": {"const": "vault-work-v1"}, "intent_id": {"$ref": "#/$defs/token"}, "idempotency_key": {"$ref": "#/$defs/token"}, "operation": {"const": "rework"}, "scope": {"$ref": "#/$defs/tenantScope"}, "surface": {"$ref": "#/$defs/surfaceIdentity"}, "input_handles": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/inputHandle"}, "contains": {"type": "object", "required": ["role"], "properties": {"role": {"const": "source_artifact"}}}, "minContains": 1, "maxContains": 1}, "value_map_handle": {"$ref": "https://schemas.maivn.dev/artifacts/vault_value_map_handle.schema.json"}, "patch": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_patch.schema.json#/$defs/vaultFullReplacementArtifactPatch"}, "bounds": {"$ref": "#/$defs/resourceBounds"}, "retention_policy_id": {"$ref": "#/$defs/token"}, "expires_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+      }
+    },
+    "retrieveSessionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "intent_id",
+        "idempotency_key",
+        "operation",
+        "scope",
+        "surface",
+        "input_handles",
+        "bounds",
+        "retention_policy_id",
+        "client_proof_digest",
+        "expires_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "vault-work-v1"
+        },
+        "intent_id": {
+          "$ref": "#/$defs/token"
+        },
+        "idempotency_key": {
+          "$ref": "#/$defs/token"
+        },
+        "operation": {
+          "const": "retrieve_session"
+        },
+        "scope": {
+          "$ref": "#/$defs/tenantScope"
+        },
+        "surface": {
+          "$ref": "#/$defs/surfaceIdentity"
+        },
+        "input_handles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/inputHandle"
+          }
+        },
+        "bounds": {
+          "$ref": "#/$defs/resourceBounds"
+        },
+        "retention_policy_id": {
+          "$ref": "#/$defs/token"
+        },
+        "client_proof_digest": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/rfc3339UtcTimestamp"
+        },
+        "retrieval_part": {
+          "const": "editable_source"
+        }
+      }
+    },
+    "deleteRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "intent_id", "idempotency_key", "operation", "scope", "surface", "input_handles", "bounds", "retention_policy_id", "deletion_scope", "expires_at"],
+      "properties": {
+        "schema_version": {"const": "vault-work-v1"}, "intent_id": {"$ref": "#/$defs/token"}, "idempotency_key": {"$ref": "#/$defs/token"}, "operation": {"const": "delete"}, "scope": {"$ref": "#/$defs/tenantScope"}, "surface": {"$ref": "#/$defs/surfaceIdentity"}, "input_handles": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/$defs/inputHandle"}}, "bounds": {"$ref": "#/$defs/resourceBounds"}, "retention_policy_id": {"$ref": "#/$defs/token"}, "deletion_scope": {"$ref": "#/$defs/deletionScope"}, "expires_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+      }
+    },
+    "redactedExportRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "intent_id", "idempotency_key", "operation", "scope", "surface", "input_handles", "bounds", "retention_policy_id", "export_filename", "expires_at"],
+      "properties": {
+        "schema_version": {"const": "vault-work-v1"}, "intent_id": {"$ref": "#/$defs/token"}, "idempotency_key": {"$ref": "#/$defs/token"}, "operation": {"const": "redacted_export"}, "scope": {"$ref": "#/$defs/tenantScope"}, "surface": {"$ref": "#/$defs/surfaceIdentity"}, "input_handles": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "#/$defs/inputHandle"}}, "bounds": {"$ref": "#/$defs/resourceBounds"}, "retention_policy_id": {"$ref": "#/$defs/token"}, "export_filename": {"$ref": "#/$defs/exportFilename"}, "expires_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+      }
+    },
+    "fileIntakeManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "mime_type",
+        "output_commitment",
+        "source_commitment",
+        "max_source_bytes"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "document",
+            "spreadsheet",
+            "presentation",
+            "image",
+            "other"
+          ]
+        },
+        "mime_type": {
+          "type": "string"
+        },
+        "output_commitment": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "source_commitment": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "max_source_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 52428800
+        },
+        "source_format": {
+          "const": "maivn-source-archive-v1"
+        },
+        "expected_base_ref": {
+          "allOf": [
+            {
+              "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactRef"
+            },
+            {
+              "properties": {
+                "state": {
+                  "const": "available_in_vault"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {
+              "const": "document"
+            },
+            "mime_type": {
+              "enum": [
+                "application/pdf",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "spreadsheet"
+            },
+            "mime_type": {
+              "enum": [
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "presentation"
+            },
+            "mime_type": {
+              "enum": [
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "image"
+            },
+            "mime_type": {
+              "enum": [
+                "image/png",
+                "image/jpeg"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {"const": "other"},
+            "mime_type": {"const": "application/octet-stream"}
+          }
+        }
+      ]
+    },
+    "ingestFileRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "intent_id",
+        "idempotency_key",
+        "operation",
+        "scope",
+        "surface",
+        "input_handles",
+        "bounds",
+        "retention_policy_id",
+        "client_proof_digest",
+        "expires_at",
+        "file_intake"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "vault-work-v1"
+        },
+        "intent_id": {
+          "$ref": "#/$defs/token"
+        },
+        "idempotency_key": {
+          "$ref": "#/$defs/token"
+        },
+        "operation": {
+          "const": "ingest_file"
+        },
+        "scope": {
+          "$ref": "#/$defs/tenantScope"
+        },
+        "surface": {
+          "$ref": "#/$defs/surfaceIdentity"
+        },
+        "input_handles": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/inputHandle"
+              },
+              {
+                "properties": {
+                  "role": {
+                    "const": "source_artifact"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "bounds": {
+          "$ref": "#/$defs/resourceBounds"
+        },
+        "retention_policy_id": {
+          "$ref": "#/$defs/token"
+        },
+        "client_proof_digest": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/rfc3339UtcTimestamp"
+        },
+        "retrieval_part": {
+          "const": "editable_source"
+        },
+        "file_intake": {
+          "$ref": "#/$defs/fileIntakeManifest"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "file_intake": {
+              "not": {
+                "required": [
+                  "expected_base_ref"
+                ]
+              }
+            },
+            "input_handles": {
+              "maxItems": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "file_intake": {
+              "required": [
+                "expected_base_ref"
+              ]
+            },
+            "input_handles": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "resourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_pages": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_sheets": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_cells": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_total_decoded_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_duration_seconds": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "documentResourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes", "max_pages"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_pages": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "workbookResourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes", "max_sheets", "max_cells"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_sheets": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_cells": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "imageResourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes", "max_pixels", "max_total_decoded_pixels"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_total_decoded_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+[
+  {
+    "event": "values",
+    "stream_mode": "values",
+    "data": {
+      "state": {
+        "phase": "planning"
+      }
+    },
+    "subgraph_path": [],
+    "ordinal": "runtime-000001",
+    "ts": "2026-07-02T17:00:01Z"
+  },
+  {
+    "event": "messages/partial",
+    "stream_mode": "messages",
+    "data": {
+      "message_id": "msg-assistant-001",
+      "delta": "I am checking the case history."
+    },
+    "subgraph_path": [],
+    "ordinal": "runtime-000002",
+    "ts": "2026-07-02T17:00:02Z"
+  },
+  {
+    "event": "custom/assignment.progress",
+    "stream_mode": "custom",
+    "data": {
+      "assignment_uuid": "assign-child-001",
+      "status": "running"
+    },
+    "subgraph_path": [
+      "orchestrator",
+      "assignment_agent"
+    ],
+    "ordinal": "runtime-000003",
+    "ts": "2026-07-02T17:00:03Z"
+  }
+]

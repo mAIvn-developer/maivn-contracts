@@ -1,0 +1,86 @@
+[
+  {
+    "schema_version": 2,
+    "nodes": [
+      {"node_id": "trigger", "kind": "trigger"},
+      {
+        "node_id": "scope",
+        "kind": "scope",
+        "scope_kind": "agent",
+        "runtime_ref": {"agent_id": "agent-support", "version": 1}
+      },
+      {"node_id": "output", "kind": "output"}
+    ],
+    "edges": [
+      {"edge_id": "start", "kind": "control", "source": "trigger", "target": "scope"},
+      {"edge_id": "finish", "kind": "result", "source": "scope", "target": "output"}
+    ],
+    "layout": {"node_positions": {"scope": {"x": 0, "y": 0}}}
+  },
+  {
+    "schema_version": 1,
+    "nodes": [
+      {"node_id": "trigger", "kind": "trigger"},
+      {
+        "node_id": "scope",
+        "kind": "scope",
+        "scope_kind": "nested_flow",
+        "runtime_ref": {"agent_id": "agent-leaf", "version": 1}
+      },
+      {"node_id": "output", "kind": "output"}
+    ],
+    "edges": [
+      {"edge_id": "start", "kind": "control", "source": "trigger", "target": "scope"},
+      {"edge_id": "finish", "kind": "result", "source": "scope", "target": "output"}
+    ],
+    "layout": {"node_positions": {"scope": {"x": 0, "y": 0}}}
+  },
+  {
+    "schema_version": 1,
+    "nodes": [
+      {"node_id": "trigger", "kind": "trigger"},
+      {
+        "node_id": "scope",
+        "kind": "scope",
+        "scope_kind": "agent",
+        "runtime_ref": {"agent_id": "agent-support", "version": 1}
+      },
+      {"node_id": "output", "kind": "output"},
+      {
+        "node_id": "skill.bad",
+        "kind": "resource",
+        "relationship": "capability",
+        "component_ref": {
+          "component_id": "cmp-skill",
+          "version": 1,
+          "component_kind": "skill"
+        }
+      }
+    ],
+    "edges": [
+      {"edge_id": "start", "kind": "control", "source": "trigger", "target": "scope"},
+      {"edge_id": "finish", "kind": "result", "source": "scope", "target": "output"},
+      {"edge_id": "bad", "kind": "capability", "source": "scope", "target": "skill.bad"}
+    ],
+    "layout": {"node_positions": {"scope": {"x": 0, "y": 0}}}
+  },
+  {
+    "schema_version": 1,
+    "nodes": [
+      {"node_id": "trigger", "kind": "trigger"},
+      {
+        "node_id": "scope",
+        "kind": "scope",
+        "scope_kind": "agent",
+        "runtime_ref": {"agent_id": "agent-support", "version": 1}
+      },
+      {"node_id": "output", "kind": "output"}
+    ],
+    "edges": [
+      {"edge_id": "start", "kind": "control", "source": "trigger", "target": "scope"},
+      {"edge_id": "finish", "kind": "result", "source": "ghost", "target": "output"}
+    ],
+    "layout": {"node_positions": {"scope": {"x": 0, "y": 0}}},
+    "unexpected": true
+  }
+]

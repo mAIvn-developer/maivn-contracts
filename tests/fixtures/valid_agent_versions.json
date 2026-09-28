@@ -1,0 +1,216 @@
+[
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 1,
+    "execution_mode": "worker",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      },
+      "thinking": {
+        "model_id": "gpt-5-mini"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Classify the case and draft a concise response."
+    },
+    "tools_snapshot": [
+      {
+        "name": "lookup_customer",
+        "description": "Fetch customer account and entitlement details.",
+        "parameters_schema": {
+          "type": "object",
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "description": "Stable customer identifier."
+            }
+          },
+          "required": [
+            "customer_id"
+          ]
+        },
+        "execution": {
+          "locus": "worker"
+        }
+      }
+    ],
+    "options": {
+      "reasoning": "medium",
+      "stream_response": true,
+      "status_messages": false,
+      "targeted_tools": [
+        "lookup_customer"
+      ]
+    },
+    "created_at": "2026-07-01T16:01:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 2,
+    "execution_mode": "webhook",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "ref",
+      "ref": "maivn://prompts/customer-triage/v2"
+    },
+    "tools_snapshot": [
+      {
+        "name": "lookup_customer",
+        "description": "Fetch customer account and entitlement details.",
+        "parameters_schema": {
+          "type": "object",
+          "properties": {
+            "customer_id": {
+              "type": "string"
+            }
+          }
+        },
+        "execution": {
+          "locus": "webhook",
+          "path": "/tools/lookup-customer"
+        }
+      }
+    ],
+    "webhook_endpoint": {
+      "url": "https://tools.example.com/maivn",
+      "secret_ref": "vault://project/prj-support/agent/agt-customer-triage/webhook-hmac"
+    },
+    "created_at": "2026-07-01T16:15:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "agt-customer-triage",
+    "version": 3,
+    "execution_mode": "hosted_only",
+    "model": {
+      "response": {
+        "tier": "fast"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Use only hosted connector tools for this no-code automation."
+    },
+    "tools_snapshot": [
+      {
+        "name": "gmail_fetch_thread",
+        "description": "Read a Gmail thread through the hosted connector.",
+        "parameters_schema": {
+          "type": "object",
+          "properties": {
+            "thread_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
+          ]
+        },
+        "execution": {
+          "locus": "hosted",
+          "provider": "gmail",
+          "tool_ref": "gmail.fetch_thread"
+        }
+      }
+    ],
+    "options": {
+      "allowed_system_tools": [
+        "gmail_fetch_thread"
+      ]
+    },
+    "memory": {
+      "enabled": true,
+      "level": "focus",
+      "persistence_mode": "vector_plus_graph",
+      "retrieval": {
+        "skills_enabled": true,
+        "insights_enabled": true,
+        "resources_enabled": false,
+        "max_skills": 4,
+        "max_insights": 3,
+        "max_resources": 2,
+        "max_context_chars": 6000
+      },
+      "skill_extraction": {
+        "enabled": true,
+        "max_count": 2
+      },
+      "insight_extraction": {
+        "enabled": false,
+        "max_count": 2
+      }
+    },
+    "output_schema": {
+      "name": "hosted_connector_result",
+      "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "summary"
+        ],
+        "properties": {
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "created_at": "2026-07-01T16:30:00Z",
+    "created_by": "usr-platform-owner"
+  },
+  {
+    "agent_id": "flow-runtime-support-triage",
+    "version": 1,
+    "execution_mode": "hosted_only",
+    "model": {
+      "response": {
+        "tier": "balanced"
+      }
+    },
+    "instructions": {
+      "kind": "inline",
+      "content": "Coordinate the compiled Flow roster."
+    },
+    "tools_snapshot": [],
+    "agents_snapshot": [
+      {
+        "name": "researcher",
+        "system_prompt": "Research the request.",
+        "tool_ids": [],
+        "tools": [],
+        "attached_skill_ids": [],
+        "use_as_final_output": false,
+        "included_nested_synthesis": "auto",
+        "final_tool_ids": [],
+        "peer_dependencies": []
+      },
+      {
+        "name": "writer",
+        "system_prompt": "Write the final response.",
+        "tool_ids": [],
+        "tools": [],
+        "attached_skill_ids": [],
+        "use_as_final_output": true,
+        "included_nested_synthesis": "auto",
+        "final_tool_ids": [],
+        "peer_dependencies": [
+          {
+            "kind": "agent",
+            "name": "researcher",
+            "arg_name": "research"
+          }
+        ]
+      }
+    ],
+    "swarm_roster": true,
+    "created_at": "2026-07-21T20:00:00Z",
+    "created_by": "usr-platform-owner"
+  }
+]

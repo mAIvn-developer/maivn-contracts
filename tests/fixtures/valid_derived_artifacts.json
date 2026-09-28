@@ -1,0 +1,60 @@
+[
+  {
+    "artifact_id": "art-markdown-storage",
+    "resource_id": "res-policy-indexed",
+    "kind": "markdown",
+    "storage_ref": {
+      "bucket": "memory-resources",
+      "path": "prj-resources/derived/res-policy-indexed/v1/document.md"
+    },
+    "content_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "conversion_method": "deterministic-structural-parse",
+    "version": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": null,
+      "model_version": null,
+      "redaction_version": null,
+      "policy_version": "resource-policy-v1"
+    },
+    "created_at": "2026-07-02T15:10:00Z"
+  },
+  {
+    "artifact_id": "art-redacted-image-v1",
+    "resource_id": "res-policy-secure",
+    "kind": "redacted_image",
+    "storage_ref": {
+      "bucket": "memory-resources",
+      "path": "prj-resources/derived/res-policy-secure/v1/page-001.png"
+    },
+    "content_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "conversion_method": "local-ocr-redaction",
+    "ocr_confidence": 0.94,
+    "version": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": "tesseract-5.4.0",
+      "model_version": "qwen2.5-vl-7b",
+      "redaction_version": "presidio-2.2.0",
+      "policy_version": "resource-policy-v1"
+    },
+    "created_at": "2026-07-02T15:11:00Z"
+  },
+  {
+    "artifact_id": "art-sidecar-map-v1",
+    "resource_id": "res-policy-secure",
+    "kind": "sidecar_map",
+    "inline_text": "{\"artifact_id\":\"art-redacted-image-v1\",\"boxes\":[{\"bbox\":[10,20,110,42],\"private_data_key\":\"patient_name\"}]}",
+    "content_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "conversion_method": "redaction-sidecar-map",
+    "version": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": "tesseract-5.4.0",
+      "model_version": "qwen2.5-vl-7b",
+      "redaction_version": "presidio-2.2.0",
+      "policy_version": "resource-policy-v1"
+    },
+    "created_at": "2026-07-02T15:11:01Z"
+  }
+]

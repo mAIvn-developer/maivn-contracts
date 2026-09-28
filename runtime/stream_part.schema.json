@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/runtime/stream_part.schema.json",
+  "title": "StreamPart",
+  "description": "Owned runtime streaming envelope with event/data parity and explicit subgraph namespacing from corpus Section 6.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event", "data", "subgraph_path", "ordinal", "ts"],
+  "properties": {
+    "event": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Namespaced event name; message events use the messages prefix by convention."
+    },
+    "stream_mode": {
+      "$ref": "#/$defs/streamMode"
+    },
+    "data": {
+      "type": "object",
+      "description": "Open event payload for this stream part.",
+      "additionalProperties": true
+    },
+    "subgraph_path": {
+      "type": "array",
+      "description": "Required subgraph namespace path; empty means the root graph, and non-empty paths preserve nested custom events from corpus Section 6.1.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ordinal": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Per-producer stream ordering token matching the Event ordinal contract."
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when the stream part was emitted."
+    }
+  },
+  "$defs": {
+    "streamMode": {
+      "type": "string",
+      "enum": ["values", "messages", "updates", "custom"],
+      "description": "Owned runtime stream modes."
+    }
+  }
+}

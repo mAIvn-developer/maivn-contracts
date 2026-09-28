@@ -1,0 +1,43 @@
+[
+  {
+    "spec_ref": {
+      "tool_id": "tool-lookup-case",
+      "namespace": "support",
+      "version": "2026-07-03"
+    },
+    "arguments": {
+      "case_id": "case-1001"
+    },
+    "lineage": {
+      "session_id": "ses-support-001",
+      "invocation_id": "inv-support-001"
+    }
+  },
+  {
+    "call_id": "call-lookup-001",
+    "spec_ref": {
+      "tool_id": "tool-lookup-case",
+      "namespace": "support",
+      "version": "2026-07-03"
+    },
+    "arguments": [],
+    "lineage": {
+      "session_id": "ses-support-001",
+      "invocation_id": "inv-support-001"
+    }
+  },
+  {
+    "call_id": "call-extra",
+    "spec_ref": {
+      "tool_id": "tool-lookup-case",
+      "namespace": "support",
+      "version": "2026-07-03"
+    },
+    "arguments": {},
+    "lineage": {
+      "session_id": "ses-support-001",
+      "invocation_id": "inv-support-001"
+    },
+    "secret": "raw-token-value"
+  }
+]

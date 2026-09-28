@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/workers/worker_connection.schema.json",
+  "title": "WorkerConnection",
+  "description": "Observable, non-secret record for an authenticated Mode A worker connection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "connection_id", "worker_id", "connection_epoch", "organization_id", "project_id", "protocol_version", "sdk_version", "capabilities", "max_in_flight", "status", "connected_at", "last_heartbeat_at"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "connection_id": {"type": "string", "minLength": 1},
+    "worker_id": {"type": "string", "minLength": 1},
+    "connection_epoch": {"type": "integer", "minimum": 1},
+    "organization_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "protocol_version": {"const": 1},
+    "sdk_version": {"type": "string", "minLength": 1},
+    "capabilities": {"type": "object", "additionalProperties": {"type": ["boolean", "number", "string"]}},
+    "max_in_flight": {"type": "integer", "minimum": 1, "maximum": 1024},
+    "status": {"type": "string", "enum": ["connected", "draining", "disconnected", "stale"]},
+    "connected_at": {"type": "string", "format": "date-time"},
+    "last_heartbeat_at": {"type": "string", "format": "date-time"},
+    "disconnected_at": {"type": "string", "format": "date-time"}
+  }
+}

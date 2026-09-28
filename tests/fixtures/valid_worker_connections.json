@@ -1,0 +1,17 @@
+[
+  {
+    "schema_version": 1,
+    "connection_id": "con-001",
+    "worker_id": "wrk-support-001",
+    "connection_epoch": 1,
+    "organization_id": "org-support",
+    "project_id": "prj-support",
+    "protocol_version": 1,
+    "sdk_version": "1.0.0",
+    "capabilities": {"tool_dispatch": true},
+    "max_in_flight": 4,
+    "status": "connected",
+    "connected_at": "2026-07-15T00:00:00Z",
+    "last_heartbeat_at": "2026-07-15T00:00:15Z"
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "invocation_id": "inv-support-webhook-0001",
+    "fire_id": "fire-support-webhook-0001",
+    "trigger_id": "trg-support-webhook",
+    "session_id": "ses-support-webhook-0001",
+    "status": "completed",
+    "shadow": false,
+    "started_at": "2026-07-01T18:15:01Z",
+    "finished_at": "2026-07-01T18:15:08Z",
+    "root_event_id": "evt-trigger-root-0001",
+    "parent_trigger_id": "trg-support-webhook",
+    "trigger_chain_depth": 1
+  }
+]

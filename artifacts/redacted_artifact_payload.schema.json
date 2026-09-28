@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json",
+  "title": "RedactedArtifactPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fragments"],
+  "properties": {"fragments": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/fragment"}}},
+  "$defs": {
+    "fragment": {
+      "type": "object", "additionalProperties": false, "required": ["structural_id", "text"],
+      "properties": {
+        "structural_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+        "text": {"type": "string", "minLength": 1, "maxLength": 16384, "pattern": "^(?:(?!\\{_\\{|}_\\})[\\s\\S]|\\{_\\{[A-Za-z0-9][A-Za-z0-9_-]{0,127}\\}_\\})*$"}
+      }
+    }
+  }
+}

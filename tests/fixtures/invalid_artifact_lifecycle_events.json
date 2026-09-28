@@ -1,0 +1,33 @@
+[
+  {
+    "event_type": "artifact.available",
+    "artifact_id": "artifact-001",
+    "logical_output_id": "output-001",
+    "revision": 1,
+    "custody": "ordinary",
+    "artifact_state": "available",
+    "storage_ref": {"bucket": "private"}
+  },
+  {
+    "event_type": "artifact.delivery_queued",
+    "delivery_id": "delivery-001",
+    "destination_ref_id": "destination-001",
+    "artifact_id": "artifact-001",
+    "logical_output_id": "output-001",
+    "revision": 1,
+    "custody": "ordinary",
+    "delivery_state": "started"
+  },
+  {
+    "event_type": "artifact.failed",
+    "reservation_id": "reservation-001",
+    "logical_output_id": "output-001",
+    "reservation_state": "failed",
+    "error": {
+      "code": "artifact_validation_failed",
+      "error_class": "validation",
+      "retryable": false,
+      "message": "private failure"
+    }
+  }
+]

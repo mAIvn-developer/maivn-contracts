@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/runtime/run_state.schema.json",
+  "title": "RunState",
+  "description": "Queryable runtime thread/run state snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["thread_id", "run_id", "status", "values", "ts"],
+  "properties": {
+    "thread_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Runtime thread identifier for the queried state."
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Runtime run identifier for this state snapshot."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "interrupted",
+        "completed",
+        "failed",
+        "cancelled",
+        "abandoned"
+      ],
+      "description": "Run lifecycle status."
+    },
+    "interrupt": {
+      "$ref": "#/$defs/interrupt"
+    },
+    "values": {
+      "type": "object",
+      "description": "Open runtime state values visible to state readers.",
+      "additionalProperties": true
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when the snapshot was observed."
+    }
+  },
+  "$defs": {
+    "interrupt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkpoint_id", "reason", "payload"],
+      "properties": {
+        "checkpoint_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Owned checkpoint identifier used by resume commands."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Machine-readable or human-readable interrupt reason."
+        },
+        "payload": {
+          "type": "object",
+          "description": "Open HITL payload surfaced to the caller.",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["tool_argument", "tool_approval", "agent_followup"],
+          "default": "tool_approval",
+          "description": "Canonical reason category for the human-in-the-loop pause."
+        },
+        "prompt_source": {
+          "type": "string",
+          "enum": ["authored", "agent_generated", "fallback"],
+          "default": "authored",
+          "description": "Provenance of the question shown to the responder."
+        },
+        "question": {
+          "type": "string",
+          "default": "",
+          "description": "Canonical question rendered by typed interrupt clients."
+        },
+        "response_schema": {
+          "type": "object",
+          "default": {},
+          "description": "Stored JSON Schema used to render and validate the response.",
+          "additionalProperties": true
+        },
+        "thread_id": {
+          "anyOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ],
+          "default": null,
+          "description": "Optional runtime thread identifier for historical compatibility."
+        },
+        "session_id": {
+          "anyOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ],
+          "default": null,
+          "description": "Optional runtime session identifier for historical compatibility."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "thread_id": "thr-support-001",
+    "run_id": "run-support-001",
+    "status": "paused",
+    "values": {},
+    "ts": "2026-07-02T17:00:04Z"
+  },
+  {
+    "thread_id": "thr-support-002",
+    "run_id": "run-support-002",
+    "status": "interrupted",
+    "interrupt": {
+      "checkpoint_id": "chk-followup-001",
+      "reason": "human_input_required",
+      "payload": {},
+      "kind": "unknown_interrupt"
+    },
+    "values": {},
+    "ts": "2026-07-02T17:00:06Z"
+  }
+]

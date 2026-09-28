@@ -1,0 +1,4 @@
+[
+  {"protocol_version": 1, "type": "register", "frame_id": "frm", "sent_at": "2026-07-15T00:00:00Z", "payload": {"worker_id": "wrk", "sdk_version": "1", "capabilities": {}, "max_in_flight": 1, "source": "forbidden"}, "frame_hmac": "00"},
+  {"protocol_version": 1, "type": "unknown", "frame_id": "frm", "sent_at": "2026-07-15T00:00:00Z", "payload": {}, "frame_hmac": "00"}
+]

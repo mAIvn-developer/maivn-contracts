@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/tools/tool_outcome.schema.json",
+  "title": "ToolOutcome",
+  "description": "Tool execution outcome returned to the brain. Exactly one of result or typed error is present. Artifact refs are references to returnable invocation outputs and do not embed artifact bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["call_id", "status", "duration_ms"],
+  "properties": {
+    "call_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ToolCall.call_id this outcome resolves."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "error"],
+      "description": "Outcome discriminator."
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Wall-clock execution duration in milliseconds."
+    },
+    "result": {
+      "description": "JSON-serializable tool result payload. Its shape may be constrained by ToolSpec.output_schema."
+    },
+    "error": {
+      "$ref": "#/$defs/toolOutcomeError"
+    },
+    "artifact_refs": {
+      "type": "array",
+      "maxItems": 32,
+      "description": "Optional canonical immutable artifact references produced by the tool. Omission remains distinct from an explicit empty list for historical compatibility.",
+      "items": {
+        "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/okToolOutcome"
+    },
+    {
+      "$ref": "#/$defs/errorToolOutcome"
+    }
+  ],
+  "discriminator": {
+    "propertyName": "status"
+  },
+  "$defs": {
+    "toolOutcomeError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Stable machine-readable error code."
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Non-sensitive human-readable error summary."
+        },
+        "retryable": {
+          "type": "boolean",
+          "description": "Whether the caller may retry the same call after backoff."
+        }
+      }
+    },
+    "okToolOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["call_id", "status", "duration_ms", "result"],
+      "properties": {
+        "call_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "const": "ok"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "result": {},
+        "artifact_refs": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json"
+          }
+        }
+      },
+      "not": {
+        "required": ["error"]
+      }
+    },
+    "errorToolOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["call_id", "status", "duration_ms", "error"],
+      "properties": {
+        "call_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "const": "error"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "$ref": "#/$defs/toolOutcomeError"
+        },
+        "artifact_refs": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json"
+          }
+        }
+      },
+      "not": {
+        "required": ["result"]
+      }
+    }
+  }
+}

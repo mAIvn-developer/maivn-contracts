@@ -1,0 +1,522 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json",
+  "title": "ArtifactRef",
+  "description": "Committed immutable ordinary or vault-private artifact reference.",
+  "x-maivn-closed-union-validation": true,
+  "x-maivn-artifact-ref-validation": true,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "logical_output_id",
+    "revision",
+    "kind",
+    "mime_type",
+    "custody",
+    "state",
+    "created_at",
+    "effective_retention",
+    "producer",
+    "retrieval_action"
+  ],
+  "properties": {
+    "artifact_id": {"$ref": "#/$defs/tokenId"},
+    "logical_output_id": {"$ref": "#/$defs/tokenId"},
+    "revision": {"type": "integer", "minimum": 1},
+    "kind": {"$ref": "#/$defs/artifactKind"},
+    "mime_type": {"$ref": "#/$defs/mimeType"},
+    "custody": {"enum": ["ordinary", "vault_private"]},
+    "state": {"$ref": "#/$defs/artifactState"},
+    "created_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"},
+    "effective_retention": {"$ref": "#/$defs/effectiveRetention"},
+    "producer": {"$ref": "#/$defs/producerLineage"},
+    "supersedes_artifact_id": {"$ref": "#/$defs/tokenId"},
+    "display_filename": {"type": "string"},
+    "size_bytes": {"type": "integer", "minimum": 1},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "validation_receipt": {"$ref": "#/$defs/validationReceipt"},
+    "safe_preview": {"$ref": "#/$defs/safePreview"},
+    "retrieval_action": {"$ref": "#/$defs/retrievalAction"},
+    "display_label": {"enum": ["Private document", "Private spreadsheet", "Private presentation", "Private image", "Private audio", "Private artifact"]},
+    "creation_receipt_id": {"$ref": "#/$defs/tokenId"},
+    "deletion_receipt_id": {"$ref": "#/$defs/tokenId"}
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/ordinaryArtifactRef"},
+    {"$ref": "#/$defs/privateArtifactRef"}
+  ],
+  "discriminator": {"propertyName": "custody"},
+  "$defs": {
+    "tokenId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "rfc3339UtcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+    },
+    "validationProfile": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "validationVersion": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "artifactKind": {
+      "type": "string",
+      "enum": ["document", "spreadsheet", "presentation", "image", "audio", "other"]
+    },
+    "mimeType": {
+      "type": "string",
+      "enum": [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "image/png",
+        "image/jpeg",
+        "audio/mpeg",
+        "audio/wav",
+        "application/octet-stream"
+      ]
+    },
+    "ordinaryArtifactState": {
+      "type": "string",
+      "enum": ["available", "expired", "deleting", "deleted", "delete_incomplete"]
+    },
+    "privateArtifactState": {
+      "type": "string",
+      "enum": [
+        "available_in_vault",
+        "expired",
+        "deleting",
+        "deletion_pending_backup_expiry",
+        "deleted",
+        "delete_incomplete"
+      ]
+    },
+    "artifactState": {
+      "type": "string",
+      "enum": [
+        "available",
+        "available_in_vault",
+        "expired",
+        "deleting",
+        "deletion_pending_backup_expiry",
+        "deleted",
+        "delete_incomplete"
+      ]
+    },
+    "effectiveRetention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_snapshot_id", "retention_class", "expires_at"],
+      "properties": {
+        "policy_snapshot_id": {"$ref": "#/$defs/tokenId"},
+        "retention_class": {"$ref": "#/$defs/tokenId"},
+        "expires_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+      }
+    },
+    "producerLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer_class", "producer_id", "root_invocation_id"],
+      "properties": {
+        "producer_class": {
+          "type": "string",
+          "enum": [
+            "hosted_tool",
+            "external_tool",
+            "provider",
+            "delegated_agent",
+            "swarm_member",
+            "rework",
+            "vault"
+          ]
+        },
+        "producer_id": {"$ref": "#/$defs/tokenId"},
+        "root_invocation_id": {"$ref": "#/$defs/tokenId"},
+        "session_id": {"$ref": "#/$defs/tokenId"},
+        "call_id": {"$ref": "#/$defs/tokenId"},
+        "dispatch_id": {"$ref": "#/$defs/tokenId"},
+        "attempt_id": {"$ref": "#/$defs/tokenId"}
+      }
+    },
+    "privateProducerLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer_class", "producer_id", "root_invocation_id"],
+      "properties": {
+        "producer_class": {"const": "vault"},
+        "producer_id": {"$ref": "#/$defs/tokenId"},
+        "root_invocation_id": {"$ref": "#/$defs/tokenId"},
+        "session_id": {"$ref": "#/$defs/tokenId"},
+        "call_id": {"$ref": "#/$defs/tokenId"},
+        "dispatch_id": {"$ref": "#/$defs/tokenId"},
+        "attempt_id": {"$ref": "#/$defs/tokenId"}
+      }
+    },
+    "validationReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "status", "validator_profile", "validator_version"],
+      "properties": {
+        "receipt_id": {"$ref": "#/$defs/tokenId"},
+        "status": {"const": "validated"},
+        "validator_profile": {"$ref": "#/$defs/validationProfile"},
+        "validator_version": {"$ref": "#/$defs/validationVersion"}
+      }
+    },
+    "retrievalAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relation"],
+      "properties": {
+        "relation": {
+          "enum": [
+            "artifact.download_authorization",
+            "artifact.vault_download_authorization"
+          ]
+        }
+      }
+    },
+    "documentSafePreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "page_count"],
+      "properties": {
+        "kind": {"const": "document"},
+        "page_count": {"type": "integer", "minimum": 1, "maximum": 500}
+      }
+    },
+    "workbookSafePreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "sheet_count"],
+      "properties": {
+        "kind": {"const": "spreadsheet"},
+        "sheet_count": {"type": "integer", "minimum": 1, "maximum": 100}
+      }
+    },
+    "presentationSafePreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "slide_count"],
+      "properties": {
+        "kind": {"const": "presentation"},
+        "slide_count": {"type": "integer", "minimum": 1, "maximum": 500}
+      }
+    },
+    "imageSafePreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "width_pixels", "height_pixels"],
+      "properties": {
+        "kind": {"const": "image"},
+        "width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000},
+        "height_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}
+      }
+    },
+    "audioSafePreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "duration_seconds"],
+      "properties": {
+        "kind": {"const": "audio"},
+        "duration_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 7200
+        }
+      }
+    },
+    "safePreview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {},
+        "page_count": {},
+        "sheet_count": {},
+        "slide_count": {},
+        "width_pixels": {},
+        "height_pixels": {},
+        "duration_seconds": {}
+      },
+      "oneOf": [
+        {"$ref": "#/$defs/documentSafePreview"},
+        {"$ref": "#/$defs/workbookSafePreview"},
+        {"$ref": "#/$defs/presentationSafePreview"},
+        {"$ref": "#/$defs/imageSafePreview"},
+        {"$ref": "#/$defs/audioSafePreview"}
+      ],
+      "discriminator": {"propertyName": "kind"}
+    },
+    "ordinaryArtifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "logical_output_id",
+        "revision",
+        "kind",
+        "mime_type",
+        "custody",
+        "state",
+        "created_at",
+        "effective_retention",
+        "producer",
+        "display_filename",
+        "size_bytes",
+        "sha256",
+        "validation_receipt",
+        "retrieval_action"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/tokenId"},
+        "logical_output_id": {"$ref": "#/$defs/tokenId"},
+        "revision": {"type": "integer", "minimum": 1},
+        "kind": {"$ref": "#/$defs/artifactKind"},
+        "mime_type": {"$ref": "#/$defs/mimeType"},
+        "custody": {"const": "ordinary"},
+        "state": {"$ref": "#/$defs/ordinaryArtifactState"},
+        "created_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"},
+        "effective_retention": {"$ref": "#/$defs/effectiveRetention"},
+        "producer": {"$ref": "#/$defs/producerLineage"},
+        "supersedes_artifact_id": {"$ref": "#/$defs/tokenId"},
+        "display_filename": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^(?!\\.{1,2}$)(?!\\s)(?!.*\\s$)[^/\\\\\\u0000-\\u001F\\u007F]+$"
+        },
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "validation_receipt": {"$ref": "#/$defs/validationReceipt"},
+        "safe_preview": {"$ref": "#/$defs/safePreview"},
+        "retrieval_action": {
+          "allOf": [
+            {"$ref": "#/$defs/retrievalAction"},
+            {"properties": {"relation": {"const": "artifact.download_authorization"}}}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {"revision": {"const": 1}},
+              "not": {"required": ["supersedes_artifact_id"]}
+            },
+            {
+              "properties": {"revision": {"type": "integer", "minimum": 2}},
+              "required": ["supersedes_artifact_id"]
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "kind": {"const": "document"},
+                "mime_type": {
+                  "enum": [
+                    "application/pdf",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ]
+                },
+                "safe_preview": {"$ref": "#/$defs/documentSafePreview"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "spreadsheet"},
+                "mime_type": {
+                  "const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                },
+                "safe_preview": {"$ref": "#/$defs/workbookSafePreview"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "presentation"},
+                "mime_type": {
+                  "const": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                },
+                "safe_preview": {"$ref": "#/$defs/presentationSafePreview"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "image"},
+                "mime_type": {"enum": ["image/png", "image/jpeg"]},
+                "safe_preview": {"$ref": "#/$defs/imageSafePreview"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "audio"},
+                "mime_type": {"enum": ["audio/mpeg", "audio/wav"]},
+                "safe_preview": {"$ref": "#/$defs/audioSafePreview"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "other"},
+                "mime_type": {"const": "application/octet-stream"}
+              },
+              "not": {"required": ["safe_preview"]}
+            }
+          ]
+        }
+      ]
+    },
+    "privateArtifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "logical_output_id",
+        "revision",
+        "kind",
+        "mime_type",
+        "custody",
+        "state",
+        "created_at",
+        "effective_retention",
+        "producer",
+        "display_label",
+        "creation_receipt_id",
+        "retrieval_action"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/tokenId"},
+        "logical_output_id": {"$ref": "#/$defs/tokenId"},
+        "revision": {"type": "integer", "minimum": 1},
+        "kind": {"$ref": "#/$defs/artifactKind"},
+        "mime_type": {"$ref": "#/$defs/mimeType"},
+        "custody": {"const": "vault_private"},
+        "state": {"$ref": "#/$defs/privateArtifactState"},
+        "created_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"},
+        "effective_retention": {"$ref": "#/$defs/effectiveRetention"},
+        "producer": {"$ref": "#/$defs/privateProducerLineage"},
+        "supersedes_artifact_id": {"$ref": "#/$defs/tokenId"},
+        "display_label": {
+          "type": "string",
+          "enum": [
+            "Private document",
+            "Private spreadsheet",
+            "Private presentation",
+            "Private image",
+            "Private audio",
+            "Private artifact"
+          ]
+        },
+        "creation_receipt_id": {"$ref": "#/$defs/tokenId"},
+        "deletion_receipt_id": {"$ref": "#/$defs/tokenId"},
+        "retrieval_action": {
+          "allOf": [
+            {"$ref": "#/$defs/retrievalAction"},
+            {
+              "properties": {
+                "relation": {"const": "artifact.vault_download_authorization"}
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {"revision": {"const": 1}},
+              "not": {"required": ["supersedes_artifact_id"]}
+            },
+            {
+              "properties": {"revision": {"type": "integer", "minimum": 2}},
+              "required": ["supersedes_artifact_id"]
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "kind": {"const": "document"},
+                "mime_type": {
+                  "enum": [
+                    "application/pdf",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ]
+                },
+                "display_label": {"const": "Private document"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "spreadsheet"},
+                "mime_type": {
+                  "const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                },
+                "display_label": {"const": "Private spreadsheet"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "presentation"},
+                "mime_type": {
+                  "const": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                },
+                "display_label": {"const": "Private presentation"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "image"},
+                "mime_type": {"enum": ["image/png", "image/jpeg"]},
+                "display_label": {"const": "Private image"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "audio"},
+                "mime_type": {"enum": ["audio/mpeg", "audio/wav"]},
+                "display_label": {"const": "Private audio"}
+              }
+            },
+            {
+              "properties": {
+                "kind": {"const": "other"},
+                "mime_type": {"const": "application/octet-stream"},
+                "display_label": {"const": "Private artifact"}
+              }
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {"state": {"enum": ["available_in_vault", "expired"]}},
+              "not": {"required": ["deletion_receipt_id"]}
+            },
+            {
+              "properties": {
+                "state": {
+                  "enum": [
+                    "deleting",
+                    "deletion_pending_backup_expiry",
+                    "deleted",
+                    "delete_incomplete"
+                  ]
+                }
+              },
+              "required": ["deletion_receipt_id"]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

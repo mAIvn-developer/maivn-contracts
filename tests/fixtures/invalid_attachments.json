@@ -1,0 +1,22 @@
+[
+  {
+    "attachment_id": "att-both-sources",
+    "filename": "bad.pdf",
+    "mime_type": "application/pdf",
+    "size_bytes": 128,
+    "storage_ref": {
+      "bucket": "memory-resources",
+      "path": "prj-support/resources/bad.pdf",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "inline_base64": "SGVsbG8=",
+    "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  {
+    "attachment_id": "att-no-source",
+    "filename": "missing.pdf",
+    "mime_type": "application/pdf",
+    "size_bytes": 128,
+    "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+]

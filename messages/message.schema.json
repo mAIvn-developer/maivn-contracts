@@ -1,0 +1,525 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/messages/message.schema.json",
+  "title": "Message",
+  "description": "Owned mAIvn Platform v2 Message wire format. It replaces framework message classes at the contract boundary. The canonical private-data placeholder format is {_{key}_}; that exact form is reserved for redaction keys, and generic <UPPER> literals are never legitimate private-data values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["message_id", "role", "content", "ts"],
+  "properties": {
+    "message_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable message identifier for id-based channel merge and replay."
+    },
+    "role": {
+      "type": "string",
+      "enum": ["user", "assistant", "system", "tool"],
+      "description": "Message role discriminator. User carries the old HumanMessage and RedactedMessage boundary through redaction presence, not through framework subclasses."
+    },
+    "content": {
+      "description": "Message text or provider-grounded content blocks. Text, image, and document blocks match the v1 native injection concepts; attachment source bytes live on attachments.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/contentBlock"
+          }
+        }
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "description": "Attachment entities riding on this message. If redaction is present, the resource plane floors these attachments to secure processing; this schema documents that boundary but does not execute the resource-plane rule.",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      }
+    },
+    "artifact_refs": {
+      "type": "array",
+      "maxItems": 32,
+      "description": "Optional ordered canonical immutable artifact references selected for this message. Omission remains distinct from an explicit empty list for historical compatibility.",
+      "items": {
+        "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json"
+      }
+    },
+    "redaction": {
+      "$ref": "#/$defs/redactionConfig"
+    },
+    "metadata": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "maxLength": 4096
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "description": "Bounded primitive metadata for tool call identifiers, trace hints, or UI labels."
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when the message was authored or emitted."
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "role": {
+          "const": "user"
+        }
+      },
+      "required": ["role"]
+    },
+    {
+      "properties": {
+        "role": {
+          "const": "assistant"
+        }
+      },
+      "required": ["role"]
+    },
+    {
+      "properties": {
+        "role": {
+          "const": "system"
+        }
+      },
+      "required": ["role"]
+    },
+    {
+      "properties": {
+        "role": {
+          "const": "tool"
+        }
+      },
+      "required": ["role"]
+    }
+  ],
+  "discriminator": {
+    "propertyName": "role"
+  },
+  "$defs": {
+    "contentBlock": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/textContentBlock"
+        },
+        {
+          "$ref": "#/$defs/imageContentBlock"
+        },
+        {
+          "$ref": "#/$defs/documentContentBlock"
+        },
+        {
+          "$ref": "#/$defs/videoContentBlock"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "textContentBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "text"],
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plain text content block."
+        }
+      }
+    },
+    "imageContentBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "attachment_id", "mime_type"],
+      "properties": {
+        "type": {
+          "const": "image"
+        },
+        "attachment_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Attachment entity that carries the image bytes."
+        },
+        "mime_type": {
+          "type": "string",
+          "pattern": "^image/",
+          "description": "Image media type routed to provider image blocks."
+        },
+        "alt_text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional human-readable image label."
+        }
+      }
+    },
+    "documentContentBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "attachment_id", "mime_type"],
+      "properties": {
+        "type": {
+          "const": "document"
+        },
+        "attachment_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Attachment entity that carries the document bytes."
+        },
+        "mime_type": {
+          "const": "application/pdf",
+          "description": "PDF document media type routed to provider document blocks."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional document label."
+        }
+      }
+    },
+    "videoContentBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "attachment_id", "mime_type"],
+      "properties": {
+        "type": {"const": "video"},
+        "attachment_id": {"type": "string", "minLength": 1},
+        "mime_type": {"type": "string", "pattern": "^video/"},
+        "title": {"type": "string", "minLength": 1}
+      }
+    },
+    "attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attachment_id",
+        "filename",
+        "mime_type",
+        "size_bytes",
+        "content_hash"
+      ],
+      "properties": {
+        "attachment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "mime_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "storage_ref": {
+          "$ref": "#/$defs/storageRef"
+        },
+        "inline_base64": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 69905068,
+          "contentEncoding": "base64",
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "resource_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["storage_ref"],
+          "not": {
+            "required": ["inline_base64"]
+          }
+        },
+        {
+          "required": ["inline_base64"],
+          "not": {
+            "required": ["storage_ref"]
+          }
+        }
+      ]
+    },
+    "storageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bucket", "path", "sha256"],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "redactionConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pii_whitelist": {
+          "$ref": "#/$defs/piiWhitelist"
+        },
+        "known_pii_values": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "description": "Known private values seeded into redaction. Values may be strings or structured descriptors; placeholders use the reserved {_{key}_} convention, never generic <UPPER> literals.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/$defs/knownPrivateData"
+              }
+            ]
+          }
+        },
+        "private_data_schema": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "description": "Reserved private-data field names whose concrete values appear as {_{key}_} placeholders after redaction. Generic <UPPER> literals are not field values.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          }
+        }
+      },
+      "description": "Presence of this object marks the redacted-message boundary. Attachments on this message inherit the same redaction config and are floored to secure processing by the resource plane."
+    },
+    "knownPrivateData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Concrete private value to redact."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "description": "Optional custom placeholder key used in the {_{key}_} convention."
+        },
+        "pii_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "PII entity type such as person, phone, email, ssn, date, or account_id."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable label included in the private_data_schema."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable description for LLM context."
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Semantic format hint such as email, phone, date, ssn, or us_phone."
+        }
+      }
+    },
+    "piiWhitelist": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/piiWhitelistEntry"
+          },
+          "description": "Whitelist entries evaluated after detection and before redaction."
+        },
+        "phi_mode": {
+          "type": "boolean",
+          "description": "When true, HIPAA Safe Harbor entity-type categories cannot be whitelisted."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "phi_mode": {
+                "const": true
+              }
+            },
+            "required": ["phi_mode"]
+          },
+          "then": {
+            "properties": {
+              "entries": {
+                "items": {
+                  "not": {
+                    "properties": {
+                      "entity_type": {
+                        "enum": [
+                          "person",
+                          "ssn",
+                          "phone",
+                          "fax",
+                          "email",
+                          "credit_card",
+                          "iban",
+                          "swift",
+                          "account_id",
+                          "medical_record_number",
+                          "health_plan_id",
+                          "certificate_id",
+                          "license_id",
+                          "vehicle_id",
+                          "device_id",
+                          "biometric_id",
+                          "ip_address",
+                          "url",
+                          "date",
+                          "datetime"
+                        ]
+                      }
+                    },
+                    "required": ["entity_type"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "piiWhitelistEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["justification"],
+      "properties": {
+        "entity_type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "PII entity type to allow. Mutually exclusive with pattern and value."
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Regex-like pattern matched against detected spans. Mutually exclusive with entity_type and value."
+        },
+        "value": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Literal value to allow. Mutually exclusive with entity_type and pattern."
+        },
+        "justification": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 512,
+          "description": "Human-readable business justification for audit evidence."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Optional audit label."
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["entity_type"],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["pattern"]
+              },
+              {
+                "required": ["value"]
+              }
+            ]
+          }
+        },
+        {
+          "required": ["pattern"],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["entity_type"]
+              },
+              {
+                "required": ["value"]
+              }
+            ]
+          }
+        },
+        {
+          "required": ["value"],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["entity_type"]
+              },
+              {
+                "required": ["pattern"]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

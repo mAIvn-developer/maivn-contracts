@@ -1,0 +1,4 @@
+[
+  {"schema_version": 2, "connection_id": "con", "worker_id": "wrk", "connection_epoch": 1, "organization_id": "org", "project_id": "prj", "protocol_version": 1, "sdk_version": "1", "capabilities": {}, "max_in_flight": 1, "status": "connected", "connected_at": "2026-07-15T00:00:00Z", "last_heartbeat_at": "2026-07-15T00:00:00Z"},
+  {"schema_version": 1, "connection_id": "con", "worker_id": "wrk", "connection_epoch": 1, "organization_id": "org", "project_id": "prj", "protocol_version": 1, "sdk_version": "1", "capabilities": {}, "max_in_flight": 1, "status": "connected", "connected_at": "2026-07-15T00:00:00Z", "last_heartbeat_at": "2026-07-15T00:00:00Z", "secret": "forbidden"}
+]

@@ -1,0 +1,579 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/tools/tool_spec.schema.json",
+  "title": "ToolSpec",
+  "description": "Owned tool specification carried by agents and projected to provider-native tools. Function tools represent SDK callables, MCP tools represent official vendor MCP servers or registry entries, and system tools represent platform built-ins. Auth is represented only by vault secret references; raw secrets are structurally impossible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tool_id",
+    "kind",
+    "namespace",
+    "version",
+    "idempotency",
+    "timeout_ms"
+  ],
+  "properties": {
+    "tool_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable tool specification identifier, grounded in v1 tool_id."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "function",
+        "mcp",
+        "system"
+      ],
+      "description": "Tool spec discriminator."
+    },
+    "namespace": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$",
+      "description": "Registration namespace, such as support, connectors.gmail, or system."
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Tool spec version or immutable deployment stamp."
+    },
+    "idempotency": {
+      "type": "string",
+      "enum": [
+        "idempotent",
+        "non_idempotent",
+        "unknown"
+      ],
+      "description": "Executor hint for retries and duplicate suppression."
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600000,
+      "description": "Maximum execution budget for one tool call, in milliseconds."
+    },
+    "auth": {
+      "$ref": "#/$defs/authRef"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$",
+      "description": "Model-facing function or system tool name."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable behavior description for model planning."
+    },
+    "input_schema": {
+      "description": "JSON Schema object for tool arguments. Dynamic schema keywords and property names are intentionally open inside this field.",
+      "additionalProperties": {}
+    },
+    "output_schema": {
+      "description": "Optional JSON Schema object for tool results. Dynamic schema keywords and property names are intentionally open inside this field.",
+      "additionalProperties": {}
+    },
+    "model_constructor": {
+      "type": "boolean",
+      "description": "True when this SDK function tool constructs a Pydantic model."
+    },
+    "argument_producer_requirements": {
+      "type": "array",
+      "description": "Caller-authored argument paths that require references issued by named producer tools.",
+      "items": {
+        "$ref": "#/$defs/toolArgumentProducerRequirement"
+      }
+    },
+    "server_ref": {
+      "$ref": "#/$defs/mcpServerRef"
+    },
+    "tool_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Raw tool name exposed by the referenced MCP server."
+    },
+    "schema_policy": {
+      "type": "string",
+      "enum": [
+        "passthrough"
+      ],
+      "description": "MCP schema handling policy. Passthrough means the server-published schemas are preserved without rewriting."
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/functionToolSpec"
+    },
+    {
+      "$ref": "#/$defs/mcpToolSpec"
+    },
+    {
+      "$ref": "#/$defs/systemToolSpec"
+    }
+  ],
+  "discriminator": {
+    "propertyName": "kind"
+  },
+  "examples": [
+    {
+      "tool_id": "tool-lookup-case",
+      "kind": "function",
+      "namespace": "support",
+      "version": "2026-07-03",
+      "idempotency": "idempotent",
+      "timeout_ms": 5000,
+      "name": "lookup_case",
+      "description": "Look up a support case by id.",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id"
+        ]
+      }
+    },
+    {
+      "tool_id": "tool-gmail-send",
+      "kind": "mcp",
+      "namespace": "connectors.gmail",
+      "version": "2026-07-03",
+      "idempotency": "non_idempotent",
+      "timeout_ms": 10000,
+      "auth": {
+        "scheme": "oauth",
+        "secret_ref": "vault://projects/prj-support/connections/gmail"
+      },
+      "server_ref": {
+        "kind": "registry",
+        "name": "gmail"
+      },
+      "tool_name": "send_email",
+      "schema_policy": "passthrough",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "to"
+        ]
+      }
+    },
+    {
+      "tool_id": "tool-system-compose-artifact",
+      "kind": "system",
+      "namespace": "system",
+      "version": "2026-07-03",
+      "idempotency": "non_idempotent",
+      "timeout_ms": 30000,
+      "name": "compose_artifact",
+      "description": "Create a returnable artifact from structured content.",
+      "input_schema": {
+        "type": "object"
+      }
+    }
+  ],
+  "$defs": {
+    "authRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheme",
+        "secret_ref"
+      ],
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "api_key",
+            "bearer",
+            "basic",
+            "oauth",
+            "custom"
+          ],
+          "description": "Authentication scheme resolved by the executor."
+        },
+        "secret_ref": {
+          "type": "string",
+          "pattern": "^vault://",
+          "description": "Vault reference for credentials. Raw token, password, key, and secret fields are not part of this schema."
+        }
+      }
+    },
+    "mcpRegistryServerRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "kind": {
+          "const": "registry"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Registered official MCP server name."
+        }
+      }
+    },
+    "mcpUrlServerRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "url_ref"
+      ],
+      "properties": {
+        "kind": {
+          "const": "url"
+        },
+        "url_ref": {
+          "type": "string",
+          "pattern": "^vault://",
+          "description": "Vault reference containing the MCP server URL."
+        }
+      }
+    },
+    "mcpServerRef": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/mcpRegistryServerRef"
+        },
+        {
+          "$ref": "#/$defs/mcpUrlServerRef"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "kind"
+      }
+    },
+    "functionToolSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool_id",
+        "kind",
+        "namespace",
+        "version",
+        "idempotency",
+        "timeout_ms",
+        "name",
+        "description",
+        "input_schema"
+      ],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "const": "function"
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency": {
+          "type": "string",
+          "enum": [
+            "idempotent",
+            "non_idempotent",
+            "unknown"
+          ]
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600000
+        },
+        "auth": {
+          "$ref": "#/$defs/authRef"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_schema": {
+          "description": "JSON Schema object for tool arguments.",
+          "additionalProperties": {}
+        },
+        "output_schema": {
+          "description": "Optional JSON Schema object for tool results.",
+          "additionalProperties": {}
+        },
+        "model_constructor": {
+          "type": "boolean",
+          "description": "True when this SDK function tool constructs a Pydantic model."
+        },
+        "always_execute": {
+          "type": "boolean",
+          "description": "Deterministically execute this tool once its declared dependencies resolve, without model choice."
+        },
+        "tool_dependencies": {
+          "type": "array",
+          "description": "Tool->tool argument edges: this tool's arg_name is produced by tool_name's result.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tool_name",
+              "arg_name"
+            ],
+            "properties": {
+              "tool_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "arg_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "result_scope": {
+                "type": "string",
+                "enum": ["invocation", "conversation"],
+                "default": "invocation",
+                "description": "Conversation permits reuse of a retained producer result in the same thread."
+              },
+              "revision_policy": {
+                "type": "string",
+                "enum": [
+                  "on_validation_error"
+                ],
+                "description": "Explicit authorization for SDK-local reconstruction after a validation failure."
+              }
+            }
+          }
+        },
+        "argument_producer_requirements": {
+          "type": "array",
+          "description": "Caller-authored argument paths that require references issued by named producer tools.",
+          "items": {
+            "$ref": "#/$defs/toolArgumentProducerRequirement"
+          }
+        },
+        "interrupt_dependencies": {
+          "type": "array",
+          "description": "Human-owned arguments resolved through durable interrupt checkpoints.",
+          "items": {
+            "$ref": "#/$defs/toolArgumentDependency"
+          }
+        }
+      }
+    },
+    "toolArgumentDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arg_name"
+      ],
+      "properties": {
+        "arg_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-supplied argument name."
+        },
+        "prompt_source": {
+          "type": "string",
+          "enum": [
+            "authored",
+            "agent_generated",
+            "fallback"
+          ],
+          "default": "authored"
+        },
+        "question": {
+          "type": "string",
+          "default": ""
+        },
+        "response_schema": {
+          "type": "object",
+          "additionalProperties": {},
+          "default": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "toolArgumentProducerRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "argument_path",
+        "producer_tool_name",
+        "reference_kind"
+      ],
+      "properties": {
+        "argument_path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*$"
+        },
+        "producer_tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+        },
+        "reference_kind": {
+          "const": "composition_reference"
+        }
+      }
+    },
+    "mcpToolSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool_id",
+        "kind",
+        "namespace",
+        "version",
+        "idempotency",
+        "timeout_ms",
+        "server_ref",
+        "tool_name",
+        "schema_policy",
+        "input_schema"
+      ],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "const": "mcp"
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency": {
+          "type": "string",
+          "enum": [
+            "idempotent",
+            "non_idempotent",
+            "unknown"
+          ]
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600000
+        },
+        "auth": {
+          "$ref": "#/$defs/authRef"
+        },
+        "server_ref": {
+          "$ref": "#/$defs/mcpServerRef"
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_policy": {
+          "const": "passthrough"
+        },
+        "input_schema": {
+          "description": "MCP-published JSON Schema object for tool arguments.",
+          "additionalProperties": {}
+        },
+        "output_schema": {
+          "description": "Optional MCP-published JSON Schema object for tool results.",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "systemToolSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool_id",
+        "kind",
+        "namespace",
+        "version",
+        "idempotency",
+        "timeout_ms",
+        "name",
+        "description",
+        "input_schema"
+      ],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "const": "system"
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency": {
+          "type": "string",
+          "enum": [
+            "idempotent",
+            "non_idempotent",
+            "unknown"
+          ]
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600000
+        },
+        "auth": {
+          "$ref": "#/$defs/authRef"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_schema": {
+          "description": "JSON Schema object for system tool arguments.",
+          "additionalProperties": {}
+        },
+        "output_schema": {
+          "description": "Optional JSON Schema object for system tool results.",
+          "additionalProperties": {}
+        }
+      }
+    }
+  }
+}

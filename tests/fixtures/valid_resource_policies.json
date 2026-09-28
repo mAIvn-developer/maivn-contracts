@@ -1,0 +1,34 @@
+[
+  {
+    "resource": {
+      "attachment_id": "att-policy-direct",
+      "filename": "plain.pdf",
+      "mime_type": "application/pdf",
+      "size_bytes": 4096,
+      "storage_ref": {
+        "bucket": "memory-resources",
+        "path": "prj-resources/resources/plain.pdf",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "resource_id": "res-policy-direct"
+    },
+    "tier": "direct",
+    "persist": false
+  },
+  {
+    "resource": "res-policy-indexed",
+    "tier": "indexed",
+    "persist": true
+  },
+  {
+    "resource": "res-policy-secure",
+    "tier": "secure",
+    "persist": true
+  },
+  {
+    "resource": "res-policy-derived",
+    "tier": null,
+    "persist": null
+  }
+]

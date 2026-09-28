@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/vault_ordinary_export_trust_document.schema.json",
+  "title": "VaultOrdinaryExportTrustDocument",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "entries"],
+  "properties": {
+    "schema_version": {"const": "vault-ordinary-export-trust-v1"},
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/entry"}
+    }
+  },
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "sha256Hex": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?Z$"
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "peer_leaf_certificate_sha256",
+        "issuer",
+        "key_id",
+        "ed25519_public_key_base64url",
+        "role",
+        "audience",
+        "allowed_paths",
+        "not_before",
+        "not_after"
+      ],
+      "properties": {
+        "peer_leaf_certificate_sha256": {"$ref": "#/$defs/sha256Hex"},
+        "issuer": {"$ref": "#/$defs/token"},
+        "key_id": {"$ref": "#/$defs/token"},
+        "ed25519_public_key_base64url": {"type": "string", "pattern": "^[A-Za-z0-9_-]{43}$"},
+        "role": {"enum": ["executor", "maintenance"]},
+        "audience": {"const": "maivn-data-plane-ordinary-export-v1"},
+        "allowed_paths": {
+          "type": "array",
+          "items": {"enum": [
+            "/internal/v1/vault/ordinary-exports/publications",
+            "/internal/v1/vault/ordinary-exports/deletions",
+            "/internal/v1/vault/ordinary-exports/deletion-status"
+          ]},
+          "uniqueItems": true
+        },
+        "not_before": {"$ref": "#/$defs/timestamp"},
+        "not_after": {"$ref": "#/$defs/timestamp"},
+        "revoked_at": {"anyOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"role": {"const": "executor"}}, "required": ["role"]},
+          "then": {"properties": {"allowed_paths": {
+            "const": ["/internal/v1/vault/ordinary-exports/publications"]
+          }}}
+        },
+        {
+          "if": {"properties": {"role": {"const": "maintenance"}}, "required": ["role"]},
+          "then": {"properties": {"allowed_paths": {"const": [
+            "/internal/v1/vault/ordinary-exports/deletions",
+            "/internal/v1/vault/ordinary-exports/deletion-status"
+          ]}}}
+        }
+      ]
+    }
+  }
+}

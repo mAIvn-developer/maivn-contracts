@@ -1,0 +1,12 @@
+[
+  {
+    "user_id": "usr-support-001",
+    "thread_id": "thr-support-001",
+    "model_directive": "turbo"
+  },
+  {
+    "user_id": "usr-support-001",
+    "thread_id": "thr-support-001",
+    "recursion_limit": 0
+  }
+]

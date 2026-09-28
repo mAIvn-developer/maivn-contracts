@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/workers/worker_frame.schema.json",
+  "title": "WorkerFrame",
+  "description": "Closed v1 Mode A worker frame. Extensions is the only forward-compatible map.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "type", "frame_id", "sent_at", "payload", "frame_hmac"],
+  "properties": {
+    "protocol_version": {"const": 1},
+    "type": {"type": "string", "enum": ["register", "registered", "heartbeat", "draining", "dispatch", "dispatch_ack", "tool_result", "error"]},
+    "frame_id": {"type": "string", "minLength": 1},
+    "sent_at": {"type": "string", "format": "date-time"},
+    "payload": {"type": "object"},
+    "frame_hmac": {"type": "string", "minLength": 1},
+    "extensions": {"type": "object", "additionalProperties": {}}
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"const": "register"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/registerPayload"}}}},
+    {"if": {"properties": {"type": {"const": "registered"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/registeredPayload"}}}},
+    {"if": {"properties": {"type": {"const": "heartbeat"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/heartbeatPayload"}}}},
+    {"if": {"properties": {"type": {"const": "draining"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/drainingPayload"}}}},
+    {"if": {"properties": {"type": {"const": "dispatch"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/dispatchPayload"}}}},
+    {"if": {"properties": {"type": {"const": "dispatch_ack"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/dispatchAckPayload"}}}},
+    {"if": {"properties": {"type": {"const": "tool_result"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/toolResultPayload"}}}},
+    {"if": {"properties": {"type": {"const": "error"}}}, "then": {"properties": {"payload": {"$ref": "#/$defs/errorPayload"}}}}
+  ],
+  "$defs": {
+    "registerPayload": {"type": "object", "additionalProperties": false, "required": ["worker_id", "sdk_version", "capabilities", "max_in_flight"], "properties": {"worker_id": {"type": "string", "minLength": 1}, "sdk_version": {"type": "string", "minLength": 1}, "capabilities": {"type": "object", "additionalProperties": {"type": ["boolean", "number", "string"]}}, "max_in_flight": {"type": "integer", "minimum": 1, "maximum": 1024}, "agent_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}, "tool_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}}},
+    "registeredPayload": {"type": "object", "additionalProperties": false, "required": ["connection_id", "connection_epoch", "heartbeat_interval_ms", "heartbeat_timeout_ms", "max_frame_bytes", "server_time", "frame_key"], "properties": {"connection_id": {"type": "string", "minLength": 1}, "connection_epoch": {"type": "integer", "minimum": 1}, "heartbeat_interval_ms": {"type": "integer", "minimum": 1}, "heartbeat_timeout_ms": {"type": "integer", "minimum": 1}, "max_frame_bytes": {"type": "integer", "minimum": 1}, "server_time": {"type": "string", "format": "date-time"}, "frame_key": {"type": "string", "minLength": 1}}},
+    "heartbeatPayload": {"type": "object", "additionalProperties": false, "required": ["connection_id", "connection_epoch", "sequence", "available_capacity", "in_flight_dispatch_ids"], "properties": {"connection_id": {"type": "string", "minLength": 1}, "connection_epoch": {"type": "integer", "minimum": 1}, "sequence": {"type": "integer", "minimum": 0}, "available_capacity": {"type": "integer", "minimum": 0}, "in_flight_dispatch_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}}},
+    "drainingPayload": {"type": "object", "additionalProperties": false, "required": ["connection_id", "connection_epoch"], "properties": {"connection_id": {"type": "string", "minLength": 1}, "connection_epoch": {"type": "integer", "minimum": 1}}},
+    "dispatchPayload": {"type": "object", "additionalProperties": false, "required": ["dispatch"], "properties": {"dispatch": {"$ref": "https://schemas.maivn.dev/tools/tool_dispatch.schema.json"}}},
+    "dispatchAckPayload": {"type": "object", "additionalProperties": false, "required": ["dispatch_id", "attempt_id"], "properties": {"dispatch_id": {"type": "string", "minLength": 1}, "attempt_id": {"type": "string", "minLength": 1}}},
+    "toolResultPayload": {"type": "object", "additionalProperties": false, "required": ["callback"], "properties": {"callback": {"$ref": "https://schemas.maivn.dev/tools/tool_callback.schema.json"}}},
+    "errorPayload": {"type": "object", "additionalProperties": false, "required": ["code", "message"], "properties": {"code": {"type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9_]*$"}, "message": {"type": "string", "minLength": 1, "maxLength": 2048}}}
+  }
+}

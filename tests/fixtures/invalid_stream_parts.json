@@ -1,0 +1,19 @@
+[
+  {
+    "event": "debug",
+    "stream_mode": "debug",
+    "data": {},
+    "subgraph_path": [],
+    "ordinal": "runtime-000001",
+    "ts": "2026-07-02T17:00:01Z"
+  },
+  {
+    "event": "custom/assignment.progress",
+    "stream_mode": "custom",
+    "data": {
+      "assignment_uuid": "assign-child-001"
+    },
+    "ordinal": "runtime-000002",
+    "ts": "2026-07-02T17:00:02Z"
+  }
+]

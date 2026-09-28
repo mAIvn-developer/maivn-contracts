@@ -1,0 +1,123 @@
+{
+  "description": "Canonical error-envelope vectors. Every service renders each error to exactly `body` (UTF-8). See maivn_contracts.api_errors.",
+  "cases": [
+    {
+      "name": "not_found",
+      "status": 404,
+      "error": {
+        "code": "not_found",
+        "detail": "Not found."
+      },
+      "body": "{\"detail\":\"Not found.\",\"code\":\"not_found\"}"
+    },
+    {
+      "name": "validation_fields",
+      "status": 422,
+      "error": {
+        "code": "validation_failed",
+        "detail": "Request validation failed.",
+        "fields": [
+          {
+            "field": "messages.0.content",
+            "message": "Field required"
+          },
+          {
+            "field": "",
+            "message": "Input should be a valid dictionary"
+          }
+        ]
+      },
+      "body": "{\"detail\":\"Request validation failed.\",\"code\":\"validation_failed\",\"fields\":[{\"field\":\"messages.0.content\",\"message\":\"Field required\"},{\"field\":\"\",\"message\":\"Input should be a valid dictionary\"}]}"
+    },
+    {
+      "name": "plan_limit_context",
+      "status": 429,
+      "error": {
+        "code": "plan_limit_exceeded",
+        "detail": "Your pro plan's 1000 monthly runs for this period are used up.",
+        "retry_after": 3600,
+        "context": {
+          "upgrade": "business",
+          "meter": "fires",
+          "limit": "1000",
+          "used": "1000",
+          "remaining": "0",
+          "plan": "pro",
+          "period_resets_at": "2026-10-01T00:00:00Z"
+        }
+      },
+      "body": "{\"detail\":\"Your pro plan's 1000 monthly runs for this period are used up.\",\"code\":\"plan_limit_exceeded\",\"retry_after\":3600,\"context\":{\"limit\":\"1000\",\"meter\":\"fires\",\"period_resets_at\":\"2026-10-01T00:00:00Z\",\"plan\":\"pro\",\"remaining\":\"0\",\"upgrade\":\"business\",\"used\":\"1000\"}}"
+    },
+    {
+      "name": "nested_context_sorted",
+      "status": 409,
+      "error": {
+        "code": "session_id_in_use",
+        "detail": "This session id is already in use.",
+        "context": {
+          "session_id": "sess_123",
+          "b": {
+            "z": 1,
+            "a": [
+              {
+                "y": true,
+                "x": null
+              }
+            ]
+          }
+        }
+      },
+      "body": "{\"detail\":\"This session id is already in use.\",\"code\":\"session_id_in_use\",\"context\":{\"b\":{\"a\":[{\"x\":null,\"y\":true}],\"z\":1},\"session_id\":\"sess_123\"}}"
+    },
+    {
+      "name": "html_and_unicode_verbatim",
+      "status": 400,
+      "error": {
+        "code": "bad_request",
+        "detail": "Café <b>&</b> “quoted” \\ \"x\""
+      },
+      "body": "{\"detail\":\"Café <b>&</b> “quoted” \\\\ \\\"x\\\".\",\"code\":\"bad_request\"}"
+    },
+    {
+      "name": "request_id",
+      "status": 500,
+      "error": {
+        "code": "internal_error",
+        "detail": "Internal error.",
+        "request_id": "req_01H"
+      },
+      "body": "{\"detail\":\"Internal error.\",\"code\":\"internal_error\",\"request_id\":\"req_01H\"}"
+    },
+    {
+      "name": "sdk_upgrade_required",
+      "status": 426,
+      "error": {
+        "code": "sdk_upgrade_required",
+        "detail": "This version of the mAIvn SDK is no longer supported. Upgrade with: pip install -U maivn. See the upgrade guide at https://developer.maivn.io/docs."
+      },
+      "body": "{\"detail\":\"This version of the mAIvn SDK is no longer supported. Upgrade with: pip install -U maivn. See the upgrade guide at https://developer.maivn.io/docs.\",\"code\":\"sdk_upgrade_required\"}"
+    },
+    {
+      "name": "sentence_form",
+      "status": 404,
+      "error": {
+        "code": "unknown_thread",
+        "detail": "  thread was not found "
+      },
+      "body": "{\"detail\":\"Thread was not found.\",\"code\":\"unknown_thread\"}"
+    },
+    {
+      "name": "sentence_form_keeps_a_leading_path",
+      "status": 422,
+      "error": {
+        "code": "project_scope_mismatch",
+        "detail": "run_config.project_id does not match authenticated project",
+        "context": {
+          "authenticated_project_id": "p-1",
+          "claimed_project_id": "p-2"
+        }
+      },
+      "body": "{\"detail\":\"run_config.project_id does not match authenticated project.\",\"code\":\"project_scope_mismatch\",\"context\":{\"authenticated_project_id\":\"p-1\",\"claimed_project_id\":\"p-2\"}}"
+    }
+  ]
+}

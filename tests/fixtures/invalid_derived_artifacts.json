@@ -1,0 +1,57 @@
+[
+  {
+    "artifact_id": "art-both-storage-inline",
+    "resource_id": "res-policy-indexed",
+    "kind": "markdown",
+    "storage_ref": {
+      "bucket": "memory-resources",
+      "path": "prj-resources/derived/res-policy-indexed/v1/document.md"
+    },
+    "inline_text": "# Duplicate body",
+    "content_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "conversion_method": "deterministic-structural-parse",
+    "version": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": null,
+      "model_version": null,
+      "redaction_version": null,
+      "policy_version": "resource-policy-v1"
+    },
+    "created_at": "2026-07-02T15:12:00Z"
+  },
+  {
+    "artifact_id": "art-neither-storage-inline",
+    "resource_id": "res-policy-indexed",
+    "kind": "markdown",
+    "content_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "conversion_method": "deterministic-structural-parse",
+    "version": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": null,
+      "model_version": null,
+      "redaction_version": null,
+      "policy_version": "resource-policy-v1"
+    },
+    "created_at": "2026-07-02T15:12:01Z"
+  },
+  {
+    "artifact_id": "art-ocr-out-of-range",
+    "resource_id": "res-policy-secure",
+    "kind": "redacted_markdown",
+    "inline_text": "# Redacted text",
+    "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+    "conversion_method": "local-ocr-redaction",
+    "ocr_confidence": 1.2,
+    "version": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": "tesseract-5.4.0",
+      "model_version": "qwen2.5-vl-7b",
+      "redaction_version": "presidio-2.2.0",
+      "policy_version": "resource-policy-v1"
+    },
+    "created_at": "2026-07-02T15:12:02Z"
+  }
+]

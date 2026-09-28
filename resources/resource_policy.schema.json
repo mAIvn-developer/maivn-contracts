@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/resources/resource_policy.schema.json",
+  "title": "ResourcePolicy",
+  "description": "Intent-level resource processing policy. It carries only resource, tier, and persist. Mechanism knobs such as OCR engine, chunking, caching, conversion toggles, or redaction options are structurally impossible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resource", "tier", "persist"],
+  "properties": {
+    "resource": {
+      "description": "Attachment entity or registered resource_id to process. Bare attachments on plain messages bypass processing and resolve to direct. Attachments on messages with redaction present inherit that redaction boundary and cannot resolve below secure.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "description": "Registered resource_id for a previously stored resource."
+        },
+        {
+          "$ref": "#/$defs/attachment"
+        }
+      ]
+    },
+    "tier": {
+      "description": "Requested processing tier. Null derives from the carrying message: plain message -> direct, redacted message -> secure. The secure floor is un-bypassable: direct or indexed on a redacted message is a validation error in that message context.",
+      "type": ["string", "null"],
+      "enum": ["direct", "indexed", "secure", null]
+    },
+    "persist": {
+      "description": "Whether to keep durable derived artifacts and a warmed per-resource thread. Null means the resource plane applies the smart default for the resolved tier and binding context.",
+      "type": ["boolean", "null"]
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "$ref": "https://schemas.maivn.dev/messages/attachment.schema.json"
+    }
+  }
+}

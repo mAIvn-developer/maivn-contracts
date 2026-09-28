@@ -1,0 +1,45 @@
+[
+  {
+    "fire_id": "fire-support-webhook-0001",
+    "trigger_id": "trg-support-webhook",
+    "dedupe_key": "case-1001",
+    "priority": "triggered",
+    "shadow": false,
+    "status": "pending",
+    "available_at": "2026-07-01T18:15:00Z",
+    "attempt": 0,
+    "payload": {
+      "case": {
+        "id": "case-1001",
+        "priority": "high",
+    "shadow": false
+      },
+      "customer": {
+        "email": "ada@example.com"
+      }
+    },
+    "root_event_id": "evt-trigger-root-0001",
+    "trigger_chain_depth": 0
+  },
+  {
+    "fire_id": "fire-support-webhook-0002",
+    "trigger_id": "trg-support-webhook",
+    "dedupe_key": "case-1002",
+    "priority": "retry",
+    "shadow": false,
+    "status": "dead",
+    "available_at": "2026-07-01T18:20:00Z",
+    "attempt": 5,
+    "payload": {
+      "case": {
+        "id": "case-1002",
+        "priority": "urgent",
+    "shadow": false
+      }
+    },
+    "root_event_id": "evt-trigger-root-0001",
+    "parent_session_id": "ses-parent-0001",
+    "parent_trigger_id": "trg-parent",
+    "trigger_chain_depth": 2
+  }
+]

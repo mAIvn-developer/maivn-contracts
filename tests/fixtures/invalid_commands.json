@@ -1,0 +1,14 @@
+[
+  {
+    "kind": "start",
+    "messages": [
+      {
+        "message_id": "msg-user-001",
+        "role": "user",
+        "content": "This command attempts to expose internal routing.",
+        "ts": "2026-07-02T17:00:00Z"
+      }
+    ],
+    "goto": "finalize_output"
+  }
+]

@@ -1,0 +1,3 @@
+[
+  {"schema_version": 1, "dispatch_id": "dsp-001", "attempt_id": "att-001", "session_id": "ses-001", "call_id": "call-001", "completed_at": "2026-07-15T00:00:01Z", "outcome": {"call_id": "call-001", "status": "ok", "duration_ms": 25, "result": {"priority": "high"}}}
+]

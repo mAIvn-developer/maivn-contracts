@@ -1,0 +1,564 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/scenarios/scenario.schema.json",
+  "title": "Scenario",
+  "description": "Single-trigger Alpha scenario. The canonical form is JSON; YAML is only a projection for code mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenario_id",
+    "project_id",
+    "name",
+    "trigger_id",
+    "revision",
+    "agent",
+    "output_binding",
+    "layout",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable scenario identifier."
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project that owns this scenario."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable scenario name."
+    },
+    "trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exactly one trigger definition attached to this v1 scenario."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Positive optimistic revision of the current scenario canvas."
+    },
+    "agent": {
+      "$ref": "#/$defs/scenarioAgent"
+    },
+    "subworkflow": {
+      "$ref": "#/$defs/scenarioSubworkflow"
+    },
+    "output_binding": {
+      "$ref": "#/$defs/outputBinding"
+    },
+    "layout": {
+      "$ref": "#/$defs/layout"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 12000,
+      "pattern": "\\S",
+      "description": "Optional bounded authoring context preserved with every revision."
+    },
+    "flow_graph": {
+      "oneOf": [
+        {
+          "$ref": "https://schemas.maivn.dev/flows/flow_graph.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Optional canonical Flow authoring topology. Legacy records without a graph remain valid."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when this scenario was created."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when this scenario was last updated."
+    }
+  },
+  "$defs": {
+    "scenarioAgent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "version"],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent identity used by this scenario."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Immutable agent version pinned by this scenario."
+        }
+      }
+    },
+    "scenarioSubworkflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario_id", "version"],
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Same-project child scenario identity."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Immutable child scenario revision."
+        }
+      }
+    },
+    "outputBinding": {
+      "description": "Bounded output node binding for the minimal v1 Alpha output kinds.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/displayInAppOutput"
+        },
+        {
+          "$ref": "#/$defs/webhookOutput"
+        },
+        {
+          "$ref": "#/$defs/slackMessageOutput"
+        },
+        {
+          "$ref": "#/$defs/emailReplyOutput"
+        },
+        {
+          "$ref": "#/$defs/databaseRecordOutput"
+        },
+        {
+          "$ref": "#/$defs/eventEmissionOutput"
+        },
+        {
+          "$ref": "#/$defs/discordMessageOutput"
+        },
+        {
+          "$ref": "#/$defs/gitHubCommentOutput"
+        },
+        {
+          "$ref": "#/$defs/fileOutput"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "kind"
+      }
+    },
+    "displayInAppOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "const": "display_in_app"
+        }
+      }
+    },
+    "webhookOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "webhook"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["endpoint_ref"],
+          "properties": {
+            "endpoint_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Connection-scoped webhook endpoint reference; never a raw URL or secret."
+            }
+          }
+        }
+      }
+    },
+    "slackMessageOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "slack_message"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["channel_ref"],
+          "properties": {
+            "channel_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Connection-scoped Slack channel reference."
+            }
+          }
+        }
+      }
+    },
+    "discordMessageOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "discord_message"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["channel_ref"],
+          "properties": {
+            "channel_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Connection-scoped Discord channel reference."
+            }
+          }
+        }
+      }
+    },
+    "emailReplyOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "email_reply"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["thread_ref"],
+          "properties": {
+            "thread_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Connection-scoped email thread reference."
+            }
+          }
+        }
+      }
+    },
+    "databaseRecordOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "database_record"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["table_ref"],
+          "properties": {
+            "table_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Project-scoped database table or collection reference."
+            }
+          }
+        }
+      }
+    },
+    "eventEmissionOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "event_emission"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["event_type"],
+          "properties": {
+            "event_type": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Canonical event type emitted by the output node."
+            }
+          }
+        }
+      }
+    },
+    "gitHubCommentOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "const": "github_comment"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository_ref", "issue_ref"],
+          "properties": {
+            "repository_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Connection-scoped GitHub repository reference."
+            },
+            "issue_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Connection-scoped GitHub issue or pull request reference."
+            }
+          }
+        }
+      }
+    },
+    "opaqueTokenId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "logicalOutputFileSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selector_type", "logical_output_name"],
+      "properties": {
+        "selector_type": {"const": "logical_output"},
+        "logical_output_name": {"$ref": "#/$defs/opaqueTokenId"}
+      }
+    },
+    "explicitSelectionFileSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selector_type", "selection_rule_ref"],
+      "properties": {
+        "selector_type": {"const": "explicit_selection"},
+        "selection_rule_ref": {"$ref": "#/$defs/opaqueTokenId"}
+      }
+    },
+    "fileOutputSelector": {
+      "oneOf": [
+        {"$ref": "#/$defs/logicalOutputFileSelector"},
+        {"$ref": "#/$defs/explicitSelectionFileSelector"}
+      ],
+      "discriminator": {"propertyName": "selector_type"}
+    },
+    "fileDeliveryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_size_bytes",
+        "authorization_ttl_seconds",
+        "max_attempts",
+        "initial_retry_delay_seconds"
+      ],
+      "properties": {
+        "max_size_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1073741824
+        },
+        "authorization_ttl_seconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 3600
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "initial_retry_delay_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        }
+      }
+    },
+    "fileOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "selector",
+        "required_kind",
+        "allowed_mime_types",
+        "required_custody",
+        "destination_connection_ref",
+        "mode",
+        "delivery_policy",
+        "private_export_authorization_required",
+        "idempotency_key_template"
+      ],
+      "properties": {
+        "kind": {"const": "file"},
+        "selector": {"$ref": "#/$defs/fileOutputSelector"},
+        "required_kind": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/artifactKind"
+        },
+        "allowed_mime_types": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/mimeType"
+          }
+        },
+        "required_custody": {"enum": ["ordinary", "vault_private"]},
+        "destination_connection_ref": {"$ref": "#/$defs/opaqueTokenId"},
+        "mode": {
+          "enum": ["attachment", "authenticated_reference", "vault_retrieval"]
+        },
+        "delivery_policy": {"$ref": "#/$defs/fileDeliveryPolicy"},
+        "private_export_authorization_required": {"type": "boolean"},
+        "idempotency_key_template": {
+          "const": "{scenario_revision}:{invocation_id}:{artifact_id}:{destination_revision}"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"required_kind": {"const": "document"}},
+            "required": ["required_kind"]
+          },
+          "then": {
+            "properties": {
+              "allowed_mime_types": {
+                "items": {
+                  "enum": [
+                    "application/pdf",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"required_kind": {"const": "spreadsheet"}},
+            "required": ["required_kind"]
+          },
+          "then": {
+            "properties": {
+              "allowed_mime_types": {
+                "items": {
+                  "const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"required_kind": {"const": "image"}},
+            "required": ["required_kind"]
+          },
+          "then": {
+            "properties": {
+              "allowed_mime_types": {"items": {"enum": ["image/jpeg", "image/png"]}}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"required_kind": {"const": "audio"}},
+            "required": ["required_kind"]
+          },
+          "then": {
+            "properties": {
+              "allowed_mime_types": {"items": {"enum": ["audio/mpeg", "audio/wav"]}}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"required_kind": {"const": "other"}},
+            "required": ["required_kind"]
+          },
+          "then": {
+            "properties": {
+              "allowed_mime_types": {"items": {"const": "application/octet-stream"}}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"required_custody": {"const": "ordinary"}},
+            "required": ["required_custody"]
+          },
+          "then": {
+            "properties": {
+              "mode": {"enum": ["attachment", "authenticated_reference"]},
+              "private_export_authorization_required": {"const": false}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_custody": {"const": "vault_private"},
+              "mode": {"const": "vault_retrieval"}
+            },
+            "required": ["required_custody", "mode"]
+          },
+          "then": {
+            "properties": {"private_export_authorization_required": {"const": false}}
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_custody": {"const": "vault_private"},
+              "mode": {"enum": ["attachment", "authenticated_reference"]}
+            },
+            "required": ["required_custody", "mode"]
+          },
+          "then": {
+            "properties": {"private_export_authorization_required": {"const": true}}
+          }
+        }
+      ]
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Bounded canvas metadata for Alpha layout. Positions are keyed by node id.",
+      "required": ["node_positions"],
+      "properties": {
+        "node_positions": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 64,
+          "additionalProperties": {
+            "$ref": "#/$defs/nodePosition"
+          }
+        }
+      }
+    },
+    "nodePosition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "Canvas x-coordinate."
+        },
+        "y": {
+          "type": "number",
+          "description": "Canvas y-coordinate."
+        }
+      }
+    }
+  }
+}

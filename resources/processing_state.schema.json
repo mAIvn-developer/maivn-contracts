@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/resources/processing_state.schema.json",
+  "title": "ProcessingState",
+  "description": "Resource processing lifecycle record for direct, indexed, and secure resources.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resource_id",
+    "tier",
+    "status",
+    "processed_at",
+    "attempt",
+    "version_stamps"
+  ],
+  "properties": {
+    "resource_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Registered resource identifier."
+    },
+    "tier": {
+      "$ref": "#/$defs/resourceTier"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "ready",
+        "failed",
+        "quarantined",
+        "redaction_failed"
+      ],
+      "description": "Processing lifecycle status. quarantined and redaction_failed are fail-closed terminal states and must never fall back to raw delivery."
+    },
+    "processed_at": {
+      "description": "RFC3339 processing timestamp, or null before terminal processing evidence exists.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Zero-based processing attempt count."
+    },
+    "error": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Optional non-sensitive error summary. It must not include raw private content."
+    },
+    "version_stamps": {
+      "$ref": "#/$defs/versionStamps"
+    }
+  },
+  "$defs": {
+    "resourceTier": {
+      "type": "string",
+      "enum": ["direct", "indexed", "secure"],
+      "description": "Resolved resource processing tier."
+    },
+    "versionStamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "extractor_version",
+        "ocr_version",
+        "model_version",
+        "redaction_version",
+        "policy_version"
+      ],
+      "properties": {
+        "extractor_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Extractor implementation version used for derived artifacts."
+        },
+        "ocr_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "OCR implementation version used for derived artifacts."
+        },
+        "model_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Model version used for layout, OCR repair, or redaction assistance."
+        },
+        "redaction_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Redaction policy or detector implementation version."
+        },
+        "policy_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Resource policy resolver version."
+        }
+      }
+    }
+  }
+}

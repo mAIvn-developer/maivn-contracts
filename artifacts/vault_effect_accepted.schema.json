@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/vault_effect_accepted.schema.json",
+  "title": "VaultEffectAccepted",
+  "x-maivn-vault-effect-accepted-validation": true,
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["server_intent_id", "operation_id", "operation", "state"],
+  "properties": {
+    "server_intent_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "operation_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "operation": {"enum": ["create", "rework", "ingest_file", "delete", "redacted_export"]},
+    "state": {"const": "queued"}
+  }
+}

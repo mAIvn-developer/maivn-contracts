@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/agents/message_binding.schema.json",
+  "title": "Message Binding",
+  "description": "One wire object for mapping an inbound trigger event payload into session messages.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["template", "callable"]
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "module_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "qualified_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/templateMessageBinding"
+    },
+    {
+      "$ref": "#/$defs/callableMessageBinding"
+    }
+  ],
+  "discriminator": {
+    "propertyName": "kind"
+  },
+  "$defs": {
+    "templateMessageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Serializable, portal-editable template binding. Template rendering is server-side and authoritative; local rendering is preview-only.",
+      "required": ["kind", "messages"],
+      "properties": {
+        "kind": {
+          "const": "template"
+        },
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Message templates with {{event.path}} interpolation placeholders.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "callableMessageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "SDK-only callable binding resolved by code reference for deployed agents.",
+      "required": ["kind", "module_path", "qualified_name", "content_hash"],
+      "properties": {
+        "kind": {
+          "const": "callable"
+        },
+        "module_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Importable module path containing the callable."
+        },
+        "qualified_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Qualified callable name inside module_path."
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "Content hash pin for the deployed callable implementation."
+        }
+      }
+    }
+  }
+}

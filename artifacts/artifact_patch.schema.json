@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/artifact_patch.schema.json",
+  "title": "ArtifactPatch",
+  "oneOf": [
+    {"$ref": "#/$defs/artifactPatchV1"},
+    {"$ref": "#/$defs/documentArtifactPatchV2"},
+    {"$ref": "#/$defs/workbookArtifactPatchV2"},
+    {"$ref": "#/$defs/imageArtifactPatchV2"}
+  ],
+  "discriminator": {"propertyName": "schema_version"},
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "retentionRequest": {"type": "object", "additionalProperties": false, "required": ["retention_class"], "properties": {"retention_class": {"$ref": "#/$defs/token"}}},
+    "artifactPatchV2": {
+      "oneOf": [
+        {"$ref": "#/$defs/documentArtifactPatchV2"},
+        {"$ref": "#/$defs/workbookArtifactPatchV2"},
+        {"$ref": "#/$defs/imageArtifactPatchV2"}
+      ],
+      "discriminator": {"propertyName": "expected_output_kind"}
+    },
+    "operation": {"oneOf": [{"$ref": "#/$defs/replace"}, {"$ref": "#/$defs/insert"}, {"$ref": "#/$defs/remove"}], "discriminator": {"propertyName": "op"}},
+    "replace": {"type": "object", "additionalProperties": false, "required": ["op", "target_id", "payload"], "properties": {"op": {"const": "replace_text"}, "target_id": {"$ref": "#/$defs/structuralId"}, "payload": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"}}},
+    "insert": {"type": "object", "additionalProperties": false, "required": ["op", "anchor_id", "payload"], "properties": {"op": {"const": "insert_after"}, "anchor_id": {"$ref": "#/$defs/structuralId"}, "payload": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"}}},
+    "remove": {"type": "object", "additionalProperties": false, "required": ["op", "target_id"], "properties": {"op": {"const": "remove_element"}, "target_id": {"$ref": "#/$defs/structuralId"}}},
+    "documentOperationV2": {"oneOf": [{"$ref": "#/$defs/documentInsertBlockV2"}, {"$ref": "#/$defs/documentReplaceBlockV2"}, {"$ref": "#/$defs/documentRemoveBlockV2"}, {"$ref": "#/$defs/documentUpdateStyleV2"}], "discriminator": {"propertyName": "op"}},
+    "documentInsertBlockV2": {"type": "object", "additionalProperties": false, "required": ["op", "anchor_id", "block"], "properties": {"op": {"const": "insert_block"}, "anchor_id": {"$ref": "#/$defs/structuralId"}, "block": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/documentFlowBlockV2"}}},
+    "documentReplaceBlockV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id", "block"], "properties": {"op": {"const": "replace_block"}, "target_id": {"$ref": "#/$defs/structuralId"}, "block": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/documentFlowBlockV2"}}},
+    "documentRemoveBlockV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id"], "properties": {"op": {"const": "remove_block"}, "target_id": {"$ref": "#/$defs/structuralId"}}},
+    "documentUpdateStyleV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id", "style"], "properties": {"op": {"const": "update_style"}, "target_id": {"$ref": "#/$defs/structuralId"}, "style": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/documentStyleV2"}}},
+    "workbookOperationV2": {"oneOf": [{"$ref": "#/$defs/workbookUpsertCellsV2"}, {"$ref": "#/$defs/workbookRemoveCellsV2"}, {"$ref": "#/$defs/workbookUpdateRangeV2"}, {"$ref": "#/$defs/workbookRemoveRangeV2"}, {"$ref": "#/$defs/workbookUpdateTableV2"}, {"$ref": "#/$defs/workbookRemoveTableV2"}, {"$ref": "#/$defs/workbookUpdateChartV2"}, {"$ref": "#/$defs/workbookRemoveChartV2"}], "discriminator": {"propertyName": "op"}},
+    "workbookUpsertCellsV2": {"type": "object", "additionalProperties": false, "required": ["op", "sheet_id", "cells"], "properties": {"op": {"const": "upsert_cells"}, "sheet_id": {"$ref": "#/$defs/structuralId"}, "cells": {"type": "array", "minItems": 1, "maxItems": 10000, "items": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/workbookCellV2"}}}},
+    "workbookRemoveCellsV2": {"type": "object", "additionalProperties": false, "required": ["op", "cell_ids"], "properties": {"op": {"const": "remove_cells"}, "cell_ids": {"type": "array", "minItems": 1, "maxItems": 10000, "uniqueItems": true, "items": {"$ref": "#/$defs/structuralId"}}}},
+    "workbookUpdateRangeV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id", "range"], "properties": {"op": {"const": "update_range"}, "target_id": {"$ref": "#/$defs/structuralId"}, "range": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/workbookRangeV2"}}},
+    "workbookRemoveRangeV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id"], "properties": {"op": {"const": "remove_range"}, "target_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookUpdateTableV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id", "table"], "properties": {"op": {"const": "update_table"}, "target_id": {"$ref": "#/$defs/structuralId"}, "table": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/workbookTableV2"}}},
+    "workbookRemoveTableV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id"], "properties": {"op": {"const": "remove_table"}, "target_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookUpdateChartV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id", "chart"], "properties": {"op": {"const": "update_chart"}, "target_id": {"$ref": "#/$defs/structuralId"}, "chart": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/workbookChartV2"}}},
+    "workbookRemoveChartV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id"], "properties": {"op": {"const": "remove_chart"}, "target_id": {"$ref": "#/$defs/structuralId"}}},
+    "imagePatchOperationV2": {"oneOf": [{"$ref": "#/$defs/imageUpsertLayerV2"}, {"$ref": "#/$defs/imageRemoveLayerV2"}, {"$ref": "#/$defs/imageReplaceOperationsV2"}], "discriminator": {"propertyName": "op"}},
+    "imageUpsertLayerV2": {"type": "object", "additionalProperties": false, "required": ["op", "layer"], "properties": {"op": {"const": "upsert_layer"}, "layer": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/imageLayerV2"}}},
+    "imageRemoveLayerV2": {"type": "object", "additionalProperties": false, "required": ["op", "target_id"], "properties": {"op": {"const": "remove_layer"}, "target_id": {"$ref": "#/$defs/structuralId"}}},
+    "imageReplaceOperationsV2": {"type": "object", "additionalProperties": false, "required": ["op", "operations"], "properties": {"op": {"const": "replace_operations"}, "operations": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/imageOperationV2"}}}},
+    "structuralId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "artifactPatchV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "target_artifact_id", "base_revision", "expected_output_kind", "renderer_profile", "rationale", "operations"],
+      "properties": {
+        "schema_version": {"const": "v1"},
+        "target_artifact_id": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1},
+        "expected_output_kind": {"enum": ["document", "spreadsheet", "image", "audio", "other"]},
+        "renderer_profile": {"$ref": "#/$defs/token"},
+        "disposition": {"enum": ["intermediate", "candidate", "final"]},
+        "retention_request": {"$ref": "#/$defs/retentionRequest"},
+        "rationale": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"},
+        "operations": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/operation"}}
+      }
+    },
+    "documentArtifactPatchV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "target_artifact_id", "base_revision", "source_manifest_digest", "expected_output_kind", "renderer_profile", "rationale", "operations"],
+      "properties": {
+        "schema_version": {"const": "v2"},
+        "target_artifact_id": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "expected_output_kind": {"const": "document"},
+        "renderer_profile": {"$ref": "#/$defs/token"},
+        "disposition": {"enum": ["intermediate", "candidate", "final"]},
+        "retention_request": {"$ref": "#/$defs/retentionRequest"},
+        "rationale": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"},
+        "operations": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/documentOperationV2"}}
+      }
+    },
+    "workbookArtifactPatchV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "target_artifact_id", "base_revision", "source_manifest_digest", "expected_output_kind", "renderer_profile", "rationale", "operations"],
+      "properties": {
+        "schema_version": {"const": "v2"},
+        "target_artifact_id": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "expected_output_kind": {"const": "spreadsheet"},
+        "renderer_profile": {"$ref": "#/$defs/token"},
+        "disposition": {"enum": ["intermediate", "candidate", "final"]},
+        "retention_request": {"$ref": "#/$defs/retentionRequest"},
+        "rationale": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"},
+        "operations": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/workbookOperationV2"}}
+      }
+    },
+    "imageArtifactPatchV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "target_artifact_id", "base_revision", "source_manifest_digest", "expected_output_kind", "renderer_profile", "rationale", "operations"],
+      "properties": {
+        "schema_version": {"const": "v2"},
+        "target_artifact_id": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "expected_output_kind": {"const": "image"},
+        "renderer_profile": {"$ref": "#/$defs/token"},
+        "disposition": {"enum": ["intermediate", "candidate", "final"]},
+        "retention_request": {"$ref": "#/$defs/retentionRequest"},
+        "rationale": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"},
+        "operations": {"type": "array", "minItems": 1, "maxItems": 500, "items": {"$ref": "#/$defs/imagePatchOperationV2"}}
+      }
+    },
+    "vaultFullReplacementArtifactPatch": {
+      "oneOf": [
+        {"$ref": "#/$defs/vaultDocxFullReplacementArtifactPatch"},
+        {"$ref": "#/$defs/vaultPdfFullReplacementArtifactPatch"},
+        {"$ref": "#/$defs/vaultXlsxFullReplacementArtifactPatch"},
+        {"$ref": "#/$defs/vaultPptxFullReplacementArtifactPatch"},
+        {"$ref": "#/$defs/vaultPngFullReplacementArtifactPatch"},
+        {"$ref": "#/$defs/vaultJpegFullReplacementArtifactPatch"}
+      ],
+      "discriminator": {"propertyName": "source_format"}
+    },
+    "vaultDocxReplacementPlan": {
+      "oneOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultDocxArtifactPlanV2"},
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultDocxArtifactPlanV3"}
+      ]
+    },
+    "vaultPdfReplacementPlan": {
+      "oneOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultPdfArtifactPlanV2"},
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultPdfArtifactPlanV3"}
+      ]
+    },
+    "vaultXlsxReplacementPlan": {
+      "oneOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultXlsxArtifactPlanV2"},
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultXlsxArtifactPlanV3"}
+      ]
+    },
+    "vaultPptxReplacementPlan": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultPptxArtifactPlanV3"},
+    "vaultPngReplacementPlan": {
+      "oneOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultPngArtifactPlanV2"},
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultPngArtifactPlanV3"}
+      ]
+    },
+    "vaultJpegReplacementPlan": {
+      "oneOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultJpegArtifactPlanV2"},
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/vaultJpegArtifactPlanV3"}
+      ]
+    },
+    "vaultDocumentResourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes", "max_pages"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_pages": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "vaultWorkbookResourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes", "max_sheets", "max_cells"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_sheets": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_cells": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "vaultImageResourceBounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_output_bytes", "max_pixels", "max_total_decoded_pixels"],
+      "properties": {
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "max_total_decoded_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}
+      }
+    },
+    "vaultDocxFullReplacementArtifactPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_format", "source_generation_handle", "base_revision", "source_manifest_digest", "source_kind", "source_mime_type", "source_resource_bounds", "replacement_plan"],
+      "properties": {
+        "source_format": {"const": "docx"},
+        "source_generation_handle": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_kind": {"const": "document"},
+        "source_mime_type": {"const": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+        "source_resource_bounds": {"$ref": "#/$defs/vaultDocumentResourceBounds"},
+        "replacement_plan": {"$ref": "#/$defs/vaultDocxReplacementPlan"}
+      }
+    },
+    "vaultPdfFullReplacementArtifactPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_format", "source_generation_handle", "base_revision", "source_manifest_digest", "source_kind", "source_mime_type", "source_resource_bounds", "replacement_plan"],
+      "properties": {
+        "source_format": {"const": "pdf"},
+        "source_generation_handle": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_kind": {"const": "document"},
+        "source_mime_type": {"const": "application/pdf"},
+        "source_resource_bounds": {"$ref": "#/$defs/vaultDocumentResourceBounds"},
+        "replacement_plan": {"$ref": "#/$defs/vaultPdfReplacementPlan"}
+      }
+    },
+    "vaultXlsxFullReplacementArtifactPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_format", "source_generation_handle", "base_revision", "source_manifest_digest", "source_kind", "source_mime_type", "source_resource_bounds", "replacement_plan"],
+      "properties": {
+        "source_format": {"const": "xlsx"},
+        "source_generation_handle": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_kind": {"const": "spreadsheet"},
+        "source_mime_type": {"const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        "source_resource_bounds": {"$ref": "#/$defs/vaultWorkbookResourceBounds"},
+        "replacement_plan": {"$ref": "#/$defs/vaultXlsxReplacementPlan"}
+      }
+    },
+    "vaultPptxFullReplacementArtifactPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_format", "source_generation_handle", "base_revision", "source_manifest_digest", "source_kind", "source_mime_type", "source_resource_bounds", "replacement_plan"],
+      "properties": {
+        "source_format": {"const": "pptx"},
+        "source_generation_handle": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_kind": {"const": "presentation"},
+        "source_mime_type": {"const": "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
+        "source_resource_bounds": {"$ref": "#/$defs/vaultDocumentResourceBounds"},
+        "replacement_plan": {"$ref": "#/$defs/vaultPptxReplacementPlan"}
+      }
+    },
+    "vaultPngFullReplacementArtifactPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_format", "source_generation_handle", "base_revision", "source_manifest_digest", "source_kind", "source_mime_type", "source_resource_bounds", "replacement_plan"],
+      "properties": {
+        "source_format": {"const": "png"},
+        "source_generation_handle": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_kind": {"const": "image"},
+        "source_mime_type": {"const": "image/png"},
+        "source_resource_bounds": {"$ref": "#/$defs/vaultImageResourceBounds"},
+        "replacement_plan": {"$ref": "#/$defs/vaultPngReplacementPlan"}
+      }
+    },
+    "vaultJpegFullReplacementArtifactPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_format", "source_generation_handle", "base_revision", "source_manifest_digest", "source_kind", "source_mime_type", "source_resource_bounds", "replacement_plan"],
+      "properties": {
+        "source_format": {"const": "jpeg"},
+        "source_generation_handle": {"$ref": "#/$defs/token"},
+        "base_revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+        "source_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_kind": {"const": "image"},
+        "source_mime_type": {"const": "image/jpeg"},
+        "source_resource_bounds": {"$ref": "#/$defs/vaultImageResourceBounds"},
+        "replacement_plan": {"$ref": "#/$defs/vaultJpegReplacementPlan"}
+      }
+    }
+  }
+}

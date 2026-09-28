@@ -1,0 +1,617 @@
+[
+  {
+    "name": "form-exact",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "form.submitted",
+    "payload": {
+      "form_id": "contact"
+    },
+    "matches": true
+  },
+  {
+    "name": "form-other",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "form.submitted",
+    "payload": {
+      "form_id": "billing"
+    },
+    "matches": false
+  },
+  {
+    "name": "form-missing",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "form.submitted",
+    "payload": {},
+    "matches": false
+  },
+  {
+    "name": "form-null",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "form.submitted",
+    "payload": {
+      "form_id": null
+    },
+    "matches": false
+  },
+  {
+    "name": "form-number",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "form.submitted",
+    "payload": {
+      "form_id": 1
+    },
+    "matches": false
+  },
+  {
+    "name": "form-quote",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "form.submitted",
+    "payload": {
+      "form_id": "contact' || true"
+    },
+    "matches": false
+  },
+  {
+    "name": "form-wrong-event",
+    "selector": {
+      "kind": "form",
+      "form_id": "contact"
+    },
+    "event_type": "form.submitted",
+    "incoming_event_type": "push",
+    "payload": {
+      "form_id": "contact"
+    },
+    "matches": false
+  },
+  {
+    "name": "local_file-exact",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "file.created",
+    "payload": {
+      "watch_id": "contact"
+    },
+    "matches": true
+  },
+  {
+    "name": "local_file-other",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "file.created",
+    "payload": {
+      "watch_id": "billing"
+    },
+    "matches": false
+  },
+  {
+    "name": "local_file-missing",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "file.created",
+    "payload": {},
+    "matches": false
+  },
+  {
+    "name": "local_file-null",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "file.created",
+    "payload": {
+      "watch_id": null
+    },
+    "matches": false
+  },
+  {
+    "name": "local_file-number",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "file.created",
+    "payload": {
+      "watch_id": 1
+    },
+    "matches": false
+  },
+  {
+    "name": "local_file-quote",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "file.created",
+    "payload": {
+      "watch_id": "contact' || true"
+    },
+    "matches": false
+  },
+  {
+    "name": "local_file-wrong-event",
+    "selector": {
+      "kind": "local_file",
+      "watch_id": "contact"
+    },
+    "event_type": "file.created",
+    "incoming_event_type": "push",
+    "payload": {
+      "watch_id": "contact"
+    },
+    "matches": false
+  },
+  {
+    "name": "legacy-no-selector",
+    "selector": null,
+    "event_type": "webhook.received",
+    "incoming_event_type": "webhook.received",
+    "payload": {},
+    "matches": true
+  },
+  {
+    "name": "repository-exact",
+    "selector": {
+      "kind": "github",
+      "repository": "owner/repo"
+    },
+    "event_type": "issues.opened",
+    "incoming_event_type": "issues.opened",
+    "payload": {
+      "repository": {
+        "full_name": "owner/repo"
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "repository-other",
+    "selector": {
+      "kind": "github",
+      "repository": "owner/repo"
+    },
+    "event_type": "issues.opened",
+    "incoming_event_type": "issues.opened",
+    "payload": {
+      "repository": {
+        "full_name": "other/repo"
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "repository-missing",
+    "selector": {
+      "kind": "github",
+      "repository": "owner/repo"
+    },
+    "event_type": "issues.opened",
+    "incoming_event_type": "issues.opened",
+    "payload": {},
+    "matches": false
+  },
+  {
+    "name": "repository-null",
+    "selector": {
+      "kind": "github",
+      "repository": "owner/repo"
+    },
+    "event_type": "issues.opened",
+    "incoming_event_type": "issues.opened",
+    "payload": {
+      "repository": {
+        "full_name": null
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "repository-wrong-container",
+    "selector": {
+      "kind": "github",
+      "repository": "owner/repo"
+    },
+    "event_type": "issues.opened",
+    "incoming_event_type": "issues.opened",
+    "payload": {
+      "repository": "owner/repo"
+    },
+    "matches": false
+  },
+  {
+    "name": "push-branch-exact",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "push",
+    "incoming_event_type": "push",
+    "payload": {
+      "ref": "refs/heads/main"
+    },
+    "matches": true
+  },
+  {
+    "name": "push-branch-other",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "push",
+    "incoming_event_type": "push",
+    "payload": {
+      "ref": "refs/heads/develop"
+    },
+    "matches": false
+  },
+  {
+    "name": "push-branch-missing",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "push",
+    "incoming_event_type": "push",
+    "payload": {},
+    "matches": false
+  },
+  {
+    "name": "pull_request.closed-branch-exact",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "base": {
+          "ref": "main"
+        }
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "pull_request.closed-branch-other",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "base": {
+          "ref": "develop"
+        }
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "pull_request.closed-branch-missing",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "base": {
+          "ref": null
+        }
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "workflow_run.completed-branch-exact",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "head_branch": "main"
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "workflow_run.completed-branch-other",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "head_branch": "develop"
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "workflow_run.completed-branch-missing",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "head_branch": null
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "push-tag-not-branch",
+    "selector": {
+      "kind": "github",
+      "branch": "main"
+    },
+    "event_type": "push",
+    "incoming_event_type": "push",
+    "payload": {
+      "ref": "refs/tags/main"
+    },
+    "matches": false
+  },
+  {
+    "name": "workflow-exact",
+    "selector": {
+      "kind": "github",
+      "workflow": "CI"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "name": "CI"
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "workflow-other",
+    "selector": {
+      "kind": "github",
+      "workflow": "CI"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "name": "other"
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "workflow-null",
+    "selector": {
+      "kind": "github",
+      "workflow": "CI"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "name": null
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "conclusion-exact",
+    "selector": {
+      "kind": "github",
+      "conclusion": "failure"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "conclusion": "failure"
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "conclusion-other",
+    "selector": {
+      "kind": "github",
+      "conclusion": "failure"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "conclusion": "other"
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "conclusion-null",
+    "selector": {
+      "kind": "github",
+      "conclusion": "failure"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "conclusion": null
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "workflow-literal-quote",
+    "selector": {
+      "kind": "github",
+      "workflow": "CI' || true"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "workflow_run": {
+        "name": "CI' || true"
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "merged-True",
+    "selector": {
+      "kind": "github",
+      "merged": true
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "merged": true
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "merged-False",
+    "selector": {
+      "kind": "github",
+      "merged": true
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "merged": false
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "merged-None",
+    "selector": {
+      "kind": "github",
+      "merged": true
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "merged": null
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "merged-1",
+    "selector": {
+      "kind": "github",
+      "merged": true
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "merged": 1
+      }
+    },
+    "matches": false
+  },
+  {
+    "name": "closed-unmerged-selected",
+    "selector": {
+      "kind": "github",
+      "merged": false
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {
+      "pull_request": {
+        "merged": false
+      }
+    },
+    "matches": true
+  },
+  {
+    "name": "closed-unmerged-missing",
+    "selector": {
+      "kind": "github",
+      "merged": false
+    },
+    "event_type": "pull_request.closed",
+    "incoming_event_type": "pull_request.closed",
+    "payload": {},
+    "matches": false
+  },
+  {
+    "name": "all-predicates-conjoined",
+    "selector": {
+      "kind": "github",
+      "repository": "owner/repo",
+      "branch": "main",
+      "workflow": "CI",
+      "conclusion": "failure"
+    },
+    "event_type": "workflow_run.completed",
+    "incoming_event_type": "workflow_run.completed",
+    "payload": {
+      "repository": {
+        "full_name": "owner/repo"
+      },
+      "workflow_run": {
+        "head_branch": "main",
+        "name": "CI",
+        "conclusion": "success"
+      }
+    },
+    "matches": false
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "kind": "start",
+    "messages": [
+      {
+        "message_id": "msg-user-001",
+        "role": "user",
+        "content": "Summarize the new support case and recommend the next action.",
+        "ts": "2026-07-02T17:00:00Z"
+      }
+    ],
+    "options": {
+      "assistant_id": "agt-support-triage",
+      "stream_modes": [
+        "updates",
+        "messages",
+        "custom"
+      ]
+    }
+  },
+  {
+    "kind": "resume",
+    "checkpoint_id": "chk-approval-001",
+    "value": {
+      "approved": true,
+      "notes": "Proceed with the drafted reply."
+    }
+  },
+  {
+    "kind": "cancel",
+    "reason": "User requested cancellation before tool dispatch."
+  }
+]

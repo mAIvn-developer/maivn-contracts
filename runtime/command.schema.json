@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/runtime/command.schema.json",
+  "title": "Command",
+  "description": "Owned runtime command wire format. Routing decisions are internal to the runtime; the wire only starts, resumes, or cancels runs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["start", "resume", "cancel"],
+      "description": "Command discriminator."
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "description": "Initial owned Message inputs for a start command.",
+      "items": {
+        "$ref": "#/$defs/message"
+      }
+    },
+    "options": {
+      "type": "object",
+      "description": "Optional open invocation options interpreted by the runtime.",
+      "additionalProperties": true
+    },
+    "checkpoint_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Checkpoint identifier to resume from."
+    },
+    "value": {
+      "description": "Resume payload supplied to the interrupted checkpoint."
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Human-readable cancellation reason."
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/startCommand"
+    },
+    {
+      "$ref": "#/$defs/resumeCommand"
+    },
+    {
+      "$ref": "#/$defs/cancelCommand"
+    }
+  ],
+  "discriminator": {
+    "propertyName": "kind"
+  },
+  "$defs": {
+    "message": {
+      "$ref": "https://schemas.maivn.dev/messages/message.schema.json"
+    },
+    "startCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "messages"],
+      "properties": {
+        "kind": {
+          "const": "start"
+        },
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/message"
+          },
+          "description": "Initial owned Message inputs for a start command."
+        },
+        "options": {
+          "type": "object",
+          "description": "Optional open invocation options interpreted by the runtime.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "resumeCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "checkpoint_id", "value"],
+      "properties": {
+        "kind": {
+          "const": "resume"
+        },
+        "checkpoint_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Checkpoint identifier to resume from."
+        },
+        "value": {
+          "description": "Resume payload supplied to the interrupted checkpoint."
+        }
+      }
+    },
+    "cancelCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "reason"],
+      "properties": {
+        "kind": {
+          "const": "cancel"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "Human-readable cancellation reason."
+        }
+      }
+    }
+  }
+}

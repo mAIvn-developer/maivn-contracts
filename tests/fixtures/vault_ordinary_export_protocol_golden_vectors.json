@@ -1,0 +1,24 @@
+{
+  "assertion": {
+    "schema_version": "vault-ordinary-export-assertion-v1",
+    "issuer": "vault_executor_0001",
+    "key_id": "key_0001",
+    "audience": "maivn-data-plane-ordinary-export-v1",
+    "role": "executor",
+    "method": "POST",
+    "fixed_path": "/internal/v1/vault/ordinary-exports/publications",
+    "request_binding": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "issued_at": "2026-08-14T18:29:30Z",
+    "expires_at": "2026-08-14T18:30:20Z",
+    "nonce": "AAECAwQFBgcICQoLDA0ODw"
+  },
+  "assertion_json_utf8": "{\"audience\":\"maivn-data-plane-ordinary-export-v1\",\"expires_at\":\"2026-08-14T18:30:20Z\",\"fixed_path\":\"/internal/v1/vault/ordinary-exports/publications\",\"issued_at\":\"2026-08-14T18:29:30Z\",\"issuer\":\"vault_executor_0001\",\"key_id\":\"key_0001\",\"method\":\"POST\",\"nonce\":\"AAECAwQFBgcICQoLDA0ODw\",\"request_binding\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"role\":\"executor\",\"schema_version\":\"vault-ordinary-export-assertion-v1\"}",
+  "assertion_signing_base64url": "bWFpdm4tdmF1bHQtb3JkaW5hcnktZXhwb3J0LWFzc2VydGlvbi12MQB7ImF1ZGllbmNlIjoibWFpdm4tZGF0YS1wbGFuZS1vcmRpbmFyeS1leHBvcnQtdjEiLCJleHBpcmVzX2F0IjoiMjAyNi0wOC0xNFQxODozMDoyMFoiLCJmaXhlZF9wYXRoIjoiL2ludGVybmFsL3YxL3ZhdWx0L29yZGluYXJ5LWV4cG9ydHMvcHVibGljYXRpb25zIiwiaXNzdWVkX2F0IjoiMjAyNi0wOC0xNFQxODoyOTozMFoiLCJpc3N1ZXIiOiJ2YXVsdF9leGVjdXRvcl8wMDAxIiwia2V5X2lkIjoia2V5XzAwMDEiLCJtZXRob2QiOiJQT1NUIiwibm9uY2UiOiJBQUVDQXdRRkJnY0lDUW9MREEwT0R3IiwicmVxdWVzdF9iaW5kaW5nIjoiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsInJvbGUiOiJleGVjdXRvciIsInNjaGVtYV92ZXJzaW9uIjoidmF1bHQtb3JkaW5hcnktZXhwb3J0LWFzc2VydGlvbi12MSJ9",
+  "assertion_transport_base64url": "eyJhdWRpZW5jZSI6Im1haXZuLWRhdGEtcGxhbmUtb3JkaW5hcnktZXhwb3J0LXYxIiwiZXhwaXJlc19hdCI6IjIwMjYtMDgtMTRUMTg6MzA6MjBaIiwiZml4ZWRfcGF0aCI6Ii9pbnRlcm5hbC92MS92YXVsdC9vcmRpbmFyeS1leHBvcnRzL3B1YmxpY2F0aW9ucyIsImlzc3VlZF9hdCI6IjIwMjYtMDgtMTRUMTg6Mjk6MzBaIiwiaXNzdWVyIjoidmF1bHRfZXhlY3V0b3JfMDAwMSIsImtleV9pZCI6ImtleV8wMDAxIiwibWV0aG9kIjoiUE9TVCIsIm5vbmNlIjoiQUFFQ0F3UUZCZ2NJQ1FvTERBME9EdyIsInJlcXVlc3RfYmluZGluZyI6ImJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmIiLCJyb2xlIjoiZXhlY3V0b3IiLCJzY2hlbWFfdmVyc2lvbiI6InZhdWx0LW9yZGluYXJ5LWV4cG9ydC1hc3NlcnRpb24tdjEifQ",
+  "signature_transport_base64url": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0-Pw",
+  "publication_control_utf8": "{\"manifest\":{\"artifact_kind\":\"document\",\"content_length\":4096,\"content_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"correlation_id\":\"export_correlation_0001\",\"mime_type\":\"application/pdf\",\"proof_receipt_id\":\"proof_receipt_0001\",\"public_filename\":\"safe-export.pdf\",\"schema_version\":\"verified-export-v1\",\"scope\":{\"organization_id\":\"organization_0001\",\"project_id\":\"project_0001\"},\"surface\":{\"caller_id\":\"caller_0001\",\"checkpoint_id\":\"checkpoint_0001\",\"root_invocation_id\":\"root_invocation_0001\",\"session_id\":\"session_0001\"}},\"operation_id\":\"publication_operation_0001\",\"schema_version\":\"verified-export-publication-v1\"}",
+  "publication_binding": "34ffd2955eafa0b3b0dcbfa718fabbbe5d7146448ac35e66fa134304b87766a7",
+  "deletion_body_utf8": "{\"deletion_manifest_id\":\"deletion_manifest_0001\",\"ordinary_deletion_ref\":\"ordinary_deletion_ref_0001\",\"schema_version\":\"ordinary-export-deletion-request-v1\"}",
+  "deletion_binding": "ea30da1281c49dca85d7dd25bfd8fc5827f463e4cc6e9a07f31f4204fab4a131",
+  "nonce_digest": "a20d497f5a8e1a90fe3ae393d511cbf60ff39a2f2562ceb340dbae582487b6fb"
+}

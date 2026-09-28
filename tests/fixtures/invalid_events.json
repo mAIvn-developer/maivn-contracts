@@ -1,0 +1,72 @@
+[
+  {
+    "event_id": "evt-invalid-missing-lineage",
+    "ordinal": "producer-agent-000010",
+    "type": "planning",
+    "session_id": "ses-invalid",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "agent:triage",
+    "mode": "hosted",
+    "payload": {},
+    "ts": "2026-07-01T14:00:10Z"
+  },
+  {
+    "event_id": "evt-invalid-mode",
+    "ordinal": "producer-agent-000011",
+    "type": "planning",
+    "session_id": "ses-invalid",
+    "root_event_id": "evt-invalid-mode",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "agent:triage",
+    "mode": "hosted_only",
+    "payload": {},
+    "ts": "2026-07-01T14:00:11Z"
+  },
+  {
+    "event_id": "evt-invalid-extra-field",
+    "ordinal": "producer-agent-000012",
+    "type": "planning",
+    "session_id": "ses-invalid",
+    "root_event_id": "evt-invalid-extra-field",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "agent:triage",
+    "mode": "hosted",
+    "payload": {},
+    "unexpected": true,
+    "ts": "2026-07-01T14:00:12Z"
+  },
+  {
+    "event_id": "evt-invalid-ordinal",
+    "ordinal": 13,
+    "type": "planning",
+    "session_id": "ses-invalid",
+    "root_event_id": "evt-invalid-ordinal",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "agent:triage",
+    "mode": "hosted",
+    "payload": {},
+    "ts": "2026-07-01T14:00:13Z"
+  },
+  {
+    "event_id": "evt-invalid-artifact-generic",
+    "ordinal": "producer-artifact-000014",
+    "type": "artifact.available",
+    "session_id": "ses-invalid",
+    "root_event_id": "evt-invalid-artifact-generic",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "artifact-service",
+    "mode": "hosted",
+    "payload": {"artifact_id": "artifact-001"},
+    "ts": "2026-08-09T00:00:00Z"
+  }
+]

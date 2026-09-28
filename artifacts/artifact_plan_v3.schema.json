@@ -1,0 +1,4711 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json",
+  "$defs": {
+    "AccessibilityMetadata": {
+      "additionalProperties": false,
+      "description": "Document-level metadata needed by native accessibility surfaces.",
+      "properties": {
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "language": {
+          "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$",
+          "title": "Language",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "language"
+      ],
+      "title": "AccessibilityMetadata",
+      "type": "object"
+    },
+    "ArtifactInputRefV3": {
+      "additionalProperties": false,
+      "description": "Exact immutable ordinary artifact input selected before rendering.",
+      "properties": {
+        "local_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Local Id",
+          "type": "string"
+        },
+        "artifact_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "generation": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Generation",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "expected_mime_type": {
+          "enum": [
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "image/png",
+            "image/jpeg",
+            "audio/mpeg",
+            "audio/wav",
+            "application/octet-stream"
+          ],
+          "title": "Expected Mime Type",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "image",
+            "edit_source",
+            "edit_mask",
+            "template",
+            "data"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "local_id",
+        "artifact_id",
+        "revision",
+        "generation",
+        "sha256",
+        "expected_mime_type",
+        "purpose"
+      ],
+      "title": "ArtifactInputRefV3",
+      "type": "object"
+    },
+    "ChartSeries": {
+      "additionalProperties": false,
+      "description": "One labeled finite chart series.",
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "ge": -1000000000000000.0,
+            "le": 1000000000000000.0
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        },
+        "color": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Color",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "values",
+        "color"
+      ],
+      "title": "ChartSeries",
+      "type": "object"
+    },
+    "ChartSpec": {
+      "additionalProperties": false,
+      "description": "Portable editable chart data and presentation controls.",
+      "properties": {
+        "chart_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Chart Id",
+          "type": "string"
+        },
+        "chart_type": {
+          "enum": [
+            "bar",
+            "column",
+            "line",
+            "area",
+            "pie",
+            "doughnut",
+            "scatter"
+          ],
+          "title": "Chart Type",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "categories": {
+          "items": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Categories",
+          "type": "array"
+        },
+        "series": {
+          "items": {
+            "$ref": "#/$defs/ChartSeries"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Series",
+          "type": "array"
+        },
+        "show_legend": {
+          "title": "Show Legend",
+          "type": "boolean"
+        },
+        "show_data_labels": {
+          "title": "Show Data Labels",
+          "type": "boolean"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chart_id",
+        "chart_type",
+        "title",
+        "categories",
+        "series",
+        "show_legend",
+        "show_data_labels",
+        "alt_text"
+      ],
+      "title": "ChartSpec",
+      "type": "object"
+    },
+    "DiagramEdgeV3": {
+      "additionalProperties": false,
+      "description": "One directed diagram edge.",
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "target_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "source_id",
+        "target_id"
+      ],
+      "title": "DiagramEdgeV3",
+      "type": "object"
+    },
+    "DiagramNodeV3": {
+      "additionalProperties": false,
+      "description": "One labeled diagram node.",
+      "properties": {
+        "node_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "fill": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Fill",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "label",
+        "fill"
+      ],
+      "title": "DiagramNodeV3",
+      "type": "object"
+    },
+    "DocumentArtifactPlanV3": {
+      "additionalProperties": false,
+      "description": "Closed rich ordinary DOCX or PDF plan.",
+      "properties": {
+        "schema_version": {
+          "const": "v3",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "logical_output_name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Logical Output Name",
+          "type": "string"
+        },
+        "custody_request": {
+          "enum": [
+            "ordinary",
+            "vault_private"
+          ],
+          "title": "Custody Request",
+          "type": "string"
+        },
+        "input_refs": {
+          "items": {
+            "$ref": "#/$defs/ArtifactInputRefV3"
+          },
+          "maxItems": 32,
+          "title": "Input Refs",
+          "type": "array"
+        },
+        "renderer_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Renderer Profile",
+          "type": "string"
+        },
+        "renderer_min_version": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Renderer Min Version",
+          "type": "string"
+        },
+        "validation_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Validation Profile",
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "intermediate",
+            "candidate",
+            "final"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "retention_request": {
+          "$ref": "#/$defs/RetentionRequest"
+        },
+        "resource_bounds": {
+          "$ref": "#/$defs/ResourceBounds"
+        },
+        "kind": {
+          "const": "document",
+          "title": "Kind",
+          "type": "string"
+        },
+        "output_mime_type": {
+          "enum": [
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/pdf"
+          ],
+          "title": "Output Mime Type",
+          "type": "string"
+        },
+        "body": {
+          "$ref": "#/$defs/DocumentBodyV3"
+        }
+      },
+      "required": [
+        "schema_version",
+        "logical_output_name",
+        "custody_request",
+        "input_refs",
+        "renderer_profile",
+        "renderer_min_version",
+        "validation_profile",
+        "disposition",
+        "retention_request",
+        "resource_bounds",
+        "kind",
+        "output_mime_type",
+        "body"
+      ],
+      "title": "DocumentArtifactPlanV3",
+      "type": "object"
+    },
+    "DocumentBodyV3": {
+      "additionalProperties": false,
+      "description": "Complete rich document body.",
+      "properties": {
+        "theme": {
+          "$ref": "#/$defs/DocumentThemeV3"
+        },
+        "page": {
+          "$ref": "#/$defs/DocumentPageV3"
+        },
+        "styles": {
+          "items": {
+            "$ref": "#/$defs/DocumentStyleV3"
+          },
+          "maxItems": 256,
+          "minItems": 1,
+          "title": "Styles",
+          "type": "array"
+        },
+        "headers": {
+          "items": {
+            "$ref": "#/$defs/DocumentRegionV3"
+          },
+          "maxItems": 16,
+          "title": "Headers",
+          "type": "array"
+        },
+        "footers": {
+          "items": {
+            "$ref": "#/$defs/DocumentRegionV3"
+          },
+          "maxItems": 16,
+          "title": "Footers",
+          "type": "array"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/DocumentNoteV3"
+          },
+          "maxItems": 1000,
+          "title": "Notes",
+          "type": "array"
+        },
+        "blocks": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "chart": "#/$defs/DocumentChartBlockV3",
+                "diagram": "#/$defs/DocumentDiagramBlockV3",
+                "heading": "#/$defs/DocumentHeadingBlockV3",
+                "image": "#/$defs/DocumentImageBlockV3",
+                "page_break": "#/$defs/DocumentPageBreakV3",
+                "table": "#/$defs/DocumentTableBlockV3",
+                "text": "#/$defs/DocumentTextBlockV3",
+                "toc": "#/$defs/DocumentTocBlockV3"
+              },
+              "propertyName": "block_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/DocumentTextBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentHeadingBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentTocBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentTableBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentImageBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentChartBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentDiagramBlockV3"
+              },
+              {
+                "$ref": "#/$defs/DocumentPageBreakV3"
+              }
+            ]
+          },
+          "maxItems": 10000,
+          "minItems": 1,
+          "title": "Blocks",
+          "type": "array"
+        },
+        "sections": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DocumentSectionV3"
+          },
+          "maxItems": 64,
+          "title": "Sections",
+          "type": "array"
+        },
+        "accessibility": {
+          "$ref": "#/$defs/AccessibilityMetadata"
+        },
+        "pdf": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentPdfOptionsV3"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "theme",
+        "page",
+        "styles",
+        "headers",
+        "footers",
+        "notes",
+        "blocks",
+        "accessibility"
+      ],
+      "title": "DocumentBodyV3",
+      "type": "object"
+    },
+    "DocumentChartBlockV3": {
+      "additionalProperties": false,
+      "description": "Editable chart block.",
+      "properties": {
+        "block_type": {
+          "const": "chart",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "chart": {
+          "$ref": "#/$defs/ChartSpec"
+        },
+        "width_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Width Points",
+          "type": "number"
+        },
+        "height_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Height Points",
+          "type": "number"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "chart",
+        "width_points",
+        "height_points"
+      ],
+      "title": "DocumentChartBlockV3",
+      "type": "object"
+    },
+    "DocumentDiagramBlockV3": {
+      "additionalProperties": false,
+      "description": "Portable process or relationship diagram.",
+      "properties": {
+        "block_type": {
+          "const": "diagram",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "layout": {
+          "enum": [
+            "horizontal",
+            "vertical",
+            "cycle",
+            "timeline"
+          ],
+          "title": "Layout",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/DiagramNodeV3"
+          },
+          "maxItems": 64,
+          "minItems": 2,
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/DiagramEdgeV3"
+          },
+          "maxItems": 128,
+          "title": "Edges",
+          "type": "array"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "layout",
+        "nodes",
+        "edges",
+        "alt_text"
+      ],
+      "title": "DocumentDiagramBlockV3",
+      "type": "object"
+    },
+    "DocumentHeadingBlockV3": {
+      "additionalProperties": false,
+      "description": "Outline heading and optional bookmark.",
+      "properties": {
+        "block_type": {
+          "const": "heading",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "level": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "content": {
+          "$ref": "#/$defs/RichText"
+        },
+        "bookmark_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bookmark Id"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "level",
+        "content"
+      ],
+      "title": "DocumentHeadingBlockV3",
+      "type": "object"
+    },
+    "DocumentImageBlockV3": {
+      "additionalProperties": false,
+      "description": "Verified image and caption block.",
+      "properties": {
+        "block_type": {
+          "const": "image",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/$defs/ImagePlacement"
+        },
+        "alignment": {
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
+          "title": "Alignment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "image",
+        "alignment"
+      ],
+      "title": "DocumentImageBlockV3",
+      "type": "object"
+    },
+    "DocumentNoteV3": {
+      "additionalProperties": false,
+      "description": "Footnote or endnote content.",
+      "properties": {
+        "note_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Note Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "footnote",
+            "endnote"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "content": {
+          "$ref": "#/$defs/RichText"
+        }
+      },
+      "required": [
+        "note_id",
+        "kind",
+        "content"
+      ],
+      "title": "DocumentNoteV3",
+      "type": "object"
+    },
+    "DocumentPageBreakV3": {
+      "additionalProperties": false,
+      "description": "Explicit page break.",
+      "properties": {
+        "block_type": {
+          "const": "page_break",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id"
+      ],
+      "title": "DocumentPageBreakV3",
+      "type": "object"
+    },
+    "DocumentPageV3": {
+      "additionalProperties": false,
+      "description": "Bounded page geometry.",
+      "properties": {
+        "width_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Width Points",
+          "type": "number"
+        },
+        "height_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Height Points",
+          "type": "number"
+        },
+        "margins": {
+          "$ref": "#/$defs/Insets"
+        },
+        "orientation": {
+          "enum": [
+            "portrait",
+            "landscape"
+          ],
+          "title": "Orientation",
+          "type": "string"
+        },
+        "columns": {
+          "maximum": 4,
+          "minimum": 1,
+          "title": "Columns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width_points",
+        "height_points",
+        "margins",
+        "orientation",
+        "columns"
+      ],
+      "title": "DocumentPageV3",
+      "type": "object"
+    },
+    "DocumentPdfOptionsV3": {
+      "additionalProperties": false,
+      "description": "Fail-closed accessible PDF controls.",
+      "properties": {
+        "tagged": {
+          "const": true,
+          "title": "Tagged",
+          "type": "boolean"
+        },
+        "pdfa": {
+          "enum": [
+            "none",
+            "2b",
+            "3b"
+          ],
+          "title": "Pdfa",
+          "type": "string"
+        },
+        "allow_actions": {
+          "const": false,
+          "title": "Allow Actions",
+          "type": "boolean"
+        },
+        "include_bookmarks": {
+          "title": "Include Bookmarks",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tagged",
+        "pdfa",
+        "allow_actions",
+        "include_bookmarks"
+      ],
+      "title": "DocumentPdfOptionsV3",
+      "type": "object"
+    },
+    "DocumentRegionV3": {
+      "additionalProperties": false,
+      "description": "Header or footer region.",
+      "properties": {
+        "slot": {
+          "enum": [
+            "default",
+            "first",
+            "even"
+          ],
+          "title": "Slot",
+          "type": "string"
+        },
+        "content": {
+          "$ref": "#/$defs/RichText"
+        },
+        "page_number": {
+          "default": false,
+          "title": "Page Number",
+          "type": "boolean"
+        },
+        "total_pages": {
+          "default": false,
+          "title": "Total Pages",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "slot",
+        "content"
+      ],
+      "title": "DocumentRegionV3",
+      "type": "object"
+    },
+    "DocumentSectionV3": {
+      "additionalProperties": false,
+      "description": "Section boundary with optional geometry override.",
+      "properties": {
+        "section_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Section Id",
+          "type": "string"
+        },
+        "start_block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Start Block Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentPageV3"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "section_id",
+        "start_block_id"
+      ],
+      "title": "DocumentSectionV3",
+      "type": "object"
+    },
+    "DocumentStyleV3": {
+      "additionalProperties": false,
+      "description": "Named paragraph style.",
+      "properties": {
+        "style_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Style Id",
+          "type": "string"
+        },
+        "font": {
+          "$ref": "#/$defs/FontSpec"
+        },
+        "based_on": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Based On"
+        },
+        "alignment": {
+          "enum": [
+            "left",
+            "center",
+            "right",
+            "justify"
+          ],
+          "title": "Alignment",
+          "type": "string"
+        },
+        "space_before_points": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Space Before Points",
+          "type": "number"
+        },
+        "space_after_points": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Space After Points",
+          "type": "number"
+        },
+        "line_spacing": {
+          "maximum": 4.0,
+          "minimum": 0.8,
+          "title": "Line Spacing",
+          "type": "number"
+        }
+      },
+      "required": [
+        "style_id",
+        "font",
+        "alignment",
+        "space_before_points",
+        "space_after_points",
+        "line_spacing"
+      ],
+      "title": "DocumentStyleV3",
+      "type": "object"
+    },
+    "DocumentTableBlockV3": {
+      "additionalProperties": false,
+      "description": "Rich accessible table.",
+      "properties": {
+        "block_type": {
+          "const": "table",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "column_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Column Count",
+          "type": "integer"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/DocumentTableRowV3"
+          },
+          "maxItems": 10000,
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        },
+        "banded_rows": {
+          "title": "Banded Rows",
+          "type": "boolean"
+        },
+        "header_rows": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Header Rows",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "column_count",
+        "rows",
+        "banded_rows",
+        "header_rows"
+      ],
+      "title": "DocumentTableBlockV3",
+      "type": "object"
+    },
+    "DocumentTableCellV3": {
+      "additionalProperties": false,
+      "description": "Merged, styled table cell.",
+      "properties": {
+        "cell_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "content": {
+          "$ref": "#/$defs/RichText"
+        },
+        "column_span": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Column Span",
+          "type": "integer"
+        },
+        "row_span": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Row Span",
+          "type": "integer"
+        },
+        "fill": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fill"
+        },
+        "vertical_alignment": {
+          "default": "top",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ],
+          "title": "Vertical Alignment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cell_id",
+        "content",
+        "column_span",
+        "row_span"
+      ],
+      "title": "DocumentTableCellV3",
+      "type": "object"
+    },
+    "DocumentTableRowV3": {
+      "additionalProperties": false,
+      "description": "Table row with header semantics.",
+      "properties": {
+        "row_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Row Id",
+          "type": "string"
+        },
+        "header": {
+          "title": "Header",
+          "type": "boolean"
+        },
+        "repeat_header": {
+          "title": "Repeat Header",
+          "type": "boolean"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/DocumentTableCellV3"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "row_id",
+        "header",
+        "repeat_header",
+        "cells"
+      ],
+      "title": "DocumentTableRowV3",
+      "type": "object"
+    },
+    "DocumentTextBlockV3": {
+      "additionalProperties": false,
+      "description": "Flowing body text.",
+      "properties": {
+        "block_type": {
+          "const": "text",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "content": {
+          "$ref": "#/$defs/RichText"
+        },
+        "bookmark_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bookmark Id"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "content"
+      ],
+      "title": "DocumentTextBlockV3",
+      "type": "object"
+    },
+    "DocumentThemeV3": {
+      "additionalProperties": false,
+      "description": "Portable report color and font theme.",
+      "properties": {
+        "primary": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Primary",
+          "type": "string"
+        },
+        "secondary": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Secondary",
+          "type": "string"
+        },
+        "accent": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Accent",
+          "type": "string"
+        },
+        "background": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Background",
+          "type": "string"
+        },
+        "heading_font": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Heading Font",
+          "type": "string"
+        },
+        "body_font": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Body Font",
+          "type": "string"
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "accent",
+        "background",
+        "heading_font",
+        "body_font"
+      ],
+      "title": "DocumentThemeV3",
+      "type": "object"
+    },
+    "DocumentTocBlockV3": {
+      "additionalProperties": false,
+      "description": "Generated table of contents field.",
+      "properties": {
+        "block_type": {
+          "const": "toc",
+          "title": "Block Type",
+          "type": "string"
+        },
+        "block_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "min_level": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Min Level",
+          "type": "integer"
+        },
+        "max_level": {
+          "maximum": 9,
+          "minimum": 1,
+          "title": "Max Level",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_type",
+        "block_id",
+        "title",
+        "min_level",
+        "max_level"
+      ],
+      "title": "DocumentTocBlockV3",
+      "type": "object"
+    },
+    "FontSpec": {
+      "additionalProperties": false,
+      "description": "Portable typography resolved against runtime-owned fonts.",
+      "properties": {
+        "family": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "size_points": {
+          "maximum": 288.0,
+          "minimum": 4.0,
+          "title": "Size Points",
+          "type": "number"
+        },
+        "weight": {
+          "enum": [
+            300,
+            400,
+            500,
+            600,
+            700,
+            800
+          ],
+          "title": "Weight",
+          "type": "integer"
+        },
+        "italic": {
+          "title": "Italic",
+          "type": "boolean"
+        },
+        "color": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Color",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "size_points",
+        "weight",
+        "italic",
+        "color"
+      ],
+      "title": "FontSpec",
+      "type": "object"
+    },
+    "HttpsLinkTarget": {
+      "additionalProperties": false,
+      "description": "External link restricted to an absolute HTTPS URI.",
+      "properties": {
+        "kind": {
+          "const": "https",
+          "default": "https",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 2048,
+          "minLength": 9,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "HttpsLinkTarget",
+      "type": "object"
+    },
+    "ImageArtifactPlanV3": {
+      "additionalProperties": false,
+      "description": "Closed rich ordinary PNG or JPEG plan.",
+      "properties": {
+        "schema_version": {
+          "const": "v3",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "logical_output_name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Logical Output Name",
+          "type": "string"
+        },
+        "custody_request": {
+          "enum": [
+            "ordinary",
+            "vault_private"
+          ],
+          "title": "Custody Request",
+          "type": "string"
+        },
+        "input_refs": {
+          "items": {
+            "$ref": "#/$defs/ArtifactInputRefV3"
+          },
+          "maxItems": 32,
+          "title": "Input Refs",
+          "type": "array"
+        },
+        "renderer_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Renderer Profile",
+          "type": "string"
+        },
+        "renderer_min_version": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Renderer Min Version",
+          "type": "string"
+        },
+        "validation_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Validation Profile",
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "intermediate",
+            "candidate",
+            "final"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "retention_request": {
+          "$ref": "#/$defs/RetentionRequest"
+        },
+        "resource_bounds": {
+          "$ref": "#/$defs/ResourceBounds"
+        },
+        "kind": {
+          "const": "image",
+          "title": "Kind",
+          "type": "string"
+        },
+        "output_mime_type": {
+          "enum": [
+            "image/png",
+            "image/jpeg"
+          ],
+          "title": "Output Mime Type",
+          "type": "string"
+        },
+        "body": {
+          "$ref": "#/$defs/ImageBodyV3"
+        }
+      },
+      "required": [
+        "schema_version",
+        "logical_output_name",
+        "custody_request",
+        "input_refs",
+        "renderer_profile",
+        "renderer_min_version",
+        "validation_profile",
+        "disposition",
+        "retention_request",
+        "resource_bounds",
+        "kind",
+        "output_mime_type",
+        "body"
+      ],
+      "title": "ImageArtifactPlanV3",
+      "type": "object"
+    },
+    "ImageBodyV3": {
+      "additionalProperties": false,
+      "description": "Complete bounded raster composition.",
+      "properties": {
+        "canvas": {
+          "$ref": "#/$defs/ImageCanvasV3"
+        },
+        "layers": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "gradient": "#/$defs/ImageGradientLayerV3",
+                "shape": "#/$defs/ImageShapeLayerV3",
+                "source": "#/$defs/ImageSourceLayerV3",
+                "text": "#/$defs/ImageTextLayerV3"
+              },
+              "propertyName": "layer_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ImageTextLayerV3"
+              },
+              {
+                "$ref": "#/$defs/ImageSourceLayerV3"
+              },
+              {
+                "$ref": "#/$defs/ImageShapeLayerV3"
+              },
+              {
+                "$ref": "#/$defs/ImageGradientLayerV3"
+              }
+            ]
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Layers",
+          "type": "array"
+        },
+        "output": {
+          "$ref": "#/$defs/ImageOutputV3"
+        }
+      },
+      "required": [
+        "canvas",
+        "layers",
+        "output"
+      ],
+      "title": "ImageBodyV3",
+      "type": "object"
+    },
+    "ImageCanvasV3": {
+      "additionalProperties": false,
+      "description": "Bounded raster canvas.",
+      "properties": {
+        "width_pixels": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Width Pixels",
+          "type": "integer"
+        },
+        "height_pixels": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Height Pixels",
+          "type": "integer"
+        },
+        "background": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Background",
+          "type": "string"
+        },
+        "color_space": {
+          "enum": [
+            "srgb",
+            "grayscale"
+          ],
+          "title": "Color Space",
+          "type": "string"
+        }
+      },
+      "required": [
+        "width_pixels",
+        "height_pixels",
+        "background",
+        "color_space"
+      ],
+      "title": "ImageCanvasV3",
+      "type": "object"
+    },
+    "ImageGradientLayerV3": {
+      "additionalProperties": false,
+      "description": "Linear or radial gradient layer.",
+      "properties": {
+        "layer_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Layer Id",
+          "type": "string"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "blend_mode": {
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "darken",
+            "lighten"
+          ],
+          "title": "Blend Mode",
+          "type": "string"
+        },
+        "mask_input_local_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mask Input Local Id"
+        },
+        "layer_type": {
+          "const": "gradient",
+          "title": "Layer Type",
+          "type": "string"
+        },
+        "gradient_type": {
+          "enum": [
+            "linear",
+            "radial"
+          ],
+          "title": "Gradient Type",
+          "type": "string"
+        },
+        "angle_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Angle Degrees",
+          "type": "number"
+        },
+        "stops": {
+          "items": {
+            "$ref": "#/$defs/ImageGradientStopV3"
+          },
+          "maxItems": 16,
+          "minItems": 2,
+          "title": "Stops",
+          "type": "array"
+        }
+      },
+      "required": [
+        "layer_id",
+        "opacity",
+        "blend_mode",
+        "mask_input_local_id",
+        "layer_type",
+        "gradient_type",
+        "angle_degrees",
+        "stops"
+      ],
+      "title": "ImageGradientLayerV3",
+      "type": "object"
+    },
+    "ImageGradientStopV3": {
+      "additionalProperties": false,
+      "description": "One gradient color stop.",
+      "properties": {
+        "position": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Position",
+          "type": "number"
+        },
+        "color": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Color",
+          "type": "string"
+        }
+      },
+      "required": [
+        "position",
+        "color"
+      ],
+      "title": "ImageGradientStopV3",
+      "type": "object"
+    },
+    "ImageOutputV3": {
+      "additionalProperties": false,
+      "description": "Deterministic PNG or JPEG encoder settings.",
+      "properties": {
+        "format": {
+          "enum": [
+            "png",
+            "jpeg"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "transparent": {
+          "title": "Transparent",
+          "type": "boolean"
+        },
+        "jpeg_quality": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Jpeg Quality"
+        },
+        "jpeg_progressive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Jpeg Progressive"
+        },
+        "jpeg_subsampling": {
+          "anyOf": [
+            {
+              "enum": [
+                "4:4:4",
+                "4:2:2",
+                "4:2:0"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Jpeg Subsampling"
+        },
+        "background": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Background"
+        },
+        "strip_metadata": {
+          "const": true,
+          "title": "Strip Metadata",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "format",
+        "transparent",
+        "jpeg_quality",
+        "jpeg_progressive",
+        "jpeg_subsampling",
+        "background",
+        "strip_metadata"
+      ],
+      "title": "ImageOutputV3",
+      "type": "object"
+    },
+    "ImagePlacement": {
+      "additionalProperties": false,
+      "description": "Placement and accessibility for one verified raster input.",
+      "properties": {
+        "input_local_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Input Local Id",
+          "type": "string"
+        },
+        "width_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Width Points",
+          "type": "number"
+        },
+        "height_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Height Points",
+          "type": "number"
+        },
+        "crop_left": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Left",
+          "type": "number"
+        },
+        "crop_top": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Top",
+          "type": "number"
+        },
+        "crop_right": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Right",
+          "type": "number"
+        },
+        "crop_bottom": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Bottom",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RichText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "input_local_id",
+        "width_points",
+        "height_points",
+        "crop_left",
+        "crop_top",
+        "crop_right",
+        "crop_bottom",
+        "rotation_degrees",
+        "opacity",
+        "alt_text"
+      ],
+      "title": "ImagePlacement",
+      "type": "object"
+    },
+    "ImageShapeLayerV3": {
+      "additionalProperties": false,
+      "description": "Vector-like rasterized shape or annotation.",
+      "properties": {
+        "layer_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Layer Id",
+          "type": "string"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "blend_mode": {
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "darken",
+            "lighten"
+          ],
+          "title": "Blend Mode",
+          "type": "string"
+        },
+        "mask_input_local_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mask Input Local Id"
+        },
+        "layer_type": {
+          "const": "shape",
+          "title": "Layer Type",
+          "type": "string"
+        },
+        "shape": {
+          "enum": [
+            "rectangle",
+            "rounded_rectangle",
+            "ellipse",
+            "line",
+            "polygon",
+            "callout"
+          ],
+          "title": "Shape",
+          "type": "string"
+        },
+        "x": {
+          "maximum": 40000000,
+          "minimum": -40000000,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 40000000,
+          "minimum": -40000000,
+          "title": "Y",
+          "type": "integer"
+        },
+        "width": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "fill": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Fill",
+          "type": "string"
+        },
+        "stroke": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Stroke",
+          "type": "string"
+        },
+        "stroke_width": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Stroke Width",
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "maximum": 40000000,
+                "minimum": -40000000,
+                "type": "integer"
+              },
+              {
+                "maximum": 40000000,
+                "minimum": -40000000,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "maxItems": 128,
+          "title": "Points",
+          "type": "array"
+        }
+      },
+      "required": [
+        "layer_id",
+        "opacity",
+        "blend_mode",
+        "mask_input_local_id",
+        "layer_type",
+        "shape",
+        "x",
+        "y",
+        "width",
+        "height",
+        "fill",
+        "stroke",
+        "stroke_width",
+        "points"
+      ],
+      "title": "ImageShapeLayerV3",
+      "type": "object"
+    },
+    "ImageSourceLayerV3": {
+      "additionalProperties": false,
+      "description": "Verified source raster with bounded transforms and adjustments.",
+      "properties": {
+        "layer_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Layer Id",
+          "type": "string"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "blend_mode": {
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "darken",
+            "lighten"
+          ],
+          "title": "Blend Mode",
+          "type": "string"
+        },
+        "mask_input_local_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mask Input Local Id"
+        },
+        "layer_type": {
+          "const": "source",
+          "title": "Layer Type",
+          "type": "string"
+        },
+        "input_local_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Input Local Id",
+          "type": "string"
+        },
+        "x": {
+          "maximum": 40000000,
+          "minimum": -40000000,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 40000000,
+          "minimum": -40000000,
+          "title": "Y",
+          "type": "integer"
+        },
+        "width": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "crop_left": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Left",
+          "type": "number"
+        },
+        "crop_top": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Top",
+          "type": "number"
+        },
+        "crop_right": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Right",
+          "type": "number"
+        },
+        "crop_bottom": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Crop Bottom",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "flip_horizontal": {
+          "title": "Flip Horizontal",
+          "type": "boolean"
+        },
+        "flip_vertical": {
+          "title": "Flip Vertical",
+          "type": "boolean"
+        },
+        "brightness": {
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Brightness",
+          "type": "number"
+        },
+        "contrast": {
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Contrast",
+          "type": "number"
+        },
+        "saturation": {
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Saturation",
+          "type": "number"
+        },
+        "sharpness": {
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Sharpness",
+          "type": "number"
+        }
+      },
+      "required": [
+        "layer_id",
+        "opacity",
+        "blend_mode",
+        "mask_input_local_id",
+        "layer_type",
+        "input_local_id",
+        "x",
+        "y",
+        "width",
+        "height",
+        "crop_left",
+        "crop_top",
+        "crop_right",
+        "crop_bottom",
+        "rotation_degrees",
+        "flip_horizontal",
+        "flip_vertical",
+        "brightness",
+        "contrast",
+        "saturation",
+        "sharpness"
+      ],
+      "title": "ImageSourceLayerV3",
+      "type": "object"
+    },
+    "ImageTextLayerV3": {
+      "additionalProperties": false,
+      "description": "Runtime-font text layer.",
+      "properties": {
+        "layer_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Layer Id",
+          "type": "string"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "blend_mode": {
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "darken",
+            "lighten"
+          ],
+          "title": "Blend Mode",
+          "type": "string"
+        },
+        "mask_input_local_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mask Input Local Id"
+        },
+        "layer_type": {
+          "const": "text",
+          "title": "Layer Type",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 16384,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "x": {
+          "maximum": 40000000,
+          "minimum": -40000000,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 40000000,
+          "minimum": -40000000,
+          "title": "Y",
+          "type": "integer"
+        },
+        "max_width": {
+          "maximum": 40000000,
+          "minimum": 1,
+          "title": "Max Width",
+          "type": "integer"
+        },
+        "font": {
+          "$ref": "#/$defs/FontSpec"
+        },
+        "horizontal_alignment": {
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
+          "title": "Horizontal Alignment",
+          "type": "string"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        }
+      },
+      "required": [
+        "layer_id",
+        "opacity",
+        "blend_mode",
+        "mask_input_local_id",
+        "layer_type",
+        "text",
+        "x",
+        "y",
+        "max_width",
+        "font",
+        "horizontal_alignment",
+        "rotation_degrees"
+      ],
+      "title": "ImageTextLayerV3",
+      "type": "object"
+    },
+    "Insets": {
+      "additionalProperties": false,
+      "description": "Four bounded inset measurements in points.",
+      "properties": {
+        "top": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Top",
+          "type": "number"
+        },
+        "right": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Right",
+          "type": "number"
+        },
+        "bottom": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Bottom",
+          "type": "number"
+        },
+        "left": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Left",
+          "type": "number"
+        }
+      },
+      "required": [
+        "top",
+        "right",
+        "bottom",
+        "left"
+      ],
+      "title": "Insets",
+      "type": "object"
+    },
+    "InternalLinkTarget": {
+      "additionalProperties": false,
+      "description": "Link to a declared bookmark, slide, sheet, or named range.",
+      "properties": {
+        "kind": {
+          "const": "internal",
+          "default": "internal",
+          "title": "Kind",
+          "type": "string"
+        },
+        "bookmark_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Bookmark Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bookmark_id"
+      ],
+      "title": "InternalLinkTarget",
+      "type": "object"
+    },
+    "Paragraph": {
+      "additionalProperties": false,
+      "description": "One styled paragraph with bounded runs and list semantics.",
+      "properties": {
+        "paragraph_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Paragraph Id",
+          "type": "string"
+        },
+        "runs": {
+          "items": {
+            "$ref": "#/$defs/TextRun"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Runs",
+          "type": "array"
+        },
+        "style_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Style Id"
+        },
+        "alignment": {
+          "enum": [
+            "left",
+            "center",
+            "right",
+            "justify"
+          ],
+          "title": "Alignment",
+          "type": "string"
+        },
+        "space_before_points": {
+          "default": 0.0,
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Space Before Points",
+          "type": "number"
+        },
+        "space_after_points": {
+          "default": 0.0,
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Space After Points",
+          "type": "number"
+        },
+        "line_spacing": {
+          "default": 1.0,
+          "maximum": 4.0,
+          "minimum": 0.8,
+          "title": "Line Spacing",
+          "type": "number"
+        },
+        "keep_with_next": {
+          "default": false,
+          "title": "Keep With Next",
+          "type": "boolean"
+        },
+        "page_break_before": {
+          "default": false,
+          "title": "Page Break Before",
+          "type": "boolean"
+        },
+        "list_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "List Id"
+        },
+        "list_level": {
+          "anyOf": [
+            {
+              "maximum": 8,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "List Level"
+        }
+      },
+      "required": [
+        "paragraph_id",
+        "runs",
+        "alignment"
+      ],
+      "title": "Paragraph",
+      "type": "object"
+    },
+    "PresentationArtifactPlanV3": {
+      "additionalProperties": false,
+      "description": "Closed rich ordinary PPTX plan.",
+      "properties": {
+        "schema_version": {
+          "const": "v3",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "logical_output_name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Logical Output Name",
+          "type": "string"
+        },
+        "custody_request": {
+          "enum": [
+            "ordinary",
+            "vault_private"
+          ],
+          "title": "Custody Request",
+          "type": "string"
+        },
+        "input_refs": {
+          "items": {
+            "$ref": "#/$defs/ArtifactInputRefV3"
+          },
+          "maxItems": 32,
+          "title": "Input Refs",
+          "type": "array"
+        },
+        "renderer_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Renderer Profile",
+          "type": "string"
+        },
+        "renderer_min_version": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Renderer Min Version",
+          "type": "string"
+        },
+        "validation_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Validation Profile",
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "intermediate",
+            "candidate",
+            "final"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "retention_request": {
+          "$ref": "#/$defs/RetentionRequest"
+        },
+        "resource_bounds": {
+          "$ref": "#/$defs/ResourceBounds"
+        },
+        "kind": {
+          "const": "presentation",
+          "title": "Kind",
+          "type": "string"
+        },
+        "output_mime_type": {
+          "const": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "title": "Output Mime Type",
+          "type": "string"
+        },
+        "body": {
+          "$ref": "#/$defs/PresentationBodyV3"
+        }
+      },
+      "required": [
+        "schema_version",
+        "logical_output_name",
+        "custody_request",
+        "input_refs",
+        "renderer_profile",
+        "renderer_min_version",
+        "validation_profile",
+        "disposition",
+        "retention_request",
+        "resource_bounds",
+        "kind",
+        "output_mime_type",
+        "body"
+      ],
+      "title": "PresentationArtifactPlanV3",
+      "type": "object"
+    },
+    "PresentationBodyV3": {
+      "additionalProperties": false,
+      "description": "Complete static-rich deck.",
+      "properties": {
+        "theme": {
+          "$ref": "#/$defs/PresentationThemeV3"
+        },
+        "slide_size": {
+          "$ref": "#/$defs/PresentationSlideSizeV3"
+        },
+        "layouts": {
+          "items": {
+            "$ref": "#/$defs/PresentationLayoutV3"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Layouts",
+          "type": "array"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/PresentationSectionV3"
+          },
+          "maxItems": 64,
+          "title": "Sections",
+          "type": "array"
+        },
+        "slides": {
+          "items": {
+            "$ref": "#/$defs/PresentationSlideV3"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Slides",
+          "type": "array"
+        },
+        "accessibility": {
+          "$ref": "#/$defs/AccessibilityMetadata"
+        },
+        "allow_animations": {
+          "const": false,
+          "title": "Allow Animations",
+          "type": "boolean"
+        },
+        "allow_embedded_media": {
+          "const": false,
+          "title": "Allow Embedded Media",
+          "type": "boolean"
+        },
+        "allow_macros": {
+          "const": false,
+          "title": "Allow Macros",
+          "type": "boolean"
+        },
+        "allow_ole": {
+          "const": false,
+          "title": "Allow Ole",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "theme",
+        "slide_size",
+        "layouts",
+        "sections",
+        "slides",
+        "accessibility",
+        "allow_animations",
+        "allow_embedded_media",
+        "allow_macros",
+        "allow_ole"
+      ],
+      "title": "PresentationBodyV3",
+      "type": "object"
+    },
+    "PresentationBoundsV3": {
+      "additionalProperties": false,
+      "description": "Element geometry in points.",
+      "properties": {
+        "x": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Y",
+          "type": "number"
+        },
+        "width": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Width",
+          "type": "number"
+        },
+        "height": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Height",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "PresentationBoundsV3",
+      "type": "object"
+    },
+    "PresentationChartElementV3": {
+      "additionalProperties": false,
+      "description": "Editable native slide chart.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "chart",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "chart": {
+          "$ref": "#/$defs/ChartSpec"
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "chart"
+      ],
+      "title": "PresentationChartElementV3",
+      "type": "object"
+    },
+    "PresentationConnectorElementV3": {
+      "additionalProperties": false,
+      "description": "Editable connector line.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "connector",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "connector": {
+          "enum": [
+            "straight",
+            "elbow",
+            "curved"
+          ],
+          "title": "Connector",
+          "type": "string"
+        },
+        "start_element_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Element Id"
+        },
+        "end_element_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Element Id"
+        },
+        "line_color": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Line Color",
+          "type": "string"
+        },
+        "line_width_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Line Width Points",
+          "type": "number"
+        },
+        "arrow_start": {
+          "title": "Arrow Start",
+          "type": "boolean"
+        },
+        "arrow_end": {
+          "title": "Arrow End",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "connector",
+        "line_color",
+        "line_width_points",
+        "arrow_start",
+        "arrow_end"
+      ],
+      "title": "PresentationConnectorElementV3",
+      "type": "object"
+    },
+    "PresentationDiagramElementV3": {
+      "additionalProperties": false,
+      "description": "Editable node/edge diagram or timeline.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "diagram",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "layout": {
+          "enum": [
+            "horizontal",
+            "vertical",
+            "cycle",
+            "timeline"
+          ],
+          "title": "Layout",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/DiagramNodeV3"
+          },
+          "maxItems": 64,
+          "minItems": 2,
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/DiagramEdgeV3"
+          },
+          "maxItems": 128,
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "layout",
+        "nodes",
+        "edges"
+      ],
+      "title": "PresentationDiagramElementV3",
+      "type": "object"
+    },
+    "PresentationImageElementV3": {
+      "additionalProperties": false,
+      "description": "Verified raster on a slide.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "image",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/$defs/ImagePlacement"
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "image"
+      ],
+      "title": "PresentationImageElementV3",
+      "type": "object"
+    },
+    "PresentationLayoutV3": {
+      "additionalProperties": false,
+      "description": "Named slide layout.",
+      "properties": {
+        "layout_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "background": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Background",
+          "type": "string"
+        }
+      },
+      "required": [
+        "layout_id",
+        "name",
+        "background"
+      ],
+      "title": "PresentationLayoutV3",
+      "type": "object"
+    },
+    "PresentationSectionV3": {
+      "additionalProperties": false,
+      "description": "Named deck section.",
+      "properties": {
+        "section_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Section Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section_id",
+        "title"
+      ],
+      "title": "PresentationSectionV3",
+      "type": "object"
+    },
+    "PresentationShapeElementV3": {
+      "additionalProperties": false,
+      "description": "Editable filled shape.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "shape",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "shape": {
+          "enum": [
+            "rectangle",
+            "rounded_rectangle",
+            "ellipse",
+            "triangle",
+            "chevron",
+            "hexagon"
+          ],
+          "title": "Shape",
+          "type": "string"
+        },
+        "fill": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Fill",
+          "type": "string"
+        },
+        "line_color": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Line Color",
+          "type": "string"
+        },
+        "line_width_points": {
+          "maximum": 20000.0,
+          "minimum": 0.0,
+          "title": "Line Width Points",
+          "type": "number"
+        },
+        "content": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RichText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "shape",
+        "fill",
+        "line_color",
+        "line_width_points"
+      ],
+      "title": "PresentationShapeElementV3",
+      "type": "object"
+    },
+    "PresentationSlideSizeV3": {
+      "additionalProperties": false,
+      "description": "Standard or custom slide dimensions.",
+      "properties": {
+        "preset": {
+          "enum": [
+            "wide",
+            "standard",
+            "custom"
+          ],
+          "title": "Preset",
+          "type": "string"
+        },
+        "width_points": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "maximum": 20000.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Width Points"
+        },
+        "height_points": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "maximum": 20000.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Height Points"
+        }
+      },
+      "required": [
+        "preset",
+        "width_points",
+        "height_points"
+      ],
+      "title": "PresentationSlideSizeV3",
+      "type": "object"
+    },
+    "PresentationSlideV3": {
+      "additionalProperties": false,
+      "description": "One static-rich slide and its notes.",
+      "properties": {
+        "slide_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Slide Id",
+          "type": "string"
+        },
+        "layout_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "section_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Section Id"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "hidden": {
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "elements": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "chart": "#/$defs/PresentationChartElementV3",
+                "connector": "#/$defs/PresentationConnectorElementV3",
+                "diagram": "#/$defs/PresentationDiagramElementV3",
+                "image": "#/$defs/PresentationImageElementV3",
+                "shape": "#/$defs/PresentationShapeElementV3",
+                "table": "#/$defs/PresentationTableElementV3",
+                "text": "#/$defs/PresentationTextElementV3"
+              },
+              "propertyName": "element_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/PresentationTextElementV3"
+              },
+              {
+                "$ref": "#/$defs/PresentationShapeElementV3"
+              },
+              {
+                "$ref": "#/$defs/PresentationConnectorElementV3"
+              },
+              {
+                "$ref": "#/$defs/PresentationTableElementV3"
+              },
+              {
+                "$ref": "#/$defs/PresentationChartElementV3"
+              },
+              {
+                "$ref": "#/$defs/PresentationImageElementV3"
+              },
+              {
+                "$ref": "#/$defs/PresentationDiagramElementV3"
+              }
+            ]
+          },
+          "maxItems": 500,
+          "title": "Elements",
+          "type": "array"
+        },
+        "speaker_notes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RichText"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "show_slide_number": {
+          "title": "Show Slide Number",
+          "type": "boolean"
+        },
+        "footer": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Footer"
+        },
+        "transition": {
+          "const": "none",
+          "title": "Transition",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slide_id",
+        "layout_id",
+        "section_id",
+        "title",
+        "hidden",
+        "elements",
+        "speaker_notes",
+        "show_slide_number",
+        "footer",
+        "transition"
+      ],
+      "title": "PresentationSlideV3",
+      "type": "object"
+    },
+    "PresentationTableCellV3": {
+      "additionalProperties": false,
+      "description": "Editable slide table cell.",
+      "properties": {
+        "content": {
+          "$ref": "#/$defs/RichText"
+        },
+        "fill": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fill"
+        },
+        "column_span": {
+          "default": 1,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Column Span",
+          "type": "integer"
+        },
+        "row_span": {
+          "default": 1,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Row Span",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "content"
+      ],
+      "title": "PresentationTableCellV3",
+      "type": "object"
+    },
+    "PresentationTableElementV3": {
+      "additionalProperties": false,
+      "description": "Editable native slide table.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "table",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "column_count": {
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Column Count",
+          "type": "integer"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/PresentationTableRowV3"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        },
+        "banded_rows": {
+          "title": "Banded Rows",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "column_count",
+        "rows",
+        "banded_rows"
+      ],
+      "title": "PresentationTableElementV3",
+      "type": "object"
+    },
+    "PresentationTableRowV3": {
+      "additionalProperties": false,
+      "description": "Editable slide table row.",
+      "properties": {
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/PresentationTableCellV3"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Cells",
+          "type": "array"
+        },
+        "header": {
+          "title": "Header",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cells",
+        "header"
+      ],
+      "title": "PresentationTableRowV3",
+      "type": "object"
+    },
+    "PresentationTextElementV3": {
+      "additionalProperties": false,
+      "description": "Editable rich text box.",
+      "properties": {
+        "element_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "bounds": {
+          "$ref": "#/$defs/PresentationBoundsV3"
+        },
+        "rotation_degrees": {
+          "maximum": 360.0,
+          "minimum": -360.0,
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "alt_text": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "element_type": {
+          "const": "text",
+          "title": "Element Type",
+          "type": "string"
+        },
+        "content": {
+          "$ref": "#/$defs/RichText"
+        }
+      },
+      "required": [
+        "element_id",
+        "bounds",
+        "rotation_degrees",
+        "opacity",
+        "alt_text",
+        "element_type",
+        "content"
+      ],
+      "title": "PresentationTextElementV3",
+      "type": "object"
+    },
+    "PresentationThemeV3": {
+      "additionalProperties": false,
+      "description": "Portable presentation brand theme.",
+      "properties": {
+        "primary": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Primary",
+          "type": "string"
+        },
+        "secondary": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Secondary",
+          "type": "string"
+        },
+        "accent": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Accent",
+          "type": "string"
+        },
+        "background": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Background",
+          "type": "string"
+        },
+        "heading_font": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Heading Font",
+          "type": "string"
+        },
+        "body_font": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Body Font",
+          "type": "string"
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "accent",
+        "background",
+        "heading_font",
+        "body_font"
+      ],
+      "title": "PresentationThemeV3",
+      "type": "object"
+    },
+    "ResourceBounds": {
+      "additionalProperties": false,
+      "description": "Declared resource caps for renderer admission and service enforcement.",
+      "properties": {
+        "max_output_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        },
+        "max_pages": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Pages"
+        },
+        "max_sheets": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Sheets"
+        },
+        "max_cells": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Cells"
+        },
+        "max_pixels": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Pixels"
+        },
+        "max_total_decoded_pixels": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Total Decoded Pixels"
+        },
+        "max_duration_seconds": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Duration Seconds"
+        }
+      },
+      "required": [
+        "max_output_bytes"
+      ],
+      "title": "ResourceBounds",
+      "type": "object"
+    },
+    "RetentionRequest": {
+      "additionalProperties": false,
+      "description": "Non-authoritative retention request subject to policy evaluation.",
+      "properties": {
+        "retention_class": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Retention Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "retention_class"
+      ],
+      "title": "RetentionRequest",
+      "type": "object"
+    },
+    "RichText": {
+      "additionalProperties": false,
+      "description": "Bounded paragraphs used by document, slide, shape, and cell content.",
+      "properties": {
+        "paragraphs": {
+          "items": {
+            "$ref": "#/$defs/Paragraph"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Paragraphs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "paragraphs"
+      ],
+      "title": "RichText",
+      "type": "object"
+    },
+    "TextRun": {
+      "additionalProperties": false,
+      "description": "One bounded span of rich ordinary text.",
+      "properties": {
+        "text": {
+          "maxLength": 16384,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "font": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FontSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "bold": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bold"
+        },
+        "italic": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Italic"
+        },
+        "underline": {
+          "default": false,
+          "title": "Underline",
+          "type": "boolean"
+        },
+        "strike": {
+          "default": false,
+          "title": "Strike",
+          "type": "boolean"
+        },
+        "link": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "https": "#/$defs/HttpsLinkTarget",
+                  "internal": "#/$defs/InternalLinkTarget"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/InternalLinkTarget"
+                },
+                {
+                  "$ref": "#/$defs/HttpsLinkTarget"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Link"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "TextRun",
+      "type": "object"
+    },
+    "WorkbookArtifactPlanV3": {
+      "additionalProperties": false,
+      "description": "Closed rich ordinary XLSX plan.",
+      "properties": {
+        "schema_version": {
+          "const": "v3",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "logical_output_name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Logical Output Name",
+          "type": "string"
+        },
+        "custody_request": {
+          "enum": [
+            "ordinary",
+            "vault_private"
+          ],
+          "title": "Custody Request",
+          "type": "string"
+        },
+        "input_refs": {
+          "items": {
+            "$ref": "#/$defs/ArtifactInputRefV3"
+          },
+          "maxItems": 32,
+          "title": "Input Refs",
+          "type": "array"
+        },
+        "renderer_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Renderer Profile",
+          "type": "string"
+        },
+        "renderer_min_version": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Renderer Min Version",
+          "type": "string"
+        },
+        "validation_profile": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+          "title": "Validation Profile",
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "intermediate",
+            "candidate",
+            "final"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "retention_request": {
+          "$ref": "#/$defs/RetentionRequest"
+        },
+        "resource_bounds": {
+          "$ref": "#/$defs/ResourceBounds"
+        },
+        "kind": {
+          "const": "spreadsheet",
+          "title": "Kind",
+          "type": "string"
+        },
+        "output_mime_type": {
+          "const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "title": "Output Mime Type",
+          "type": "string"
+        },
+        "body": {
+          "$ref": "#/$defs/WorkbookBodyV3"
+        }
+      },
+      "required": [
+        "schema_version",
+        "logical_output_name",
+        "custody_request",
+        "input_refs",
+        "renderer_profile",
+        "renderer_min_version",
+        "validation_profile",
+        "disposition",
+        "retention_request",
+        "resource_bounds",
+        "kind",
+        "output_mime_type",
+        "body"
+      ],
+      "title": "WorkbookArtifactPlanV3",
+      "type": "object"
+    },
+    "WorkbookBodyV3": {
+      "additionalProperties": false,
+      "description": "Rich workbook body.",
+      "properties": {
+        "theme": {
+          "$ref": "#/$defs/WorkbookThemeV3"
+        },
+        "defined_names": {
+          "items": {
+            "$ref": "#/$defs/WorkbookDefinedNameV3"
+          },
+          "maxItems": 1000,
+          "title": "Defined Names",
+          "type": "array"
+        },
+        "sheets": {
+          "items": {
+            "$ref": "#/$defs/WorkbookSheetV3"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sheets",
+          "type": "array"
+        },
+        "calculation_mode": {
+          "const": "auto",
+          "title": "Calculation Mode",
+          "type": "string"
+        },
+        "strip_metadata": {
+          "const": true,
+          "title": "Strip Metadata",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "theme",
+        "defined_names",
+        "sheets",
+        "calculation_mode",
+        "strip_metadata"
+      ],
+      "title": "WorkbookBodyV3",
+      "type": "object"
+    },
+    "WorkbookBooleanValueV3": {
+      "additionalProperties": false,
+      "description": "Boolean cell value.",
+      "properties": {
+        "value_type": {
+          "const": "boolean",
+          "title": "Value Type",
+          "type": "string"
+        },
+        "boolean": {
+          "title": "Boolean",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "value_type",
+        "boolean"
+      ],
+      "title": "WorkbookBooleanValueV3",
+      "type": "object"
+    },
+    "WorkbookCellStyleV3": {
+      "additionalProperties": false,
+      "description": "Closed cell appearance.",
+      "properties": {
+        "fill": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fill"
+        },
+        "font_color": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Font Color"
+        },
+        "bold": {
+          "default": false,
+          "title": "Bold",
+          "type": "boolean"
+        },
+        "italic": {
+          "default": false,
+          "title": "Italic",
+          "type": "boolean"
+        },
+        "number_format": {
+          "default": "General",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Number Format",
+          "type": "string"
+        },
+        "horizontal_alignment": {
+          "default": "general",
+          "enum": [
+            "general",
+            "left",
+            "center",
+            "right"
+          ],
+          "title": "Horizontal Alignment",
+          "type": "string"
+        },
+        "vertical_alignment": {
+          "default": "bottom",
+          "enum": [
+            "top",
+            "center",
+            "bottom"
+          ],
+          "title": "Vertical Alignment",
+          "type": "string"
+        },
+        "wrap_text": {
+          "default": false,
+          "title": "Wrap Text",
+          "type": "boolean"
+        },
+        "border_color": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Border Color"
+        }
+      },
+      "title": "WorkbookCellStyleV3",
+      "type": "object"
+    },
+    "WorkbookCellV3": {
+      "additionalProperties": false,
+      "description": "Typed cell with optional appearance and link/note metadata.",
+      "properties": {
+        "address": {
+          "pattern": "^\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}$",
+          "title": "Address",
+          "type": "string"
+        },
+        "value": {
+          "discriminator": {
+            "mapping": {
+              "boolean": "#/$defs/WorkbookBooleanValueV3",
+              "date": "#/$defs/WorkbookDateValueV3",
+              "datetime": "#/$defs/WorkbookDateTimeValueV3",
+              "formula": "#/$defs/WorkbookFormulaValueV3",
+              "number": "#/$defs/WorkbookNumberValueV3",
+              "text": "#/$defs/WorkbookTextValueV3"
+            },
+            "propertyName": "value_type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkbookTextValueV3"
+            },
+            {
+              "$ref": "#/$defs/WorkbookNumberValueV3"
+            },
+            {
+              "$ref": "#/$defs/WorkbookBooleanValueV3"
+            },
+            {
+              "$ref": "#/$defs/WorkbookDateValueV3"
+            },
+            {
+              "$ref": "#/$defs/WorkbookDateTimeValueV3"
+            },
+            {
+              "$ref": "#/$defs/WorkbookFormulaValueV3"
+            }
+          ],
+          "title": "Value"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkbookCellStyleV3"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "note": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "https_link": {
+          "anyOf": [
+            {
+              "pattern": "^https://[^\\s]{1,2039}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Https Link"
+        }
+      },
+      "required": [
+        "address",
+        "value"
+      ],
+      "title": "WorkbookCellV3",
+      "type": "object"
+    },
+    "WorkbookChartV3": {
+      "additionalProperties": false,
+      "description": "Editable worksheet chart placement.",
+      "properties": {
+        "chart": {
+          "$ref": "#/$defs/ChartSpec"
+        },
+        "anchor": {
+          "pattern": "^\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}$",
+          "title": "Anchor",
+          "type": "string"
+        },
+        "width_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Width Points",
+          "type": "number"
+        },
+        "height_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Height Points",
+          "type": "number"
+        }
+      },
+      "required": [
+        "chart",
+        "anchor",
+        "width_points",
+        "height_points"
+      ],
+      "title": "WorkbookChartV3",
+      "type": "object"
+    },
+    "WorkbookColumnWidthV3": {
+      "additionalProperties": false,
+      "description": "Column display width.",
+      "properties": {
+        "column": {
+          "pattern": "^[A-Z]{1,3}$",
+          "title": "Column",
+          "type": "string"
+        },
+        "width": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 255.0,
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "column",
+        "width"
+      ],
+      "title": "WorkbookColumnWidthV3",
+      "type": "object"
+    },
+    "WorkbookConditionalFormatV3": {
+      "additionalProperties": false,
+      "description": "Bounded native conditional formatting rule.",
+      "properties": {
+        "range": {
+          "pattern": "^(?:[A-Za-z][A-Za-z0-9_ ]{0,30}!)?\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}(?::\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6})?$",
+          "title": "Range",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "cell",
+            "color_scale",
+            "data_bar",
+            "icon_set"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "enum": [
+                "greaterThan",
+                "lessThan",
+                "between",
+                "equal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operator"
+        },
+        "formula": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Formula"
+        },
+        "color": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Color",
+          "type": "string"
+        }
+      },
+      "required": [
+        "range",
+        "kind",
+        "operator",
+        "formula",
+        "color"
+      ],
+      "title": "WorkbookConditionalFormatV3",
+      "type": "object"
+    },
+    "WorkbookDateTimeValueV3": {
+      "additionalProperties": false,
+      "description": "Datetime cell value.",
+      "properties": {
+        "value_type": {
+          "const": "datetime",
+          "title": "Value Type",
+          "type": "string"
+        },
+        "datetime_value": {
+          "format": "date-time",
+          "title": "Datetime Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value_type",
+        "datetime_value"
+      ],
+      "title": "WorkbookDateTimeValueV3",
+      "type": "object"
+    },
+    "WorkbookDateValueV3": {
+      "additionalProperties": false,
+      "description": "Date cell value.",
+      "properties": {
+        "value_type": {
+          "const": "date",
+          "title": "Value Type",
+          "type": "string"
+        },
+        "date_value": {
+          "format": "date",
+          "title": "Date Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value_type",
+        "date_value"
+      ],
+      "title": "WorkbookDateValueV3",
+      "type": "object"
+    },
+    "WorkbookDefinedNameV3": {
+      "additionalProperties": false,
+      "description": "Workbook-scoped safe named reference.",
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,254}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "formula": {
+          "maxLength": 8192,
+          "minLength": 2,
+          "title": "Formula",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "formula"
+      ],
+      "title": "WorkbookDefinedNameV3",
+      "type": "object"
+    },
+    "WorkbookFormulaValueV3": {
+      "additionalProperties": false,
+      "description": "Allowlisted workbook formula.",
+      "properties": {
+        "value_type": {
+          "const": "formula",
+          "title": "Value Type",
+          "type": "string"
+        },
+        "formula": {
+          "maxLength": 8192,
+          "minLength": 2,
+          "title": "Formula",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value_type",
+        "formula"
+      ],
+      "title": "WorkbookFormulaValueV3",
+      "type": "object"
+    },
+    "WorkbookGroupV3": {
+      "additionalProperties": false,
+      "description": "Row or column outline group.",
+      "properties": {
+        "axis": {
+          "enum": [
+            "row",
+            "column"
+          ],
+          "title": "Axis",
+          "type": "string"
+        },
+        "start": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Start",
+          "type": "integer"
+        },
+        "end": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "End",
+          "type": "integer"
+        },
+        "level": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "collapsed": {
+          "title": "Collapsed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "axis",
+        "start",
+        "end",
+        "level",
+        "collapsed"
+      ],
+      "title": "WorkbookGroupV3",
+      "type": "object"
+    },
+    "WorkbookImageV3": {
+      "additionalProperties": false,
+      "description": "Verified worksheet image placement.",
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/ImagePlacement"
+        },
+        "anchor": {
+          "pattern": "^\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}$",
+          "title": "Anchor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "image",
+        "anchor"
+      ],
+      "title": "WorkbookImageV3",
+      "type": "object"
+    },
+    "WorkbookNoteV3": {
+      "additionalProperties": false,
+      "description": "Explicit cell note.",
+      "properties": {
+        "address": {
+          "pattern": "^\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}$",
+          "title": "Address",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "text"
+      ],
+      "title": "WorkbookNoteV3",
+      "type": "object"
+    },
+    "WorkbookNumberValueV3": {
+      "additionalProperties": false,
+      "description": "Finite numeric cell value.",
+      "properties": {
+        "value_type": {
+          "const": "number",
+          "title": "Value Type",
+          "type": "string"
+        },
+        "number": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "ge": -1000000000000000.0,
+          "le": 1000000000000000.0,
+          "title": "Number"
+        }
+      },
+      "required": [
+        "value_type",
+        "number"
+      ],
+      "title": "WorkbookNumberValueV3",
+      "type": "object"
+    },
+    "WorkbookPrintSetupV3": {
+      "additionalProperties": false,
+      "description": "Print-ready worksheet settings.",
+      "properties": {
+        "orientation": {
+          "enum": [
+            "portrait",
+            "landscape"
+          ],
+          "title": "Orientation",
+          "type": "string"
+        },
+        "paper_size": {
+          "enum": [
+            "letter",
+            "legal",
+            "a4",
+            "a3"
+          ],
+          "title": "Paper Size",
+          "type": "string"
+        },
+        "fit_to_width": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Fit To Width",
+          "type": "integer"
+        },
+        "fit_to_height": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Fit To Height",
+          "type": "integer"
+        },
+        "print_area": {
+          "pattern": "^(?:[A-Za-z][A-Za-z0-9_ ]{0,30}!)?\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}(?::\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6})?$",
+          "title": "Print Area",
+          "type": "string"
+        },
+        "repeat_rows": {
+          "anyOf": [
+            {
+              "pattern": "^\\$?[1-9][0-9]*:\\$?[1-9][0-9]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Repeat Rows"
+        }
+      },
+      "required": [
+        "orientation",
+        "paper_size",
+        "fit_to_width",
+        "fit_to_height",
+        "print_area",
+        "repeat_rows"
+      ],
+      "title": "WorkbookPrintSetupV3",
+      "type": "object"
+    },
+    "WorkbookRowHeightV3": {
+      "additionalProperties": false,
+      "description": "Row display height.",
+      "properties": {
+        "row": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        },
+        "height_points": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 20000.0,
+          "title": "Height Points",
+          "type": "number"
+        }
+      },
+      "required": [
+        "row",
+        "height_points"
+      ],
+      "title": "WorkbookRowHeightV3",
+      "type": "object"
+    },
+    "WorkbookSheetV3": {
+      "additionalProperties": false,
+      "description": "Complete worksheet surface.",
+      "properties": {
+        "sheet_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Sheet Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 31,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "visible",
+            "hidden"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/WorkbookCellV3"
+          },
+          "maxItems": 1000000,
+          "title": "Cells",
+          "type": "array"
+        },
+        "column_widths": {
+          "items": {
+            "$ref": "#/$defs/WorkbookColumnWidthV3"
+          },
+          "maxItems": 16384,
+          "title": "Column Widths",
+          "type": "array"
+        },
+        "row_heights": {
+          "items": {
+            "$ref": "#/$defs/WorkbookRowHeightV3"
+          },
+          "maxItems": 100000,
+          "title": "Row Heights",
+          "type": "array"
+        },
+        "merges": {
+          "items": {
+            "pattern": "^(?:[A-Za-z][A-Za-z0-9_ ]{0,30}!)?\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}(?::\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6})?$",
+            "type": "string"
+          },
+          "maxItems": 10000,
+          "title": "Merges",
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/WorkbookGroupV3"
+          },
+          "maxItems": 10000,
+          "title": "Groups",
+          "type": "array"
+        },
+        "freeze_panes": {
+          "anyOf": [
+            {
+              "pattern": "^\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Freeze Panes"
+        },
+        "auto_filter": {
+          "anyOf": [
+            {
+              "pattern": "^(?:[A-Za-z][A-Za-z0-9_ ]{0,30}!)?\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}(?::\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Auto Filter"
+        },
+        "tables": {
+          "items": {
+            "$ref": "#/$defs/WorkbookTableV3"
+          },
+          "maxItems": 1000,
+          "title": "Tables",
+          "type": "array"
+        },
+        "validations": {
+          "items": {
+            "$ref": "#/$defs/WorkbookValidationV3"
+          },
+          "maxItems": 10000,
+          "title": "Validations",
+          "type": "array"
+        },
+        "conditional_formats": {
+          "items": {
+            "$ref": "#/$defs/WorkbookConditionalFormatV3"
+          },
+          "maxItems": 10000,
+          "title": "Conditional Formats",
+          "type": "array"
+        },
+        "charts": {
+          "items": {
+            "$ref": "#/$defs/WorkbookChartV3"
+          },
+          "maxItems": 256,
+          "title": "Charts",
+          "type": "array"
+        },
+        "images": {
+          "items": {
+            "$ref": "#/$defs/WorkbookImageV3"
+          },
+          "maxItems": 256,
+          "title": "Images",
+          "type": "array"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/WorkbookNoteV3"
+          },
+          "maxItems": 10000,
+          "title": "Notes",
+          "type": "array"
+        },
+        "print_setup": {
+          "$ref": "#/$defs/WorkbookPrintSetupV3"
+        }
+      },
+      "required": [
+        "sheet_id",
+        "name",
+        "visibility",
+        "cells",
+        "column_widths",
+        "row_heights",
+        "merges",
+        "groups",
+        "freeze_panes",
+        "auto_filter",
+        "tables",
+        "validations",
+        "conditional_formats",
+        "charts",
+        "images",
+        "notes",
+        "print_setup"
+      ],
+      "title": "WorkbookSheetV3",
+      "type": "object"
+    },
+    "WorkbookTableV3": {
+      "additionalProperties": false,
+      "description": "Native worksheet table.",
+      "properties": {
+        "table_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Table Id",
+          "type": "string"
+        },
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,254}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "range": {
+          "pattern": "^(?:[A-Za-z][A-Za-z0-9_ ]{0,30}!)?\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}(?::\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6})?$",
+          "title": "Range",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "light1",
+            "light9",
+            "medium2",
+            "medium4",
+            "medium9",
+            "dark2"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "show_totals": {
+          "title": "Show Totals",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "table_id",
+        "name",
+        "range",
+        "style",
+        "show_totals"
+      ],
+      "title": "WorkbookTableV3",
+      "type": "object"
+    },
+    "WorkbookTextValueV3": {
+      "additionalProperties": false,
+      "description": "Text cell value.",
+      "properties": {
+        "value_type": {
+          "const": "text",
+          "title": "Value Type",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 32767,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value_type",
+        "text"
+      ],
+      "title": "WorkbookTextValueV3",
+      "type": "object"
+    },
+    "WorkbookThemeV3": {
+      "additionalProperties": false,
+      "description": "Workbook brand theme.",
+      "properties": {
+        "primary": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Primary",
+          "type": "string"
+        },
+        "secondary": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Secondary",
+          "type": "string"
+        },
+        "accent": {
+          "pattern": "^#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?$",
+          "title": "Accent",
+          "type": "string"
+        },
+        "font_family": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Font Family",
+          "type": "string"
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "accent",
+        "font_family"
+      ],
+      "title": "WorkbookThemeV3",
+      "type": "object"
+    },
+    "WorkbookValidationV3": {
+      "additionalProperties": false,
+      "description": "Safe cell validation rule.",
+      "properties": {
+        "validation_id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Validation Id",
+          "type": "string"
+        },
+        "range": {
+          "pattern": "^(?:[A-Za-z][A-Za-z0-9_ ]{0,30}!)?\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6}(?::\\$?[A-Z]{1,3}\\$?[1-9][0-9]{0,6})?$",
+          "title": "Range",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "list",
+            "whole",
+            "decimal",
+            "date",
+            "text_length"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "formula1": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Formula1",
+          "type": "string"
+        },
+        "formula2": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Formula2"
+        },
+        "allow_blank": {
+          "title": "Allow Blank",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "validation_id",
+        "range",
+        "kind",
+        "formula1",
+        "allow_blank"
+      ],
+      "title": "WorkbookValidationV3",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "document": "#/$defs/DocumentArtifactPlanV3",
+      "image": "#/$defs/ImageArtifactPlanV3",
+      "presentation": "#/$defs/PresentationArtifactPlanV3",
+      "spreadsheet": "#/$defs/WorkbookArtifactPlanV3"
+    },
+    "propertyName": "kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/DocumentArtifactPlanV3"
+    },
+    {
+      "$ref": "#/$defs/WorkbookArtifactPlanV3"
+    },
+    {
+      "$ref": "#/$defs/PresentationArtifactPlanV3"
+    },
+    {
+      "$ref": "#/$defs/ImageArtifactPlanV3"
+    }
+  ]
+}

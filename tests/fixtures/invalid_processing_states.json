@@ -1,0 +1,16 @@
+[
+  {
+    "resource_id": "res-policy-invalid",
+    "tier": "secure",
+    "status": "fallback_raw",
+    "processed_at": "2026-07-02T15:02:00Z",
+    "attempt": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": "tesseract-5.4.0",
+      "model_version": "qwen2.5-vl-7b",
+      "redaction_version": "presidio-2.2.0",
+      "policy_version": "resource-policy-v1"
+    }
+  }
+]

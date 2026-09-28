@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/private_artifact_lifecycle_receipt.schema.json",
+  "title": "PrivateArtifactLifecycleReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["receipt_id", "artifact_id", "operation", "state", "correlation_id", "occurred_at"],
+  "properties": {
+    "receipt_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+    "artifact_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+    "operation": {"enum": ["create", "rework", "delete"]},
+    "state": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactState"},
+    "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+    "occurred_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}
+  }
+}

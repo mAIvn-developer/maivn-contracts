@@ -1,0 +1,460 @@
+{
+  "_meta": {
+    "name": "audit",
+    "version": "0.1.0",
+    "lossy": true,
+    "note": "Security-relevant audit projection. Entries retain only actor, action, resource, outcome, safe reason codes, timestamps, lineage, and explicitly allowlisted scalar counts, booleans, or machine codes. Raw payloads, messages, prompts, values, and user content never enter the audit log.",
+    "reserved_future_actions": [
+      "api_key.issued",
+      "api_key.revoked",
+      "approval.approved",
+      "approval.rejected",
+      "auth.session_ended",
+      "auth.session_started",
+      "breakglass.used",
+      "config.changed",
+      "flag.changed",
+      "privacy.redaction_failed",
+      "quota.denied",
+      "spend.denied",
+      "trigger.admitted",
+      "trigger.rejected",
+      "webhook.delivery_failed"
+    ],
+    "reserved_note": "Audit actions reserved for event types not yet on the spine (api keys, auth sessions, approvals, breakglass, config/flag changes, quota/spend denials, webhook delivery failures). Add the vocabulary event first, then promote the mapping out of this list."
+  },
+  "target_events": [
+    "audit.entry"
+  ],
+  "mappings": {
+    "connection.event_received": {
+      "target": "audit.entry",
+      "action": "connection.event_received",
+      "resource_type": "connection",
+      "resource_field": "connection_id",
+      "outcome": "success",
+      "payload_fields": ["connection_id", "provider", "event_type"]
+    },
+    "email.received": {
+      "target": "audit.entry",
+      "action": "connection.event_received",
+      "resource_type": "connection",
+      "resource_field": "connection_id",
+      "outcome": "success",
+      "payload_fields": ["connection_id", "provider", "event_type"]
+    },
+    "conversation.reply_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Conversation replies contain customer-authored message content."
+    },
+    "memory.record_changed": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory mutation routing belongs to trigger diagnostics, not the user audit projection."
+    },
+    "storage.object_uploaded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Private object paths belong to resource and trigger diagnostics, not the user audit projection."
+    },
+    "trigger.fire_requested": {
+      "target": "audit.entry",
+      "action": "trigger.requested",
+      "resource_type": "trigger_request",
+      "resource_field": "request_id",
+      "outcome": "pending",
+      "payload_fields": ["request_id"]
+    },
+    "tool_event": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool payloads can carry user content."
+    },
+    "interrupt_request": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Interrupt payloads can carry approval questions and user content."
+    },
+    "interrupt_required": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Interrupt payloads can carry approval questions and user content."
+    },
+    "assignment_received": {
+      "target": "audit.entry",
+      "action": "session.started",
+      "resource_type": "session",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "assignment_completed": {
+      "target": "audit.entry",
+      "action": "run.completed",
+      "resource_type": "session",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "model_tool_complete": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool completion payloads can carry outputs."
+    },
+    "heartbeat": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Transport keepalive has no audit meaning."
+    },
+    "update": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "State deltas can carry user content."
+    },
+    "progress_update": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Progress payloads are operational internals."
+    },
+    "model_routing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Model routing is not a security audit action."
+    },
+    "status_message": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Status messages can carry user content."
+    },
+    "status_message_chunk": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Streaming chunks can carry user content."
+    },
+    "final": {
+      "target": "audit.entry",
+      "action": "run.completed",
+      "resource_type": "session",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "error": {
+      "target": "audit.entry",
+      "action": "run.failed",
+      "resource_type": "session",
+      "outcome": "failure",
+      "reason_code_field": "reason_code",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "system_tool_start": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool payloads can carry arguments."
+    },
+    "system_tool_chunk": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool chunks can carry user content."
+    },
+    "system_tool_complete": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool payloads can carry outputs."
+    },
+    "system_tool_error": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool failures can carry provider messages."
+    },
+    "hook_fired": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Developer hook internals are not audit actions."
+    },
+    "enrichment": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Enrichment payloads can carry user content."
+    },
+    "evaluating": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Processing internals are not audit actions."
+    },
+    "planning": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Planning internals are not audit actions."
+    },
+    "searching_tools": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool-search internals are not audit actions."
+    },
+    "loading_tools": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Tool-loading internals are not audit actions."
+    },
+    "planning_assignments": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Assignment planning is not an audit action."
+    },
+    "executing_assignments": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Assignment execution is not an audit action."
+    },
+    "executing_actions": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Action execution payloads can carry user content."
+    },
+    "synthesizing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Synthesis can carry user content."
+    },
+    "finalizing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Finalization can carry user content."
+    },
+    "reevaluate_accrued": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Re-evaluation is an orchestration internal."
+    },
+    "memory_summarizing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_summarized": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_retrieving": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_retrieved": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_indexing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_indexed": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_graph_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_skill_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_insight_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_skill_extracted": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "memory_insight_extracted": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals can carry user content."
+    },
+    "redaction_previewed": {
+      "target": "audit.entry",
+      "action": "privacy.redaction_previewed",
+      "resource_type": "session",
+      "outcome": "success",
+      "payload_fields": [
+        "entity_count",
+        "redaction_count"
+      ]
+    },
+    "message_redaction_applied": {
+      "target": "audit.entry",
+      "action": "privacy.redaction_applied",
+      "resource_type": "session",
+      "outcome": "success",
+      "payload_fields": [
+        "entity_count",
+        "redaction_count"
+      ]
+    },
+    "resource_registering": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource payloads can identify or contain user documents."
+    },
+    "resource_registered": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource payloads can identify or contain user documents."
+    },
+    "resource_dedup_reused": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource payloads can identify user documents."
+    },
+    "resource_version_superseded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource payloads can identify user documents."
+    },
+    "resource_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource payloads can carry extracted content."
+    },
+    "resource_extracted": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource payloads can carry extracted content."
+    },
+    "document_analysis_selected": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Document-analysis telemetry is represented in the tenant trace, not the cross-tenant audit feed."
+    },
+    "document_evidence_coverage": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Document-evidence telemetry is represented in the tenant trace, not the cross-tenant audit feed."
+    },
+    "trigger.fired": {
+      "target": "audit.entry",
+      "action": "trigger.fired",
+      "resource_type": "trigger",
+      "resource_field": "trigger_id",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "trigger.skipped": {
+      "target": "audit.entry",
+      "action": "trigger.skipped",
+      "resource_type": "trigger",
+      "resource_field": "trigger_id",
+      "outcome": "denied",
+      "reason_code_field": "reason_code",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "trigger.failed": {
+      "target": "audit.entry",
+      "action": "trigger.failed",
+      "resource_type": "trigger",
+      "resource_field": "trigger_id",
+      "outcome": "failure",
+      "reason_code_field": "reason_code",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "trigger.disabled": {
+      "target": "audit.entry",
+      "action": "trigger.disabled",
+      "resource_type": "trigger",
+      "resource_field": "trigger_id",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "trigger.enabled": {
+      "target": "audit.entry",
+      "action": "trigger.enabled",
+      "resource_type": "trigger",
+      "resource_field": "trigger_id",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    },
+    "agent.thinking": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas painting is not an audit action."
+    },
+    "agent.tool_selected": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas painting is not an audit action."
+    },
+    "tool.dispatch_started": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas painting and tool payloads are not audit data."
+    },
+    "tool.dispatch_completed": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas painting and tool payloads are not audit data."
+    },
+    "agent.responded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas painting is not an audit action."
+    },
+    "artifact.reserved": {"target":"audit.entry","action":"artifact.reserved","resource_type":"artifact_reservation","resource_field":"reservation_id","outcome":"pending","payload_fields":["reservation_id","logical_output_id","reservation_state","policy_snapshot_id"]},
+    "artifact.uploaded": {"target":"audit.entry","action":"artifact.uploaded","resource_type":"artifact_reservation","resource_field":"reservation_id","outcome":"success","payload_fields":["reservation_id","logical_output_id","reservation_state","upload_receipt_id"]},
+    "artifact.validation_started": {"target":"audit.entry","action":"artifact.validation_started","resource_type":"artifact_reservation","resource_field":"reservation_id","outcome":"pending","payload_fields":["reservation_id","logical_output_id","reservation_state","validation_profile"]},
+    "artifact.validated": {"target":"audit.entry","action":"artifact.validated","resource_type":"artifact_reservation","resource_field":"reservation_id","outcome":"success","payload_fields":["reservation_id","logical_output_id","reservation_state","validation_receipt_id"]},
+    "artifact.available": {"target":"audit.entry","action":"artifact.available","resource_type":"artifact","resource_field":"artifact_id","outcome":"success","payload_fields":["artifact_id","logical_output_id","revision","custody","artifact_state"]},
+    "artifact.rejected": {"target":"audit.entry","action":"artifact.rejected","resource_type":"artifact_reservation","resource_field":"reservation_id","outcome":"failure","payload_fields":["reservation_id","logical_output_id","reservation_state"]},
+    "artifact.failed": {"target":"audit.entry","action":"artifact.failed","resource_type":"artifact_reservation","resource_field":"reservation_id","outcome":"failure","payload_fields":["reservation_id","logical_output_id","reservation_state"]},
+    "artifact.selected": {"target":"audit.entry","action":"artifact.selected","resource_type":"artifact","resource_field":"artifact_id","outcome":"success","payload_fields":["selection_id","artifact_id","logical_output_id","revision","custody"]},
+    "artifact.delivery_queued": {"target":"audit.entry","action":"artifact.delivery_queued","resource_type":"artifact_delivery","resource_field":"delivery_id","outcome":"pending","payload_fields":["delivery_id","destination_ref_id","artifact_id","logical_output_id","revision","custody","delivery_state"]},
+    "artifact.delivery_started": {"target":"audit.entry","action":"artifact.delivery_started","resource_type":"artifact_delivery","resource_field":"delivery_id","outcome":"pending","payload_fields":["delivery_id","destination_ref_id","artifact_id","logical_output_id","revision","custody","delivery_state"]},
+    "artifact.delivery_succeeded": {"target":"audit.entry","action":"artifact.delivery_succeeded","resource_type":"artifact_delivery","resource_field":"delivery_id","outcome":"success","payload_fields":["delivery_id","destination_ref_id","artifact_id","logical_output_id","revision","custody","delivery_state"]},
+    "artifact.delivery_failed": {"target":"audit.entry","action":"artifact.delivery_failed","resource_type":"artifact_delivery","resource_field":"delivery_id","outcome":"failure","payload_fields":["delivery_id","destination_ref_id","artifact_id","logical_output_id","revision","custody","delivery_state"]},
+    "artifact.expired": {"target":"audit.entry","action":"artifact.expired","resource_type":"artifact","resource_field":"artifact_id","outcome":"success","payload_fields":["artifact_id","logical_output_id","revision","custody","artifact_state"]},
+    "artifact.deletion_requested": {"target":"audit.entry","action":"artifact.deletion_requested","resource_type":"artifact","resource_field":"artifact_id","outcome":"pending","payload_fields":["deletion_id","artifact_id","logical_output_id","revision","custody","artifact_state"]},
+    "artifact.deletion_started": {"target":"audit.entry","action":"artifact.deletion_started","resource_type":"artifact","resource_field":"artifact_id","outcome":"pending","payload_fields":["deletion_id","artifact_id","logical_output_id","revision","custody","artifact_state"]},
+    "artifact.deletion_pending_backup_expiry": {"target":"audit.entry","action":"artifact.deletion_pending_backup_expiry","resource_type":"artifact","resource_field":"artifact_id","outcome":"pending","payload_fields":["deletion_id","artifact_id","logical_output_id","revision","custody","artifact_state","deletion_receipt_id"]},
+    "artifact.deleted": {"target":"audit.entry","action":"artifact.deleted","resource_type":"artifact","resource_field":"artifact_id","outcome":"success","payload_fields":["deletion_id","artifact_id","logical_output_id","revision","custody","artifact_state","deletion_receipt_id"]},
+    "artifact.delete_incomplete": {"target":"audit.entry","action":"artifact.delete_incomplete","resource_type":"artifact","resource_field":"artifact_id","outcome":"failure","payload_fields":["deletion_id","artifact_id","logical_output_id","revision","custody","artifact_state","deletion_receipt_id"]},
+    "artifact.vault_authorization_pending": {"target":"audit.entry","action":"artifact.vault_authorization_pending","resource_type":"private_artifact_intent","resource_field":"intent_id","outcome":"pending","payload_fields":["intent_id","correlation_id","intent_state"]},
+    "artifact.vault_authorization_denied": {"target":"audit.entry","action":"artifact.vault_authorization_denied","resource_type":"private_artifact_intent","resource_field":"intent_id","outcome":"denied","payload_fields":["intent_id","correlation_id","intent_state"]},
+    "artifact.vault_render_started": {"target":"audit.entry","action":"artifact.vault_render_started","resource_type":"private_artifact_intent","resource_field":"intent_id","outcome":"pending","payload_fields":["intent_id","correlation_id","intent_state"]},
+    "artifact.vault_render_failed": {"target":"audit.entry","action":"artifact.vault_render_failed","resource_type":"private_artifact_intent","resource_field":"intent_id","outcome":"failure","payload_fields":["intent_id","correlation_id","intent_state"]},
+    "session.completed": {
+      "target": "audit.entry",
+      "action": "run.completed",
+      "resource_type": "session",
+      "outcome": "success",
+      "payload_fields": [
+        "reason_code"
+      ]
+    }
+  }
+}

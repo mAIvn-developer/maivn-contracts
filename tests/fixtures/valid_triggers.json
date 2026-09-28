@@ -1,0 +1,282 @@
+[
+  {
+    "trigger_id": "trg-daily-digest",
+    "project_id": "prj-support",
+    "name": "Daily support digest",
+    "status": "enabled",
+    "source": {
+      "kind": "schedule",
+      "phase": "phase_1",
+      "cron": "0 9 * * *",
+      "jitter_seconds": 60
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Build the daily support digest for {{event.window.date}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-support-digest",
+      "version": 3
+    },
+    "options": {
+      "concurrency": 4,
+      "retry_policy": {
+        "max_attempts": 3,
+        "initial_delay_seconds": 30,
+        "max_delay_seconds": 3600,
+        "backoff": "exponential"
+      },
+      "dedupe_window_seconds": 86400,
+      "depth_cap": 8,
+      "fanout_cap": 100,
+      "shadow": false,
+      "fire_budget": 5
+    },
+    "scenario_id": "scn-daily-support-digest",
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-support-webhook",
+    "project_id": "prj-support",
+    "name": "High-priority support webhook",
+    "status": "enabled",
+    "source": {
+      "kind": "webhook",
+      "phase": "phase_1",
+      "secret_ref": "vault://project/prj-support/trigger/trg-support-webhook/hmac"
+    },
+    "filter": "$.case[?(@.priority == 'high')]",
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "New high-priority case {{event.case.id}} from {{event.customer.email}}.",
+        "Summarize the customer's issue and recommend the next action."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": "latest"
+    },
+    "options": {
+      "concurrency": 4,
+      "retry_policy": {
+        "max_attempts": 3,
+        "initial_delay_seconds": 30,
+        "max_delay_seconds": 3600,
+        "backoff": "exponential"
+      },
+      "dedupe_window_seconds": 86400,
+      "depth_cap": 8,
+      "fanout_cap": 100,
+      "shadow": false,
+      "fire_budget": 5
+    },
+    "scenario_id": "scn-customer-triage",
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z"
+  },
+  {
+    "trigger_id": "trg-manual-replay",
+    "project_id": "prj-support",
+    "name": "Manual replay",
+    "status": "paused",
+    "source": {
+      "kind": "manual",
+      "phase": "phase_1"
+    },
+    "binding": {
+      "kind": "callable",
+      "module_path": "support.scenarios.bindings",
+      "qualified_name": "build_replay_messages",
+      "content_hash": "sha256:abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"
+    },
+    "agent": {
+      "agent_id": "agt-replay",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:10:00Z",
+    "updated_at": "2026-07-01T18:10:00Z"
+  },
+  {
+    "trigger_id": "trg-chained-summary",
+    "project_id": "prj-support",
+    "name": "Summarize completed triage",
+    "status": "enabled",
+    "source": {
+      "kind": "chained_event",
+      "phase": "phase_3",
+      "event_type": "session.completed",
+      "origin_trigger_id": "trg-support-webhook"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Summarize the completed upstream session {{event.session_id}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-support-digest",
+      "version": 3
+    },
+    "created_at": "2026-07-01T18:15:00Z",
+    "updated_at": "2026-07-01T18:15:00Z"
+  },
+  {
+    "trigger_id": "trg-memory-insight-update",
+    "project_id": "prj-support",
+    "name": "Review updated insights",
+    "status": "enabled",
+    "source": {
+      "kind": "memory_event",
+      "phase": "phase_3",
+      "record_kind": "insight",
+      "operation": "updated"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Review the updated insight {{event.record_id}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-support-digest",
+      "version": 3
+    },
+    "created_at": "2026-07-01T18:20:00Z",
+    "updated_at": "2026-07-01T18:20:00Z"
+  },
+  {
+    "trigger_id": "trg-storage-source-upload",
+    "project_id": "prj-support",
+    "name": "Process uploaded source",
+    "status": "enabled",
+    "source": {
+      "kind": "storage_event",
+      "phase": "phase_3",
+      "bucket": "memory-resources",
+      "object_kind": "source",
+      "operation": "inserted"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Process the uploaded source {{event.path}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-support-digest",
+      "version": "latest"
+    },
+    "created_at": "2026-07-01T18:25:00Z",
+    "updated_at": "2026-07-01T18:25:00Z"
+  },
+  {
+    "trigger_id": "trg-agent-follow-up",
+    "project_id": "prj-support",
+    "name": "Agent-selected follow-up",
+    "status": "enabled",
+    "source": {
+      "kind": "fire_trigger_tool",
+      "phase": "phase_4"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Handle the agent-requested follow-up for {{event.reason}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-support-digest",
+      "version": "latest"
+    },
+    "options": {
+      "concurrency": 4,
+      "dedupe_window_seconds": 86400,
+      "depth_cap": 8,
+      "fanout_cap": 100,
+      "shadow": false,
+      "fire_budget": 5
+    },
+    "created_at": "2026-07-01T18:30:00Z",
+    "updated_at": "2026-07-01T18:30:00Z"
+  },
+  {
+    "trigger_id": "trg-salesforce-contact-update",
+    "project_id": "prj-support",
+    "name": "Review updated Salesforce contact",
+    "status": "enabled",
+    "source": {
+      "kind": "external_connection_event",
+      "phase": "phase_2",
+      "connection_id": "conn-salesforce-primary",
+      "event_type": "contact.updated"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Review the updated contact {{event.data.record_id}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": "latest"
+    },
+    "created_at": "2026-07-01T18:35:00Z",
+    "updated_at": "2026-07-01T18:35:00Z"
+  },
+  {
+    "trigger_id": "trg-project-email-dropzone",
+    "project_id": "prj-support",
+    "name": "Triage project drop-zone email",
+    "status": "enabled",
+    "source": {
+      "kind": "email_to_invoke",
+      "phase": "phase_2",
+      "connection_id": "conn-project-dropzone",
+      "sender_allowlist": [
+        "support@example.com",
+        "*@trusted.example"
+      ]
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Triage the inbound email {{event.data.message_id}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 4
+    },
+    "created_at": "2026-07-01T18:40:00Z",
+    "updated_at": "2026-07-01T18:40:00Z"
+  },
+  {
+    "trigger_id": "trg-customer-reply-sla",
+    "project_id": "prj-support",
+    "name": "Escalate missing customer reply",
+    "status": "enabled",
+    "source": {
+      "kind": "sla_timer",
+      "phase": "phase_4",
+      "condition": "customer_reply",
+      "fire_when": "condition_missing",
+      "deadline_seconds": 3600
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "Escalate SLA timer {{event.timer_id}} for {{event.instance_key}}."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 4
+    },
+    "created_at": "2026-07-01T18:45:00Z",
+    "updated_at": "2026-07-01T18:45:00Z"
+  }
+]

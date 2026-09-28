@@ -1,0 +1,35 @@
+[
+  {
+    "fire_id": "fire-negative-depth",
+    "trigger_id": "trg-support-webhook",
+    "dedupe_key": "case-1001",
+    "priority": "triggered",
+    "status": "pending",
+    "available_at": "2026-07-01T18:15:00Z",
+    "attempt": 0,
+    "payload": {
+      "case": {
+        "id": "case-1001"
+      }
+    },
+    "root_event_id": "evt-trigger-root-0001",
+    "trigger_chain_depth": -1
+  },
+  {
+    "fire_id": "fire-extra-property",
+    "trigger_id": "trg-support-webhook",
+    "dedupe_key": "case-1001",
+    "priority": "triggered",
+    "status": "pending",
+    "available_at": "2026-07-01T18:15:00Z",
+    "attempt": 0,
+    "payload": {
+      "case": {
+        "id": "case-1001"
+      }
+    },
+    "root_event_id": "evt-trigger-root-0001",
+    "trigger_chain_depth": 0,
+    "unexpected": true
+  }
+]

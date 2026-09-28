@@ -1,0 +1,68 @@
+[
+  {
+    "artifact_id": "art_ordinary_0001",
+    "logical_output_id": "out_report_0001",
+    "revision": 1,
+    "kind": "document",
+    "mime_type": "application/pdf",
+    "custody": "ordinary",
+    "state": "available",
+    "created_at": "2026-08-09T00:00:00Z",
+    "effective_retention": {
+      "policy_snapshot_id": "policy_0001",
+      "retention_class": "invocation_artifact_30d",
+      "expires_at": "2026-09-08T00:00:00Z"
+    },
+    "producer": {
+      "producer_class": "hosted_tool",
+      "producer_id": "producer_0001",
+      "root_invocation_id": "invocation_0001",
+      "session_id": "session_0001",
+      "call_id": "call_0001",
+      "dispatch_id": "dispatch_0001",
+      "attempt_id": "attempt_0001"
+    },
+    "display_filename": "report.pdf",
+    "size_bytes": 4096,
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "validation_receipt": {
+      "receipt_id": "receipt_0001",
+      "status": "validated",
+      "validator_profile": "document-default",
+      "validator_version": "1.0.0"
+    },
+    "safe_preview": {
+      "kind": "document",
+      "page_count": 2
+    },
+    "retrieval_action": {
+      "relation": "artifact.download_authorization"
+    }
+  },
+  {
+    "artifact_id": "art_private_0001",
+    "logical_output_id": "out_image_0001",
+    "revision": 2,
+    "kind": "image",
+    "mime_type": "image/png",
+    "custody": "vault_private",
+    "state": "available_in_vault",
+    "created_at": "2026-08-09T00:01:00Z",
+    "effective_retention": {
+      "policy_snapshot_id": "policy_0002",
+      "retention_class": "vault_private",
+      "expires_at": "2026-09-08T00:01:00Z"
+    },
+    "producer": {
+      "producer_class": "vault",
+      "producer_id": "producer_0002",
+      "root_invocation_id": "invocation_0001"
+    },
+    "supersedes_artifact_id": "art_private_0000",
+    "display_label": "Private image",
+    "creation_receipt_id": "receipt_0002",
+    "retrieval_action": {
+      "relation": "artifact.vault_download_authorization"
+    }
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "strict",
+  "reportUnnecessaryTypeIgnoreComment": "error",
+  "include": [
+    "src",
+    "tests",
+    "evals"
+  ],
+  "exclude": [
+    ".venv",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".uv-cache",
+    ".uv-cache-*",
+    ".uv-python",
+    ".uv-python-*",
+    "typings-temp",
+    "**/__pycache__"
+  ]
+}

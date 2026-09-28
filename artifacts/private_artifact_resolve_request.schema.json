@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "VaultDeletionScope": {
+      "additionalProperties": false,
+      "description": "Closed retention choice for a private deletion effect.",
+      "properties": {
+        "mode": {
+          "enum": [
+            "private_only",
+            "include_redacted_exports"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "VaultDeletionScope",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Select an exact private reference within an authenticated session.",
+  "properties": {
+    "artifact_ref": {
+      "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactRef"
+    },
+    "session_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "operation": {
+      "default": "retrieve_session",
+      "enum": [
+        "retrieve_session",
+        "redacted_export",
+        "delete"
+      ],
+      "title": "Operation",
+      "type": "string"
+    },
+    "client_proof_digest": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Client Proof Digest"
+    },
+    "export_filename": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._ ()-]{0,254}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Export Filename"
+    },
+    "deletion_scope": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/VaultDeletionScope"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "retrieval_part": {
+      "default": "private_original",
+      "enum": [
+        "private_original",
+        "editable_source"
+      ],
+      "title": "Retrieval Part",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifact_ref",
+    "session_id"
+  ],
+  "title": "PrivateArtifactResolveRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/private_artifact_resolve_request.schema.json",
+  "oneOf": [
+    {
+      "required": [
+        "client_proof_digest"
+      ],
+      "properties": {
+        "operation": {
+          "const": "retrieve_session"
+        },
+        "client_proof_digest": {
+          "type": "string"
+        },
+        "export_filename": {
+          "type": "null"
+        },
+        "deletion_scope": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "required": [
+        "export_filename",
+        "operation"
+      ],
+      "properties": {
+        "operation": {
+          "const": "redacted_export"
+        },
+        "retrieval_part": {
+          "const": "private_original"
+        },
+        "client_proof_digest": {
+          "type": "null"
+        },
+        "export_filename": {
+          "type": "string"
+        },
+        "deletion_scope": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "required": [
+        "deletion_scope",
+        "operation"
+      ],
+      "properties": {
+        "operation": {
+          "const": "delete"
+        },
+        "retrieval_part": {
+          "const": "private_original"
+        },
+        "client_proof_digest": {
+          "type": "null"
+        },
+        "export_filename": {
+          "type": "null"
+        },
+        "deletion_scope": {
+          "$ref": "#/$defs/VaultDeletionScope"
+        }
+      }
+    }
+  ]
+}

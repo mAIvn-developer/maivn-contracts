@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/scenarios/trigger_launch.schema.json",
+  "title": "TriggerLaunch",
+  "description": "Authenticated internal trigger launch envelope pinned to one immutable AgentVersion; latest is structurally impossible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "fire_id", "trigger_id", "invocation_id", "organization_id", "project_id", "agent_id", "agent_version", "agent_version_snapshot", "payload", "session_id", "root_event_id", "trigger_chain_depth"],
+  "properties": {"schema_version": {"const": 1}, "fire_id": {"type": "string", "minLength": 1}, "trigger_id": {"type": "string", "minLength": 1}, "invocation_id": {"type": "string", "minLength": 1}, "organization_id": {"type": "string", "minLength": 1}, "project_id": {"type": "string", "minLength": 1}, "agent_id": {"type": "string", "minLength": 1}, "agent_version": {"type": "integer", "minimum": 1}, "agent_version_snapshot": {"$ref": "https://schemas.maivn.dev/agents/agent_version.schema.json"}, "payload": {"type": "object"}, "binding": {"$ref": "https://schemas.maivn.dev/agents/message_binding.schema.json"}, "session_id": {"type": "string", "minLength": 1}, "root_event_id": {"type": "string", "minLength": 1}, "parent_session_id": {"type": "string", "minLength": 1}, "parent_trigger_id": {"type": "string", "minLength": 1}, "trigger_chain_depth": {"type": "integer", "minimum": 0}, "conversation": {"$ref": "#/$defs/conversation"}},
+  "$defs": {
+    "conversation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conversation_id", "sequence"],
+      "properties": {
+        "conversation_id": {"type": "string", "minLength": 1},
+        "sequence": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

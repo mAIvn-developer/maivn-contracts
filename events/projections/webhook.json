@@ -1,0 +1,292 @@
+{
+  "_meta": {
+    "name": "webhook",
+    "version": "0.1.0",
+    "lossy": false,
+    "note": "Webhook projection targets stay within the existing 12-value v1 WebhookEventType vocabulary for this P0 contract."
+  },
+  "target_events": [
+    "session.started",
+    "session.completed",
+    "session.failed",
+    "checkpoint.created",
+    "checkpoint.resumed",
+    "tool.executed",
+    "tool.failed",
+    "quota.warning",
+    "quota.exceeded",
+    "api_key.created",
+    "api_key.rotated",
+    "api_key.revoked"
+  ],
+  "mappings": {
+    "connection.event_received": {
+      "target": "checkpoint.created",
+      "note": "A durable normalized provider receipt maps to the existing checkpoint vocabulary."
+    },
+    "email.received": {
+      "target": "checkpoint.created",
+      "note": "A durable inbound-mail receipt maps to the existing checkpoint vocabulary."
+    },
+    "conversation.reply_received": {
+      "target": "checkpoint.created",
+      "note": "A durable conversation reply maps to the existing checkpoint vocabulary."
+    },
+    "memory.record_changed": {
+      "target": "checkpoint.created",
+      "note": "Metadata-only memory mutation maps to a checkpoint."
+    },
+    "storage.object_uploaded": {
+      "target": "checkpoint.created",
+      "note": "Metadata-only resource upload maps to a checkpoint."
+    },
+    "trigger.fire_requested": {
+      "target": "checkpoint.created",
+      "note": "A durable asynchronous trigger handoff maps to the existing checkpoint vocabulary."
+    },
+    "tool_event": {
+      "target": "tool.executed",
+      "note": "Legacy tool_event maps to the existing tool execution webhook."
+    },
+    "interrupt_request": {
+      "target": "checkpoint.created",
+      "note": "Interrupt request creates a resumable checkpoint."
+    },
+    "interrupt_required": {
+      "target": "checkpoint.created",
+      "note": "Interrupt-required marker creates a resumable checkpoint."
+    },
+    "assignment_received": {
+      "target": "session.started",
+      "note": "Assignment receipt marks execution start for webhook consumers."
+    },
+    "assignment_completed": {
+      "target": "session.completed",
+      "note": "Assignment completion maps to session completion."
+    },
+    "model_tool_complete": {
+      "target": "tool.executed",
+      "note": "Completed model tool call maps to tool execution."
+    },
+    "heartbeat": {
+      "target": "checkpoint.resumed",
+      "note": "Heartbeat remains in the closest existing operational webhook bucket."
+    },
+    "update": {
+      "target": "checkpoint.created",
+      "note": "Generic updates map to checkpoint creation."
+    },
+    "progress_update": {
+      "target": "checkpoint.created",
+      "note": "Progress updates map to checkpoint creation."
+    },
+    "status_message": {
+      "target": "checkpoint.created",
+      "note": "Status messages map to checkpoint creation."
+    },
+    "status_message_chunk": {
+      "target": "checkpoint.created",
+      "note": "Status chunks map to checkpoint creation."
+    },
+    "final": {
+      "target": "session.completed",
+      "note": "Final event maps to session completion."
+    },
+    "error": {
+      "target": "session.failed",
+      "note": "Error event maps to session failure."
+    },
+    "system_tool_start": {
+      "target": "tool.executed",
+      "note": "System tool start stays in the tool webhook bucket."
+    },
+    "system_tool_chunk": {
+      "target": "tool.executed",
+      "note": "System tool chunks stay in the tool webhook bucket."
+    },
+    "system_tool_complete": {
+      "target": "tool.executed",
+      "note": "System tool completion maps to tool execution."
+    },
+    "system_tool_error": {
+      "target": "tool.failed",
+      "note": "System tool error maps to tool failure."
+    },
+    "hook_fired": {
+      "target": "checkpoint.created",
+      "note": "Hook execution maps to checkpoint creation."
+    },
+    "enrichment": {
+      "target": "checkpoint.created",
+      "note": "Generic enrichment maps to checkpoint creation."
+    },
+    "evaluating": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "planning": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "searching_tools": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "loading_tools": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "planning_assignments": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "executing_assignments": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "executing_actions": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "synthesizing": {
+      "target": "checkpoint.created",
+      "note": "Processing phase maps to checkpoint creation."
+    },
+    "finalizing": {
+      "target": "session.completed",
+      "note": "Finalization maps to session completion."
+    },
+    "reevaluate_accrued": {
+      "target": "checkpoint.created",
+      "note": "Re-evaluation maps to checkpoint creation."
+    },
+    "memory_summarizing": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_summarized": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_retrieving": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_retrieved": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_indexing": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_indexed": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_graph_extracting": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_skill_extracting": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_insight_extracting": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_skill_extracted": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "memory_insight_extracted": {
+      "target": "checkpoint.created",
+      "note": "Memory phase maps to checkpoint creation."
+    },
+    "redaction_previewed": {
+      "target": "checkpoint.created",
+      "note": "Redaction phase maps to checkpoint creation."
+    },
+    "message_redaction_applied": {
+      "target": "checkpoint.created",
+      "note": "Redaction phase maps to checkpoint creation."
+    },
+    "resource_registering": {
+      "target": "checkpoint.created",
+      "note": "Resource phase maps to checkpoint creation."
+    },
+    "resource_registered": {
+      "target": "checkpoint.created",
+      "note": "Resource phase maps to checkpoint creation."
+    },
+    "resource_dedup_reused": {
+      "target": "checkpoint.created",
+      "note": "Resource phase maps to checkpoint creation."
+    },
+    "resource_version_superseded": {
+      "target": "checkpoint.created",
+      "note": "Resource phase maps to checkpoint creation."
+    },
+    "resource_extracting": {
+      "target": "checkpoint.created",
+      "note": "Resource phase maps to checkpoint creation."
+    },
+    "resource_extracted": {
+      "target": "checkpoint.created",
+      "note": "Resource phase maps to checkpoint creation."
+    },
+    "document_analysis_selected": {
+      "target": "checkpoint.created",
+      "note": "Document strategy selection maps to the existing checkpoint vocabulary."
+    },
+    "document_evidence_coverage": {
+      "target": "checkpoint.created",
+      "note": "Document evidence coverage maps to the existing checkpoint vocabulary."
+    },
+    "trigger.fired": {
+      "target": "session.started",
+      "note": "Trigger fire launches a session in the existing webhook vocabulary."
+    },
+    "trigger.skipped": {
+      "target": "session.failed",
+      "note": "Skipped trigger has no v1 target, so it uses the failure bucket for alerting."
+    },
+    "trigger.failed": {
+      "target": "session.failed",
+      "note": "Trigger failure maps to session failure."
+    },
+    "trigger.disabled": {
+      "target": "session.failed",
+      "note": "Auto-disabled trigger maps to session failure for existing webhook consumers."
+    },
+    "trigger.enabled": {
+      "target": "checkpoint.resumed",
+      "note": "Trigger resume maps to checkpoint resumed."
+    },
+    "agent.thinking": {
+      "target": "checkpoint.created",
+      "note": "Canvas thinking event maps to checkpoint creation."
+    },
+    "agent.tool_selected": {
+      "target": "checkpoint.created",
+      "note": "Pre-dispatch tool selection maps to checkpoint creation."
+    },
+    "tool.dispatch_started": {
+      "target": "tool.executed",
+      "note": "Dispatch start remains in the existing tool webhook bucket."
+    },
+    "tool.dispatch_completed": {
+      "target": "tool.executed",
+      "note": "Dispatch completion maps to tool execution."
+    },
+    "agent.responded": {
+      "target": "checkpoint.created",
+      "note": "Agent response maps to checkpoint creation."
+    },
+    "session.completed": {
+      "target": "session.completed",
+      "note": "Session completion maps directly."
+    }
+  }
+}

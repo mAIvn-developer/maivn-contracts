@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/resources/derived_artifact.schema.json",
+  "title": "DerivedArtifact",
+  "description": "Produced resource artifact record for markdown, redacted markdown, redacted images, and sidecar maps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "resource_id",
+    "kind",
+    "content_hash",
+    "conversion_method",
+    "version",
+    "version_stamps",
+    "created_at"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable derived artifact identifier."
+    },
+    "resource_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Registered resource that produced this artifact."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "markdown",
+        "redacted_markdown",
+        "redacted_image",
+        "sidecar_map"
+      ],
+      "description": "Produced artifact kind."
+    },
+    "storage_ref": {
+      "$ref": "#/$defs/storageRef"
+    },
+    "inline_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 262144,
+      "description": "Bounded inline artifact text for small markdown or sidecar map artifacts."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hex digest of the artifact body."
+    },
+    "conversion_method": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Internal conversion method name used to produce this artifact."
+    },
+    "ocr_confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional OCR confidence score from 0 through 1."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Positive artifact version number."
+    },
+    "supersedes_artifact_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional prior artifact replaced by this version."
+    },
+    "version_stamps": {
+      "$ref": "#/$defs/versionStamps"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 creation timestamp."
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["storage_ref"],
+      "not": {
+        "required": ["inline_text"]
+      }
+    },
+    {
+      "required": ["inline_text"],
+      "not": {
+        "required": ["storage_ref"]
+      }
+    }
+  ],
+  "$defs": {
+    "storageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bucket", "path"],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Storage bucket, grounded in v1 storage_bucket."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Storage object path, grounded in v1 storage_path."
+        }
+      }
+    },
+    "versionStamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "extractor_version",
+        "ocr_version",
+        "model_version",
+        "redaction_version",
+        "policy_version"
+      ],
+      "properties": {
+        "extractor_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Extractor implementation version used for this artifact."
+        },
+        "ocr_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "OCR implementation version used for this artifact."
+        },
+        "model_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Model version used for layout, OCR repair, or redaction assistance."
+        },
+        "redaction_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Redaction policy or detector implementation version."
+        },
+        "policy_version": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "description": "Resource policy resolver version."
+        }
+      }
+    }
+  }
+}

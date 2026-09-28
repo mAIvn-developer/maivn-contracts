@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/runtime/run_config.schema.json",
+  "title": "RunConfig",
+  "description": "Owned runtime invocation configuration injected by the data plane per run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "user_id",
+    "thread_id"
+  ],
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Authenticated user identifier used for runtime ownership and shielding."
+    },
+    "thread_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Runtime thread identifier used to bind checkpoint state."
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional session identifier used for tool execution context."
+    },
+    "invocation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional invocation identifier for trace and retry correlation."
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional project identifier used for policy and spend attribution."
+    },
+    "organization_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Organization the run belongs to; stamped from the authenticated caller."
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Agent scope this run executes as; required to reach agent-bound memory."
+    },
+    "swarm_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Swarm scope this run executes as; required to reach swarm-bound memory."
+    },
+    "client_timezone": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional IANA timezone reported by the invoking SDK client."
+    },
+    "sdk_deployment_timezone": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional IANA timezone configured for the SDK deployment."
+    },
+    "model_directive": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "fast",
+        "balanced",
+        "max",
+        "ultra",
+        "force"
+      ],
+      "description": "Optional runtime model directive selected at invocation time."
+    },
+    "routing_preference": {
+      "type": "string",
+      "enum": [
+        "speed",
+        "cost",
+        "quality"
+      ],
+      "description": "Ask auto routing to lean faster, cheaper, or stronger than the request content alone would pick. Absent means no preference. Only auto routing reads it; every other directive already names its own tier. One value rather than separate flags, because these are mutually exclusive and a caller cannot ask for two at once."
+    },
+    "system_model_choices": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional explicit model choices for framework-owned system tools. Absent preserves each tool's internal default profile.",
+      "properties": {
+        "thinking": {
+          "$ref": "#/$defs/modelChoice",
+          "description": "Optional model choice for the think system tool."
+        },
+        "compose_argument": {
+          "$ref": "#/$defs/modelChoice",
+          "description": "Optional model choice for compose_argument synthesis."
+        },
+        "repl": {
+          "$ref": "#/$defs/modelChoice",
+          "description": "Optional model choice for REPL code generation and repair."
+        }
+      }
+    },
+    "planning": {
+      "$ref": "#/$defs/planningChoice",
+      "description": "Optional explicit model choice for framework-owned planning."
+    },
+    "job_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Execution-tree depth for nested assignment replay and ordering."
+    },
+    "job_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Execution-tree sibling index for causal ordering within a parent."
+    },
+    "parent_assignment_uuid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent assignment UUID for nested job lineage."
+    },
+    "child_run_kind": {
+      "type": "string",
+      "enum": [
+        "root",
+        "swarm_member",
+        "tool_job"
+      ],
+      "description": "Absent means an ordinary root invocation. What KIND of child run this is, not merely that it is one: a swarm member and a decomposed tool job both report job_depth 1."
+    },
+    "plan_node_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier of the plan node this run executes; survives retries and re-planning, which a sibling ordinal does not."
+    },
+    "decomposition_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many JOB boundaries deep this run is, counted separately from job_depth so swarm hops do not spend the decomposition budget."
+    },
+    "recursion_limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "default": 100,
+      "description": "Runtime cycle guard; defaults to the v1 parity value of 100."
+    },
+    "durability": {
+      "type": "string",
+      "enum": [
+        "exit",
+        "async",
+        "sync"
+      ],
+      "default": "exit",
+      "description": "Checkpoint persistence mode; exit persists at run exit or interrupt."
+    },
+    "origin": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional self-reported invoking client, display/filter only, never consulted for authorization. Conventional starting set: studio, alpha, portal, sdk. Not an enforced enum - unrecognized values from newer clients are accepted and read back as-is; absent on historical rows."
+    }
+  },
+  "$defs": {
+    "modelChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["auto", "fast", "balanced", "max", "ultra"]
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "oneOf": [
+        {"required": ["tier"], "not": {"required": ["model_id"]}},
+        {"required": ["model_id"], "not": {"required": ["tier"]}}
+      ]
+    },
+    "planningChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "standard",
+            "advanced",
+            "deep"
+          ]
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tier"
+          ],
+          "properties": {
+            "tier": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "standard",
+                "advanced",
+                "deep"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model_id"
+          ],
+          "properties": {
+            "model_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ],
+      "x-maivn-closed-union-validation": true
+    }
+  }
+}

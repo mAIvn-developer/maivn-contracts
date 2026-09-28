@@ -1,0 +1,45 @@
+[
+  {
+    "resource_id": "res-policy-direct",
+    "tier": "direct",
+    "status": "pending",
+    "processed_at": null,
+    "attempt": 0,
+    "version_stamps": {
+      "extractor_version": null,
+      "ocr_version": null,
+      "model_version": null,
+      "redaction_version": null,
+      "policy_version": "resource-policy-v1"
+    }
+  },
+  {
+    "resource_id": "res-policy-indexed",
+    "tier": "indexed",
+    "status": "ready",
+    "processed_at": "2026-07-02T15:00:00Z",
+    "attempt": 1,
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": null,
+      "model_version": null,
+      "redaction_version": null,
+      "policy_version": "resource-policy-v1"
+    }
+  },
+  {
+    "resource_id": "res-policy-secure",
+    "tier": "secure",
+    "status": "quarantined",
+    "processed_at": "2026-07-02T15:01:00Z",
+    "attempt": 2,
+    "error": "redaction shield found unresolved private spans",
+    "version_stamps": {
+      "extractor_version": "docling-1.0.0",
+      "ocr_version": "tesseract-5.4.0",
+      "model_version": "qwen2.5-vl-7b",
+      "redaction_version": "presidio-2.2.0",
+      "policy_version": "resource-policy-v1"
+    }
+  }
+]

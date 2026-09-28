@@ -1,0 +1,283 @@
+[
+  {
+    "trigger_id": "trg-unknown-source",
+    "project_id": "prj-support",
+    "name": "Unknown source",
+    "status": "enabled",
+    "source": {
+      "kind": "ftp",
+      "phase": "phase_1"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-raw-secret",
+    "project_id": "prj-support",
+    "name": "Raw webhook secret",
+    "status": "enabled",
+    "source": {
+      "kind": "webhook",
+      "phase": "phase_1",
+      "secret_ref": "raw-secret-value"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-two-filter-languages",
+    "project_id": "prj-support",
+    "name": "Two filter languages",
+    "status": "enabled",
+    "source": {
+      "kind": "manual",
+      "phase": "phase_1"
+    },
+    "filter": {
+      "jsonpath": "$.case",
+      "jq": ".case"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-extra-property",
+    "project_id": "prj-support",
+    "name": "Extra property",
+    "status": "enabled",
+    "source": {
+      "kind": "manual",
+      "phase": "phase_1"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z",
+    "unexpected": true
+  },
+  {
+    "trigger_id": "trg-chained-unsupported",
+    "project_id": "prj-support",
+    "name": "Unsupported chained event",
+    "status": "enabled",
+    "source": {
+      "kind": "chained_event",
+      "phase": "phase_3",
+      "event_type": "trigger.fired"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-memory-extra-selector",
+    "project_id": "prj-support",
+    "name": "Invalid memory selector",
+    "status": "enabled",
+    "source": {
+      "kind": "memory_event",
+      "phase": "phase_3",
+      "record_kind": "insight",
+      "operation": "updated",
+      "record_id": "insight-secret"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-storage-public-bucket",
+    "project_id": "prj-support",
+    "name": "Invalid storage bucket",
+    "status": "enabled",
+    "source": {
+      "kind": "storage_event",
+      "phase": "phase_3",
+      "bucket": "public-assets",
+      "object_kind": "source",
+      "operation": "inserted"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-storage-delete",
+    "project_id": "prj-support",
+    "name": "Unsupported storage delete",
+    "status": "enabled",
+    "source": {
+      "kind": "storage_event",
+      "phase": "phase_3",
+      "bucket": "memory-resources",
+      "object_kind": "artifact",
+      "operation": "deleted"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-fire-tool-wrong-phase",
+    "project_id": "prj-support",
+    "name": "Wrong phase fire tool",
+    "status": "enabled",
+    "source": {
+      "kind": "fire_trigger_tool",
+      "phase": "phase_3"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-fire-tool-missing-phase",
+    "project_id": "prj-support",
+    "name": "Missing phase fire tool",
+    "status": "enabled",
+    "source": {
+      "kind": "fire_trigger_tool"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-fire-tool-extra-selector",
+    "project_id": "prj-support",
+    "name": "Extra fire tool selector",
+    "status": "enabled",
+    "source": {
+      "kind": "fire_trigger_tool",
+      "phase": "phase_4",
+      "target_trigger_id": "trg-other"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  },
+  {
+    "trigger_id": "trg-fire-tool-cross-variant",
+    "project_id": "prj-support",
+    "name": "Cross variant fire tool",
+    "status": "enabled",
+    "source": {
+      "kind": "fire_trigger_tool",
+      "phase": "phase_4",
+      "event_type": "session.completed"
+    },
+    "binding": {
+      "kind": "template",
+      "messages": [
+        "This should not validate."
+      ]
+    },
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 1
+    },
+    "created_at": "2026-07-01T18:00:00Z",
+    "updated_at": "2026-07-01T18:00:00Z"
+  }
+]

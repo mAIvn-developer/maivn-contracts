@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/ordinary_export_deletion_status_request.schema.json",
+  "title": "OrdinaryExportDeletionStatusRequest",
+  "x-maivn-verified-export-validation": "deletion-status-request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ordinary_deletion_ref", "deletion_receipt_id"],
+  "properties": {
+    "schema_version": {"const": "ordinary-export-deletion-status-request-v1"},
+    "ordinary_deletion_ref": {"$ref": "#/$defs/token"},
+    "deletion_receipt_id": {"$ref": "#/$defs/token"}
+  },
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"}
+  }
+}

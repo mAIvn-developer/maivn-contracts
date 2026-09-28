@@ -1,0 +1,937 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/agents/agent_version.schema.json",
+  "title": "Agent Version",
+  "description": "Immutable deployed-agent version record used to reconstruct triggered invocations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_id",
+    "version",
+    "execution_mode",
+    "model",
+    "instructions",
+    "tools_snapshot",
+    "created_at",
+    "created_by"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable deployed-agent identifier this version belongs to."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Positive immutable deployed-agent version number."
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": ["worker", "webhook", "hosted_only"],
+      "description": "AgentExecutionMode bound to this immutable version. Switching modes requires a new version; in-flight invocations finish under their original version."
+    },
+    "model": {
+      "$ref": "#/$defs/modelSettings"
+    },
+    "instructions": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/inlineInstructions"
+        },
+        {
+          "$ref": "#/$defs/referenceInstructions"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "kind"
+      },
+      "description": "System prompt or instructions source bound to this immutable version."
+    },
+    "tools_snapshot": {
+      "type": "array",
+      "description": "Tool specs captured at deployment time from the SDK/session-start shape: name, description, parameters schema, and execution locus.",
+      "items": {
+        "$ref": "#/$defs/toolSnapshot"
+      }
+    },
+    "attached_skill_ids": {
+      "type": "array",
+      "maxItems": 256,
+      "description": "Optional immutable skills attached directly to the compiled Flow root.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "agents_snapshot": {
+      "type": "array",
+      "maxItems": 64,
+      "description": "Optional immutable invocation-local roster compiled for this version.",
+      "items": {
+        "$ref": "#/$defs/invokeAgentSpec"
+      }
+    },
+    "agent_tool_dependencies": {
+      "type": "array",
+      "maxItems": 256,
+      "description": "Optional immutable delegated tool arguments compiled for this version.",
+      "items": {
+        "$ref": "#/$defs/agentToolDependency"
+      }
+    },
+    "swarm_roster": {
+      "type": "boolean",
+      "description": "Whether this immutable version executes as a compiled swarm roster."
+    },
+    "options": {
+      "$ref": "#/$defs/versionOptions"
+    },
+    "memory": {
+      "$ref": "#/$defs/agentMemoryPolicy"
+    },
+    "output_schema": {
+      "$ref": "#/$defs/agentOutputSchema"
+    },
+    "webhook_endpoint": {
+      "$ref": "#/$defs/webhookEndpoint"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp for when this immutable version was created."
+    },
+    "created_by": {
+      "type": "string",
+      "minLength": 1,
+      "description": "User or service principal that created this immutable version."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "webhook"
+          }
+        },
+        "required": ["execution_mode"]
+      },
+      "then": {
+        "required": ["webhook_endpoint"],
+        "properties": {
+          "tools_snapshot": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/toolSnapshot"
+                },
+                {
+                  "properties": {
+                    "execution": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/$defs/webhookToolExecution"
+                        },
+                        {
+                          "$ref": "#/$defs/hostedToolExecution"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "required": ["webhook_endpoint"]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "worker"
+          }
+        },
+        "required": ["execution_mode"]
+      },
+      "then": {
+        "properties": {
+          "tools_snapshot": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/toolSnapshot"
+                },
+                {
+                  "properties": {
+                    "execution": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/$defs/workerToolExecution"
+                        },
+                        {
+                          "$ref": "#/$defs/hostedToolExecution"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "hosted_only"
+          }
+        },
+        "required": ["execution_mode"]
+      },
+      "then": {
+        "properties": {
+          "tools_snapshot": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/toolSnapshot"
+                },
+                {
+                  "properties": {
+                    "execution": {
+                      "$ref": "#/$defs/hostedToolExecution"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "swarm_roster": {
+            "const": true
+          }
+        },
+        "required": ["swarm_roster"]
+      },
+      "then": {
+        "required": ["agents_snapshot"],
+        "properties": {
+          "agents_snapshot": {
+            "minItems": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "agents_snapshot": {
+            "maxItems": 0
+          },
+          "agent_tool_dependencies": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "agentPeerDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "arg_name"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["agent", "tool"],
+          "description": "What kind of producer feeds this member."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Roster agent name or invocation-local tool id producing the value."
+        },
+        "arg_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Label under which the produced value is injected."
+        }
+      }
+    },
+    "agentToolDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool_id", "agent_name", "arg_name"],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tool whose argument this dependency fills."
+        },
+        "agent_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Roster agent delegated to produce the argument."
+        },
+        "arg_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tool argument receiving the delegated result."
+        },
+        "optional": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the declaring tool marked this argument optional. An optional dependency is presented to the model as a boolean toggle and delegated only when the model asks; a required one always delegates."
+        }
+      }
+    },
+    "invokeAgentSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "tool_ids",
+        "tools",
+        "attached_skill_ids",
+        "use_as_final_output",
+        "final_tool_ids",
+        "peer_dependencies"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name the agent is addressed by within this runtime."
+        },
+        "system_prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Persona reproduced for this immutable member."
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional exact provider model for this member."
+        },
+        "tool_ids": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"type": "string", "minLength": 1},
+          "description": "Immutable root tool ids granted to this member."
+        },
+        "tools": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"$ref": "https://schemas.maivn.dev/tools/tool_spec.schema.json"},
+          "description": "Immutable member-owned tool specifications."
+        },
+        "attached_skill_ids": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"type": "string", "minLength": 1},
+          "description": "Immutable skills attached to this member."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What this member contributes to the Flow."
+        },
+        "use_as_final_output": {
+          "type": "boolean",
+          "description": "Whether this member supplies the Flow result."
+        },
+        "included_nested_synthesis": {
+          "oneOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "default": "auto",
+          "description": "Whether a delegated member adds a prose synthesis turn after its tools."
+        },
+        "final_tool_ids": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"type": "string", "minLength": 1},
+          "description": "Granted tools eligible to supply this member's final result."
+        },
+        "peer_dependencies": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {"$ref": "#/$defs/agentPeerDependency"},
+          "description": "Declared immutable member inputs."
+        },
+        "agents": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {"$ref": "#/$defs/invokeAgentSpec"},
+          "description": "Delegates scoped to this agent, not its parent swarm roster."
+        },
+        "agent_tool_dependencies": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"$ref": "#/$defs/agentToolDependency"},
+          "description": "Tool arguments supplied by this agent nested delegates."
+        }
+      }
+    },
+    "modelChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Scoped model choice grounded in v1 ModelChoice: exactly one tier or exact model id.",
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["auto", "fast", "balanced", "max", "ultra"],
+          "description": "Model tier for this framework part."
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exact provider model id for this framework part."
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["tier"],
+          "not": {
+            "required": ["model_id"]
+          }
+        },
+        {
+          "required": ["model_id"],
+          "not": {
+            "required": ["tier"]
+          }
+        }
+      ]
+    },
+    "modelSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Scoped model settings for response and framework-owned model-backed tools.",
+      "required": ["response"],
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/modelChoice"
+        },
+        "planning": {
+          "$ref": "#/$defs/planningChoice"
+        },
+        "thinking": {
+          "$ref": "#/$defs/modelChoice"
+        },
+        "compose_argument": {
+          "$ref": "#/$defs/modelChoice"
+        },
+        "repl": {
+          "$ref": "#/$defs/modelChoice"
+        }
+      }
+    },
+    "planningChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "standard",
+            "advanced",
+            "deep"
+          ]
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tier"
+          ],
+          "properties": {
+            "tier": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "standard",
+                "advanced",
+                "deep"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model_id"
+          ],
+          "properties": {
+            "model_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ],
+      "x-maivn-closed-union-validation": true
+    },
+    "inlineInstructions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "content"],
+      "properties": {
+        "kind": {
+          "const": "inline"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Inline system prompt or instruction content."
+        }
+      }
+    },
+    "referenceInstructions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": {
+          "const": "ref"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Server-resolved reference to immutable prompt or instruction content."
+        }
+      }
+    },
+    "parameterProperty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "integer", "boolean", "object", "array"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/parameterProperty"
+          }
+        },
+        "items": {
+          "$ref": "#/$defs/parameterProperty"
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "parametersSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "object"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/parameterProperty"
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "description": "Closed JSON-Schema subset for tool parameters; property names are dynamic, so the properties map carries schema-valued entries."
+    },
+    "workerToolExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locus"],
+      "properties": {
+        "locus": {
+          "const": "worker"
+        }
+      }
+    },
+    "webhookToolExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locus", "path"],
+      "properties": {
+        "locus": {
+          "const": "webhook"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^/([^/?#][^?#]*)?$",
+          "description": "Relative absolute-path endpoint under the version-level webhook endpoint for this tool."
+        }
+      }
+    },
+    "hostedToolExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locus", "provider", "tool_ref"],
+      "properties": {
+        "locus": {
+          "const": "hosted"
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hosted connector, system tool, no-code tool, or hosted MCP provider."
+        },
+        "tool_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable hosted tool reference within the provider."
+        }
+      }
+    },
+    "toolExecution": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/workerToolExecution"
+        },
+        {
+          "$ref": "#/$defs/webhookToolExecution"
+        },
+        {
+          "$ref": "#/$defs/hostedToolExecution"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "locus"
+      }
+    },
+    "toolSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "parameters_schema", "execution"],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable tool specification identifier captured for external dispatch."
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Immutable tool specification version captured for external dispatch."
+        },
+        "idempotency": {
+          "type": "string",
+          "enum": ["idempotent", "non_idempotent", "unknown"],
+          "description": "Retry and duplicate-suppression declaration captured for external dispatch."
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600000,
+          "description": "Maximum immutable execution budget for one external tool call."
+        },
+        "output_schema": {
+          "description": "Optional JSON Schema object for external tool results.",
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "expected_runtime_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600000,
+          "description": "Expected external execution duration used to select sync or async delivery."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable tool name from the deployed tool spec."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable tool behavior description from the deployed tool spec."
+        },
+        "parameters_schema": {
+          "$ref": "#/$defs/parametersSchema"
+        },
+        "execution": {
+          "$ref": "#/$defs/toolExecution"
+        },
+        "tool_dependencies": {
+          "type": "array",
+          "maxItems": 256,
+          "description": "Immutable tool outputs injected into this tool by argument name.",
+          "items": {
+            "$ref": "#/$defs/toolDependencyEdge"
+          }
+        }
+      }
+    },
+    "toolDependencyEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool_name", "arg_name"],
+      "properties": {
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "arg_name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "versionOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Closed subset of v1 session-start options that affect invocation reconstruction.",
+      "properties": {
+        "reasoning": {
+          "type": "string",
+          "enum": ["minimal", "low", "medium", "high"]
+        },
+        "stream_response": {
+          "type": "boolean"
+        },
+        "status_messages": {
+          "type": "boolean"
+        },
+        "force_final_tool": {
+          "type": "boolean"
+        },
+        "sticky_workers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prefer a stable eligible Mode A worker for one agent session."
+        },
+        "targeted_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allowed_system_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "agentMemoryRetrievalPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Recall controls pinned to an immutable agent version.",
+      "required": [
+        "skills_enabled",
+        "insights_enabled",
+        "resources_enabled",
+        "max_skills",
+        "max_insights",
+        "max_resources",
+        "max_context_chars"
+      ],
+      "properties": {
+        "skills_enabled": {
+          "type": "boolean"
+        },
+        "insights_enabled": {
+          "type": "boolean"
+        },
+        "resources_enabled": {
+          "type": "boolean"
+        },
+        "graph_enabled": {
+          "type": "boolean",
+          "description": "Recall graph assertions independently of the write mode; absent means enabled."
+        },
+        "max_graph_assertions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_skills": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_insights": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_resources": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_context_chars": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 12000
+        }
+      }
+    },
+    "agentMemoryExtractionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Post-run extraction controls for one memory signal kind.",
+      "required": [
+        "enabled",
+        "max_count"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        }
+      }
+    },
+    "agentMemoryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Complete agent-level memory behavior pinned to an immutable version.",
+      "required": [
+        "enabled",
+        "level",
+        "persistence_mode",
+        "retrieval",
+        "skill_extraction",
+        "insight_extraction"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "none",
+            "glimpse",
+            "focus",
+            "clarity"
+          ]
+        },
+        "persistence_mode": {
+          "type": "string",
+          "enum": [
+            "persist_none",
+            "vector_only",
+            "vector_plus_graph"
+          ]
+        },
+        "retrieval": {
+          "$ref": "#/$defs/agentMemoryRetrievalPolicy"
+        },
+        "skill_extraction": {
+          "$ref": "#/$defs/agentMemoryExtractionPolicy"
+        },
+        "insight_extraction": {
+          "$ref": "#/$defs/agentMemoryExtractionPolicy"
+        },
+        "graph_extraction": {
+          "$ref": "#/$defs/agentMemoryExtractionPolicy",
+          "description": "Optional graph extraction controls; writes still require vector_plus_graph mode."
+        }
+      }
+    },
+    "agentOutputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Provider-neutral structured-output contract pinned to an agent version.",
+      "required": [
+        "name",
+        "schema"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+        },
+        "schema": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "webhookEndpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "secret_ref"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "HTTPS base URL used for Mode B tool delivery. Control-plane service validation additionally enforces the SSRF, host, port, userinfo, and fragment policy."
+        },
+        "secret_ref": {
+          "type": "string",
+          "pattern": "^vault://",
+          "description": "Vault reference for the Mode B webhook HMAC secret. Raw secret values are not part of this schema."
+        }
+      }
+    }
+  }
+}

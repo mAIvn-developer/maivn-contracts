@@ -1,0 +1,277 @@
+{
+  "_meta": {
+    "name": "canvas",
+    "version": "0.1.0",
+    "lossy": true,
+    "note": "The canvas projection is the only projection permitted to be lossy. It may collapse execution-tree coordinates for painting, but the canonical event remains authoritative.",
+    "lossy_peers": [
+      "trace"
+    ],
+    "lossy_note": "Canvas collapses execution-tree coordinates for painting. The trace projection is the only other lossy projection, and its loss is deliberate curation: user-facing traces show WHAT happened, never orchestration internals (owner ruling 2026-07-13)."
+  },
+  "target_events": [
+    "trigger.fired",
+    "agent.thinking",
+    "agent.tool_selected",
+    "tool.dispatch_started",
+    "tool.dispatch_completed",
+    "agent.responded",
+    "session.completed"
+  ],
+  "mappings": {
+    "connection.event_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Provider payloads do not paint until admission produces trigger.fired."
+    },
+    "email.received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Email content does not paint until admission produces trigger.fired."
+    },
+    "conversation.reply_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Conversation content does not paint until admission produces trigger.fired."
+    },
+    "memory.record_changed": {
+      "target": "agent.thinking",
+      "note": "Metadata-only memory mutation paints as background agent activity."
+    },
+    "storage.object_uploaded": {
+      "target": "agent.thinking",
+      "note": "Metadata-only resource upload paints as background agent activity."
+    },
+    "trigger.fire_requested": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "A request paints no child run until admission produces trigger.fired."
+    },
+    "trigger.skipped": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "A skipped trigger starts no run; it is not a canvas paint step."
+    },
+    "trigger.failed": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "A failed trigger starts no run; failure details stay in the trigger plane."
+    },
+    "trigger.disabled": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Trigger enable/disable is admin lifecycle, not a canvas paint step."
+    },
+    "trigger.enabled": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Trigger enable/disable is admin lifecycle, not a canvas paint step."
+    },
+    "tool_event": {
+      "target": "tool.dispatch_completed",
+      "note": "Legacy tool_event paints as a completed tool dispatch."
+    },
+    "interrupt_request": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "No canvas vocabulary value exists for a pending interrupt."
+    },
+    "interrupt_required": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "No canvas vocabulary value exists for an interrupt-required marker."
+    },
+    "model_routing": { "target": null, "drop": true, "drop_reason": "Model routing is a trace-curated decision record, not a canvas paint step." },
+    "assignment_received": {
+      "target": "agent.thinking",
+      "note": "Assignment receipt paints as agent activity."
+    },
+    "assignment_completed": {
+      "target": "agent.responded",
+      "note": "Assignment completion paints as an agent response."
+    },
+    "model_tool_complete": {
+      "target": "tool.dispatch_completed",
+      "note": "v1 only emits after completion; v2 also emits pre-dispatch tool selection separately."
+    },
+    "heartbeat": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Connection health is not part of the seven canvas events."
+    },
+    "update": {
+      "target": "agent.thinking",
+      "note": "Generic updates paint as active agent reasoning."
+    },
+    "progress_update": {
+      "target": "agent.thinking",
+      "note": "Streaming progress paints as active agent reasoning."
+    },
+    "status_message": {
+      "target": "agent.thinking",
+      "note": "Standalone status messages paint as active agent reasoning."
+    },
+    "status_message_chunk": {
+      "target": "agent.thinking",
+      "note": "Status message chunks paint as active agent reasoning."
+    },
+    "final": {
+      "target": "session.completed",
+      "note": "Final v1 event completes the canvas run."
+    },
+    "error": {
+      "target": "agent.responded",
+      "note": "Canvas has no failure event; error details stay in payload."
+    },
+    "system_tool_start": {
+      "target": "tool.dispatch_started",
+      "note": "System tool start paints as dispatch start."
+    },
+    "system_tool_chunk": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Incremental system tool chunks do not change the seven-event canvas state."
+    },
+    "system_tool_complete": {
+      "target": "tool.dispatch_completed",
+      "note": "System tool completion paints as dispatch completion."
+    },
+    "system_tool_error": {
+      "target": "tool.dispatch_completed",
+      "note": "Canvas has no tool failure event; failure details stay in payload."
+    },
+    "hook_fired": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Hook callbacks are internal instrumentation, not a canvas paint step."
+    },
+    "enrichment": {
+      "target": "agent.thinking",
+      "note": "Generic enrichment paints as active agent reasoning."
+    },
+    "evaluating": {
+      "target": "agent.thinking",
+      "note": "Processing enrichment paints as active agent reasoning."
+    },
+    "planning": {
+      "target": "agent.thinking",
+      "note": "Planning enrichment paints as active agent reasoning."
+    },
+    "searching_tools": {
+      "target": "agent.thinking",
+      "note": "Tool-search enrichment paints as active agent reasoning."
+    },
+    "loading_tools": {
+      "target": "agent.thinking",
+      "note": "Tool-loading enrichment paints as active agent reasoning."
+    },
+    "planning_assignments": {
+      "target": "agent.thinking",
+      "note": "Assignment planning paints as active agent reasoning."
+    },
+    "executing_assignments": {
+      "target": "agent.thinking",
+      "note": "Nested assignment execution paints as active agent reasoning."
+    },
+    "executing_actions": {
+      "target": "agent.thinking",
+      "note": "Action execution paints as active agent reasoning."
+    },
+    "synthesizing": {
+      "target": "agent.responded",
+      "note": "Synthesis paints as the agent response stage."
+    },
+    "finalizing": {
+      "target": "agent.responded",
+      "note": "Finalization paints as the agent response stage."
+    },
+    "reevaluate_accrued": {
+      "target": "agent.thinking",
+      "note": "Re-evaluation paints as active agent reasoning."
+    },
+    "memory_summarizing": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_summarized": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_retrieving": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_retrieved": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_indexing": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_indexed": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_graph_extracting": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_skill_extracting": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_insight_extracting": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_skill_extracted": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "memory_insight_extracted": {
+      "target": "agent.thinking",
+      "note": "Memory enrichment paints as active agent reasoning."
+    },
+    "redaction_previewed": {
+      "target": "agent.thinking",
+      "note": "Redaction enrichment paints as active agent reasoning."
+    },
+    "message_redaction_applied": {
+      "target": "agent.thinking",
+      "note": "Redaction enrichment paints as active agent reasoning."
+    },
+    "resource_registering": {
+      "target": "agent.thinking",
+      "note": "Resource enrichment paints as active agent reasoning."
+    },
+    "resource_registered": {
+      "target": "agent.thinking",
+      "note": "Resource enrichment paints as active agent reasoning."
+    },
+    "resource_dedup_reused": {
+      "target": "agent.thinking",
+      "note": "Resource enrichment paints as active agent reasoning."
+    },
+    "resource_version_superseded": {
+      "target": "agent.thinking",
+      "note": "Resource enrichment paints as active agent reasoning."
+    },
+    "resource_extracting": {
+      "target": "agent.thinking",
+      "note": "Resource enrichment paints as active agent reasoning."
+    },
+    "resource_extracted": {
+      "target": "agent.thinking",
+      "note": "Resource enrichment paints as active agent reasoning."
+    },
+    "document_analysis_selected": {
+      "target": "agent.thinking",
+      "note": "Document strategy selection paints as active agent reasoning."
+    },
+    "document_evidence_coverage": {
+      "target": "agent.thinking",
+      "note": "Evidence coverage assembly paints as active agent reasoning."
+    }
+  }
+}

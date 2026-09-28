@@ -1,0 +1,274 @@
+[
+  {
+    "scenario_id": "scn-zero-triggers",
+    "project_id": "prj-support",
+    "name": "Zero triggers",
+    "revision": 1,
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 2
+    },
+    "output_binding": {
+      "kind": "event_emission",
+      "target": {
+        "event_type": "support.case.updated"
+      }
+    },
+    "layout": {
+      "node_positions": {
+        "agent": {
+          "x": 360,
+          "y": 120
+        }
+      }
+    },
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z"
+  },
+  {
+    "scenario_id": "scn-two-triggers",
+    "project_id": "prj-support",
+    "name": "Two triggers",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "trigger_ids": [
+      "trg-support-webhook",
+      "trg-manual-replay"
+    ],
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 2
+    },
+    "output_binding": {
+      "kind": "event_emission",
+      "target": {
+        "event_type": "support.case.updated"
+      }
+    },
+    "layout": {
+      "node_positions": {
+        "trigger": {
+          "x": 0,
+          "y": 120
+        },
+        "agent": {
+          "x": 360,
+          "y": 120
+        },
+        "output": {
+          "x": 720,
+          "y": 120
+        }
+      }
+    },
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z"
+  },
+  {
+    "scenario_id": "scn-extra-property",
+    "project_id": "prj-support",
+    "name": "Extra property",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 2
+    },
+    "output_binding": {
+      "kind": "event_emission",
+      "target": {
+        "event_type": "support.case.updated"
+      }
+    },
+    "layout": {
+      "node_positions": {
+        "trigger": {
+          "x": 0,
+          "y": 120
+        },
+        "agent": {
+          "x": 360,
+          "y": 120
+        },
+        "output": {
+          "x": 720,
+          "y": 120
+        }
+      }
+    },
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z",
+    "unexpected": true
+  },
+  {
+    "scenario_id": "scn-display-in-app-with-target",
+    "project_id": "prj-support",
+    "name": "Display in app with unexpected target",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 2
+    },
+    "output_binding": {
+      "kind": "display_in_app",
+      "target": {}
+    },
+    "layout": {
+      "node_positions": {
+        "agent": {
+          "x": 360,
+          "y": 120
+        }
+      }
+    },
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z"
+  },
+  {
+    "scenario_id": "scn-webhook-missing-endpoint-ref",
+    "project_id": "prj-support",
+    "name": "Webhook missing endpoint_ref",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 2
+    },
+    "output_binding": {
+      "kind": "webhook",
+      "target": {}
+    },
+    "layout": {
+      "node_positions": {
+        "agent": {
+          "x": 360,
+          "y": 120
+        }
+      }
+    },
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z"
+  },
+  {
+    "scenario_id": "scn-webhook-raw-secret",
+    "project_id": "prj-support",
+    "name": "Webhook output with raw secret material",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {
+      "agent_id": "agt-customer-triage",
+      "version": 2
+    },
+    "output_binding": {
+      "kind": "webhook",
+      "target": {
+        "endpoint_ref": "webhook://project/prj-support/endpoint/case-updates",
+        "secret": "do-not-store"
+      }
+    },
+    "layout": {
+      "node_positions": {
+        "agent": {
+          "x": 360,
+          "y": 120
+        }
+      }
+    },
+    "created_at": "2026-07-01T18:05:00Z",
+    "updated_at": "2026-07-01T18:05:00Z"
+  },
+  {
+    "scenario_id": "scn-file-kind-mime-mismatch",
+    "project_id": "prj-support",
+    "name": "Mismatched artifact format",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {"agent_id": "agt-customer-triage", "version": 2},
+    "output_binding": {
+      "kind": "file",
+      "selector": {"selector_type": "logical_output", "logical_output_name": "case_brief"},
+      "required_kind": "document",
+      "allowed_mime_types": ["image/png"],
+      "required_custody": "ordinary",
+      "destination_connection_ref": "connection-support-export",
+      "mode": "attachment",
+      "delivery_policy": {"max_size_bytes": 10485760, "authorization_ttl_seconds": 900, "max_attempts": 3, "initial_retry_delay_seconds": 5},
+      "private_export_authorization_required": false,
+      "idempotency_key_template": "{scenario_revision}:{invocation_id}:{artifact_id}:{destination_revision}"
+    },
+    "layout": {"node_positions": {"output": {"x": 720, "y": 120}}},
+    "created_at": "2026-08-09T00:00:00Z",
+    "updated_at": "2026-08-09T00:00:00Z"
+  },
+  {
+    "scenario_id": "scn-file-ordinary-vault-retrieval",
+    "project_id": "prj-support",
+    "name": "Ordinary vault retrieval",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {"agent_id": "agt-customer-triage", "version": 2},
+    "output_binding": {
+      "kind": "file",
+      "selector": {"selector_type": "logical_output", "logical_output_name": "case_brief"},
+      "required_kind": "document",
+      "allowed_mime_types": ["application/pdf"],
+      "required_custody": "ordinary",
+      "destination_connection_ref": "connection-support-export",
+      "mode": "vault_retrieval",
+      "delivery_policy": {"max_size_bytes": 10485760, "authorization_ttl_seconds": 900, "max_attempts": 3, "initial_retry_delay_seconds": 5},
+      "private_export_authorization_required": false,
+      "idempotency_key_template": "{scenario_revision}:{invocation_id}:{artifact_id}:{destination_revision}"
+    },
+    "layout": {"node_positions": {"output": {"x": 720, "y": 120}}},
+    "created_at": "2026-08-09T00:00:00Z",
+    "updated_at": "2026-08-09T00:00:00Z"
+  },
+  {
+    "scenario_id": "scn-file-private-export-without-authorization",
+    "project_id": "prj-support",
+    "name": "Unauthorized private export",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {"agent_id": "agt-customer-triage", "version": 2},
+    "output_binding": {
+      "kind": "file",
+      "selector": {"selector_type": "explicit_selection", "selection_rule_ref": "final"},
+      "required_kind": "document",
+      "allowed_mime_types": ["application/pdf"],
+      "required_custody": "vault_private",
+      "destination_connection_ref": "connection-support-export",
+      "mode": "attachment",
+      "delivery_policy": {"max_size_bytes": 10485760, "authorization_ttl_seconds": 900, "max_attempts": 3, "initial_retry_delay_seconds": 5},
+      "private_export_authorization_required": false,
+      "idempotency_key_template": "{scenario_revision}:{invocation_id}:{artifact_id}:{destination_revision}"
+    },
+    "layout": {"node_positions": {"output": {"x": 720, "y": 120}}},
+    "created_at": "2026-08-09T00:00:00Z",
+    "updated_at": "2026-08-09T00:00:00Z"
+  },
+  {
+    "scenario_id": "scn-file-destination-capability",
+    "project_id": "prj-support",
+    "name": "Destination capability leakage",
+    "trigger_id": "trg-support-webhook",
+    "revision": 1,
+    "agent": {"agent_id": "agt-customer-triage", "version": 2},
+    "output_binding": {
+      "kind": "file",
+      "selector": {"selector_type": "logical_output", "logical_output_name": "case_brief"},
+      "required_kind": "document",
+      "allowed_mime_types": ["application/pdf"],
+      "required_custody": "ordinary",
+      "destination_connection_ref": "connection-support-export",
+      "mode": "attachment",
+      "delivery_policy": {"max_size_bytes": 10485760, "authorization_ttl_seconds": 900, "max_attempts": 3, "initial_retry_delay_seconds": 5},
+      "private_export_authorization_required": false,
+      "idempotency_key_template": "{scenario_revision}:{invocation_id}:{artifact_id}:{destination_revision}",
+      "url": "https://example.com/upload"
+    },
+    "layout": {"node_positions": {"output": {"x": 720, "y": 120}}},
+    "created_at": "2026-08-09T00:00:00Z",
+    "updated_at": "2026-08-09T00:00:00Z"
+  }
+]

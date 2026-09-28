@@ -1,0 +1,160 @@
+{
+  "_meta": {
+    "name": "maivn canonical event taxonomy",
+    "version": "0.1.0",
+    "sources": [
+      "corpus:01-platform-v2-blueprint#3",
+      "corpus:02-event-and-trigger-plane#11.2",
+      "corpus:03-maivn-alpha-product-blueprint#6.2",
+      "legacy:libraries/maivn-shared/src/maivn_shared/core/events.py",
+      "legacy:services/maivn-server/src/maivn_server/domain/entities/webhook.py"
+    ]
+  },
+  "internal": {
+    "description": "v1 internal event-name superset, including direct event names and enrichment phase values.",
+    "events": [
+      "tool_event",
+      "interrupt_request",
+      "interrupt_required",
+      "assignment_received",
+      "assignment_completed",
+      "model_tool_complete",
+      "heartbeat",
+      "update",
+      "progress_update",
+      "model_routing",
+      "status_message",
+      "status_message_chunk",
+      "final",
+      "error",
+      "system_tool_start",
+      "system_tool_chunk",
+      "system_tool_complete",
+      "system_tool_error",
+      "hook_fired",
+      "enrichment"
+    ],
+    "enrichment_phases": {
+      "processing": [
+        "evaluating",
+        "planning",
+        "searching_tools",
+        "loading_tools",
+        "planning_assignments",
+        "executing_assignments",
+        "executing_actions",
+        "synthesizing",
+        "finalizing",
+        "reevaluate_accrued"
+      ],
+      "memory": [
+        "memory_summarizing",
+        "memory_summarized",
+        "memory_retrieving",
+        "memory_retrieved",
+        "memory_indexing",
+        "memory_indexed",
+        "memory_graph_extracting",
+        "memory_skill_extracting",
+        "memory_insight_extracting",
+        "memory_skill_extracted",
+        "memory_insight_extracted"
+      ],
+      "redaction": [
+        "redaction_previewed",
+        "message_redaction_applied"
+      ],
+      "resource": [
+        "resource_registering",
+        "resource_registered",
+        "resource_dedup_reused",
+        "resource_version_superseded",
+        "resource_extracting",
+        "resource_extracted",
+        "document_analysis_selected",
+        "document_evidence_coverage"
+      ]
+    }
+  },
+  "trigger": {
+    "description": "Trigger lifecycle event types added by the event and trigger plane.",
+    "events": [
+      "trigger.fired",
+      "trigger.skipped",
+      "trigger.failed",
+      "trigger.disabled",
+      "trigger.enabled",
+      "trigger.fire_requested"
+    ]
+  },
+  "data_plane": {
+    "description": "Metadata-only durable data-plane mutation events used by internal trigger sources.",
+    "events": [
+      "memory.record_changed",
+      "storage.object_uploaded"
+    ]
+  },
+  "connections": {
+    "description": "Normalized project-scoped external connection, email, and conversation receipt events.",
+    "events": [
+      "connection.event_received",
+      "email.received",
+      "conversation.reply_received"
+    ]
+  },
+  "artifacts": {
+    "description": "Closed immutable artifact lifecycle and vault transition events.",
+    "events": ["artifact.reserved", "artifact.uploaded", "artifact.validation_started", "artifact.validated", "artifact.available", "artifact.rejected", "artifact.failed", "artifact.selected", "artifact.delivery_queued", "artifact.delivery_started", "artifact.delivery_succeeded", "artifact.delivery_failed", "artifact.expired", "artifact.deletion_requested", "artifact.deletion_started", "artifact.deletion_pending_backup_expiry", "artifact.deleted", "artifact.delete_incomplete", "artifact.vault_authorization_pending", "artifact.vault_authorization_denied", "artifact.vault_render_started", "artifact.vault_render_failed"]
+  },
+  "projections": {
+    "description": "Projection event vocabularies that consumers receive from canonical events.",
+    "canvas": [
+      "trigger.fired",
+      "agent.thinking",
+      "agent.tool_selected",
+      "tool.dispatch_started",
+      "tool.dispatch_completed",
+      "agent.responded",
+      "session.completed"
+    ],
+    "webhook": [
+      "session.started",
+      "session.completed",
+      "session.failed",
+      "checkpoint.created",
+      "checkpoint.resumed",
+      "tool.executed",
+      "tool.failed",
+      "quota.warning",
+      "quota.exceeded",
+      "api_key.created",
+      "api_key.rotated",
+      "api_key.revoked"
+    ],
+    "trace": [
+      "trace.run_started",
+      "trace.run_completed",
+      "trace.run_failed",
+      "trace.tool_started",
+      "trace.tool_completed",
+      "trace.tool_failed",
+      "trace.working",
+      "trace.memory",
+      "trace.resource",
+      "trace.shield",
+      "trace.interrupt",
+        "trace.trigger_fired",
+        "trace.trigger_failed",
+        "trace.trigger_skipped",
+        "trace.hook",
+        "trace.routing",
+        "trace.model_stream"
+    ],
+    "audit": [
+      "audit.entry"
+    ],
+    "billing": [
+      "billing.unit"
+    ]
+  }
+}

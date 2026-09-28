@@ -1,0 +1,66 @@
+[
+  {
+    "call_id": "call-lookup-001",
+    "status": "ok",
+    "duration_ms": 42,
+    "result": {
+      "priority": "high"
+    }
+  },
+  {
+    "call_id": "call-compose-artifact-001",
+    "status": "ok",
+    "duration_ms": 900,
+    "result": {
+      "artifact_id": "art-case-brief-001"
+    },
+    "artifact_refs": [
+      {
+        "artifact_id": "art-case-brief-001",
+        "kind": "document",
+        "mime_type": "application/pdf",
+        "logical_output_id": "out-case-brief-001",
+        "revision": 1,
+        "custody": "ordinary",
+        "state": "available",
+        "created_at": "2026-08-09T00:00:00Z",
+        "effective_retention": {
+          "policy_snapshot_id": "policy-case-brief-001",
+          "retention_class": "invocation_artifact_30d",
+          "expires_at": "2026-09-08T00:00:00Z"
+        },
+        "producer": {
+          "producer_class": "hosted_tool",
+          "producer_id": "producer-case-brief-001",
+          "root_invocation_id": "invocation-support-001"
+        },
+        "display_filename": "case-brief.pdf",
+        "size_bytes": 4096,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validation_receipt": {
+          "receipt_id": "receipt-case-brief-001",
+          "status": "validated",
+          "validator_profile": "document-default",
+          "validator_version": "1.0.0"
+        },
+        "safe_preview": {
+          "kind": "document",
+          "page_count": 1
+        },
+        "retrieval_action": {
+          "relation": "artifact.download_authorization"
+        }
+      }
+    ]
+  },
+  {
+    "call_id": "call-gmail-send-001",
+    "status": "error",
+    "duration_ms": 250,
+    "error": {
+      "code": "rate_limited",
+      "message": "Gmail returned a retryable rate-limit response.",
+      "retryable": true
+    }
+  }
+]

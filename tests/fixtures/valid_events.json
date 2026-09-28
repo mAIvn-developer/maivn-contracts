@@ -1,0 +1,147 @@
+[
+  {
+    "event_id": "evt-trigger-fired-0001",
+    "ordinal": "producer-trigger-000001",
+    "type": "trigger.fired",
+    "session_id": "ses-fire-0001",
+    "scenario_id": "scn-customer-email-triage",
+    "trigger_id": "trg-inbound-email",
+    "root_event_id": "evt-trigger-fired-0001",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "trigger:inbound-email",
+    "mode": "hosted",
+    "payload": {
+      "source": "email",
+      "subject": "Escalation request"
+    },
+    "ts": "2026-07-01T14:00:00Z"
+  },
+  {
+    "event_id": "evt-agent-thinking-0002",
+    "ordinal": "producer-agent-000002",
+    "type": "planning",
+    "session_id": "ses-fire-0001",
+    "scenario_id": "scn-customer-email-triage",
+    "trigger_id": "trg-inbound-email",
+    "root_event_id": "evt-trigger-fired-0001",
+    "parent_trigger_id": "trg-inbound-email",
+    "trigger_chain_depth": 1,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "agent:triage",
+    "mode": "hosted",
+    "payload": {
+      "phase": "planning"
+    },
+    "ts": "2026-07-01T14:00:01Z"
+  },
+  {
+    "event_id": "evt-tool-selected-0003",
+    "ordinal": "producer-agent-000003",
+    "type": "agent.tool_selected",
+    "session_id": "ses-fire-0001",
+    "scenario_id": "scn-customer-email-triage",
+    "trigger_id": "trg-inbound-email",
+    "root_event_id": "evt-trigger-fired-0001",
+    "parent_trigger_id": "trg-inbound-email",
+    "trigger_chain_depth": 1,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "agent:triage",
+    "mode": "hosted",
+    "correlation_id": "tool-call-0003",
+    "payload": {
+      "tool_name": "customer_lookup",
+      "input_schema": {
+        "customer_id": "string"
+      }
+    },
+    "ts": "2026-07-01T14:00:02Z"
+  },
+  {
+    "event_id": "evt-tool-started-0004",
+    "ordinal": "producer-agent-000004",
+    "type": "tool.dispatch_started",
+    "session_id": "ses-fire-0001",
+    "scenario_id": "scn-customer-email-triage",
+    "trigger_id": "trg-inbound-email",
+    "root_event_id": "evt-trigger-fired-0001",
+    "parent_trigger_id": "trg-inbound-email",
+    "trigger_chain_depth": 1,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "tool:customer_lookup",
+    "mode": "webhook",
+    "correlation_id": "tool-call-0003",
+    "payload": {
+      "endpoint": "customer-profile"
+    },
+    "ts": "2026-07-01T14:00:03Z"
+  },
+  {
+    "event_id": "evt-tool-completed-0005",
+    "ordinal": "producer-tool-000005",
+    "type": "tool.dispatch_completed",
+    "session_id": "ses-fire-0001",
+    "scenario_id": "scn-customer-email-triage",
+    "trigger_id": "trg-inbound-email",
+    "root_event_id": "evt-trigger-fired-0001",
+    "parent_trigger_id": "trg-inbound-email",
+    "trigger_chain_depth": 1,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "tool:customer_lookup",
+    "mode": "webhook",
+    "correlation_id": "tool-call-0003",
+    "payload": {
+      "status": "ok",
+      "records": 1
+    },
+    "latency_ms": 184,
+    "ts": "2026-07-01T14:00:04Z"
+  },
+  {
+    "event_id": "evt-depth-two-swarm-0006",
+    "ordinal": "producer-assignment-000006",
+    "type": "assignment_received",
+    "session_id": "ses-fire-0001",
+    "scenario_id": "scn-customer-email-triage",
+    "trigger_id": "trg-inbound-email",
+    "root_event_id": "evt-trigger-fired-0001",
+    "parent_session_id": "ses-fire-parent",
+    "parent_trigger_id": "trg-inbound-email",
+    "trigger_chain_depth": 2,
+    "parent_assignment_uuid": "assign-parent-0005",
+    "job_depth": 2,
+    "job_index": 1,
+    "actor": "agent:policy-reviewer",
+    "mode": "worker",
+    "payload": {
+      "assignment": "check-refund-policy"
+    },
+    "ts": "2026-07-01T14:00:05Z"
+  },
+  {
+    "event_id": "evt-artifact-available-0007",
+    "ordinal": "producer-artifact-000007",
+    "type": "artifact.available",
+    "session_id": "ses-fire-0001",
+    "root_event_id": "evt-trigger-fired-0001",
+    "trigger_chain_depth": 0,
+    "job_depth": 0,
+    "job_index": 0,
+    "actor": "artifact-service",
+    "mode": "hosted",
+    "payload": {
+      "event_type": "artifact.available",
+      "artifact_id": "artifact-001",
+      "logical_output_id": "output-001",
+      "revision": 1,
+      "custody": "ordinary",
+      "artifact_state": "available"
+    },
+    "ts": "2026-08-09T00:00:00Z"
+  }
+]

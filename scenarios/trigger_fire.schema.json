@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/scenarios/trigger_fire.schema.json",
+  "title": "Trigger Fire",
+  "description": "Durable outbox row representing a trigger fire owed an invocation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fire_id",
+    "trigger_id",
+    "dedupe_key",
+    "priority",
+    "status",
+    "available_at",
+    "attempt",
+    "payload",
+    "root_event_id",
+    "trigger_chain_depth"
+  ],
+  "properties": {
+    "fire_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable trigger fire outbox row identifier."
+    },
+    "trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Trigger definition that produced this fire."
+    },
+    "dedupe_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Provider event id or computed idempotency key, unique per trigger over the sliding dedupe window."
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["interactive", "triggered", "retry"],
+      "description": "Priority lane: interactive, triggered, or retry."
+    },
+    "shadow": {
+      "type": "boolean",
+      "description": "Whether this fire was admitted in shadow mode; shadow fires record intent and never execute effects."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "claimed", "completed", "failed", "dead"],
+      "description": "Outbox processing status."
+    },
+    "available_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp when this fire becomes claimable."
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Zero-based launcher attempt count."
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Normalized inbound event payload admitted by the trigger."
+    },
+    "root_event_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Root event identifier for cross-fire lineage and trigger-chain correlation."
+    },
+    "parent_session_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent session identifier for chained or nested invocations."
+    },
+    "parent_trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent trigger identifier for chained trigger invocations."
+    },
+    "trigger_chain_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Depth of the trigger chain used for amplification guards and trace correlation."
+    },
+    "conversation": {
+      "$ref": "#/$defs/conversation"
+    }
+  },
+  "$defs": {
+    "conversation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conversation_id", "sequence"],
+      "properties": {
+        "conversation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_event_id", "trigger_chain_depth"],
+      "properties": {
+        "root_event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_trigger_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger_chain_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

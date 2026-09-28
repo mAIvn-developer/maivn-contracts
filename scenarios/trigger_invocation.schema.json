@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/scenarios/trigger_invocation.schema.json",
+  "title": "Trigger Invocation",
+  "description": "Terminal trigger fire history record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "invocation_id",
+    "fire_id",
+    "trigger_id",
+    "session_id",
+    "status",
+    "started_at",
+    "finished_at",
+    "root_event_id",
+    "trigger_chain_depth"
+  ],
+  "properties": {
+    "invocation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable trigger invocation history identifier."
+    },
+    "fire_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Trigger fire row that produced this invocation."
+    },
+    "trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Trigger definition that produced this invocation."
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Session or invocation identifier launched by this fire."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "failed", "dead"],
+      "description": "Terminal invocation status."
+    },
+    "shadow": {
+      "type": "boolean",
+      "description": "Whether this invocation records a shadow fire; nothing launched, billed, or delivered."
+    },
+    "outcome": {
+      "enum": ["success", "failure", "escalation", null],
+      "description": "Reserved for future outcome-based pricing; omitted until populated, with explicit null accepted for tolerant readers."
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp when the invocation started."
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp when the invocation reached a terminal state."
+    },
+    "root_event_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Root event identifier for cross-fire lineage and trigger-chain correlation."
+    },
+    "parent_session_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent session identifier for chained or nested invocations."
+    },
+    "parent_trigger_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional parent trigger identifier for chained trigger invocations."
+    },
+    "trigger_chain_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Depth of the trigger chain used for amplification guards and trace correlation."
+    }
+  },
+  "$defs": {
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_event_id", "trigger_chain_depth"],
+      "properties": {
+        "root_event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_trigger_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger_chain_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

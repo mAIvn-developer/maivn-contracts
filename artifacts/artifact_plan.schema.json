@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/artifact_plan.schema.json",
+  "title": "ArtifactPlan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "logical_output_name", "custody_request", "input_refs", "renderer_profile", "renderer_min_version", "output_mime_type", "validation_profile", "disposition", "retention_request", "resource_bounds"],
+  "properties": {
+    "schema_version": {"enum": ["v1", "v2"]}, "kind": {}, "logical_output_name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"}, "custody_request": {"enum": ["ordinary", "vault_private"]},
+    "content": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"},
+    "body": {"oneOf": [{"$ref": "#/$defs/documentBodyV2"}, {"$ref": "#/$defs/workbookBodyV2"}, {"$ref": "#/$defs/imageBodyV2"}]},
+    "input_refs": {"type": "array", "maxItems": 32},
+    "renderer_profile": {"$ref": "#/$defs/token"}, "renderer_min_version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"}, "output_mime_type": {}, "validation_profile": {"$ref": "#/$defs/token"}, "disposition": {"enum": ["intermediate", "candidate", "final"]},
+    "retention_request": {"type": "object", "additionalProperties": false, "required": ["retention_class"], "properties": {"retention_class": {"$ref": "#/$defs/token"}}},
+    "resource_bounds": {"type": "object", "additionalProperties": false, "required": ["max_output_bytes"], "properties": {"max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_pages": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_sheets": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_cells": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_total_decoded_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_duration_seconds": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}}
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {"properties": {"schema_version": {"const": "v1"}, "input_refs": {"items": {"$ref": "#/$defs/inputRef"}}}, "required": ["content"], "not": {"required": ["body"]}},
+        {"$ref": "#/$defs/artifactPlanV2"}
+      ]
+    }
+  ],
+  "oneOf": [
+    {"properties": {"kind": {"const": "document"}, "output_mime_type": {"enum": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]}}},
+    {"properties": {"kind": {"const": "spreadsheet"}, "output_mime_type": {"const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}}},
+    {"properties": {"kind": {"const": "image"}, "output_mime_type": {"enum": ["image/png", "image/jpeg"]}}},
+    {"properties": {"kind": {"const": "audio"}, "output_mime_type": {"enum": ["audio/mpeg", "audio/wav"]}}}
+  ],
+  "discriminator": {"propertyName": "kind"},
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "inputRef": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"$ref": "#/$defs/resourceRef"}, {"$ref": "#/$defs/templateRef"}], "discriminator": {"propertyName": "ref_type"}},
+    "artifactRef": {"type": "object", "additionalProperties": false, "required": ["ref_type", "artifact_id", "revision"], "properties": {"ref_type": {"const": "artifact"}, "artifact_id": {"$ref": "#/$defs/token"}, "revision": {"type": "integer", "minimum": 1}}},
+    "resourceRef": {"type": "object", "additionalProperties": false, "required": ["ref_type", "resource_id", "revision"], "properties": {"ref_type": {"const": "resource"}, "resource_id": {"$ref": "#/$defs/token"}, "revision": {"type": "integer", "minimum": 1}}},
+    "templateRef": {"type": "object", "additionalProperties": false, "required": ["ref_type", "template_id", "revision"], "properties": {"ref_type": {"const": "template"}, "template_id": {"$ref": "#/$defs/token"}, "revision": {"type": "integer", "minimum": 1}}},
+    "inputRefV2": {"oneOf": [{"$ref": "#/$defs/artifactRefV2"}, {"$ref": "#/$defs/resourceRefV2"}, {"$ref": "#/$defs/templateRefV2"}], "discriminator": {"propertyName": "ref_type"}},
+    "artifactRefV2": {"type": "object", "additionalProperties": false, "required": ["local_id", "ref_type", "artifact_id", "revision"], "properties": {"local_id": {"$ref": "#/$defs/structuralId"}, "ref_type": {"const": "artifact"}, "artifact_id": {"$ref": "#/$defs/token"}, "revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}},
+    "resourceRefV2": {"type": "object", "additionalProperties": false, "required": ["local_id", "ref_type", "resource_id", "revision"], "properties": {"local_id": {"$ref": "#/$defs/structuralId"}, "ref_type": {"const": "resource"}, "resource_id": {"$ref": "#/$defs/token"}, "revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}},
+    "templateRefV2": {"type": "object", "additionalProperties": false, "required": ["local_id", "ref_type", "template_id", "revision"], "properties": {"local_id": {"$ref": "#/$defs/structuralId"}, "ref_type": {"const": "template"}, "template_id": {"$ref": "#/$defs/token"}, "revision": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}},
+    "structuralId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "documentBodyV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["page_settings", "styles", "headers", "footers", "footnotes", "blocks"],
+      "properties": {
+        "template_local_id": {"$ref": "#/$defs/structuralId"},
+        "page_settings": {"$ref": "#/$defs/documentPageSettingsV2"},
+        "styles": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/documentStyleV2"}},
+        "headers": {"type": "array", "maxItems": 16, "items": {"$ref": "#/$defs/documentRegionV2"}},
+        "footers": {"type": "array", "maxItems": 16, "items": {"$ref": "#/$defs/documentRegionV2"}},
+        "footnotes": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/documentFootnoteV2"}},
+        "blocks": {"type": "array", "minItems": 1, "maxItems": 10000, "items": {"$ref": "#/$defs/documentFlowBlockV2"}}
+      }
+    },
+    "documentPageSettingsV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["width_twips", "height_twips", "margin_top_twips", "margin_right_twips", "margin_bottom_twips", "margin_left_twips"],
+      "properties": {
+        "width_twips": {"type": "integer", "minimum": 1, "maximum": 31680},
+        "height_twips": {"type": "integer", "minimum": 1, "maximum": 31680},
+        "margin_top_twips": {"type": "integer", "minimum": 0, "maximum": 14400},
+        "margin_right_twips": {"type": "integer", "minimum": 0, "maximum": 14400},
+        "margin_bottom_twips": {"type": "integer", "minimum": 0, "maximum": 14400},
+        "margin_left_twips": {"type": "integer", "minimum": 0, "maximum": 14400}
+      }
+    },
+    "documentStyleV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["style_id", "font_family", "font_size_half_points", "bold", "italic"],
+      "properties": {"style_id": {"$ref": "#/$defs/structuralId"}, "font_family": {"type": "string", "minLength": 1, "maxLength": 128}, "font_size_half_points": {"type": "integer", "minimum": 2, "maximum": 192}, "bold": {"type": "boolean"}, "italic": {"type": "boolean"}}
+    },
+    "documentTextRunV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "payload", "bold", "italic", "underline"],
+      "properties": {"run_id": {"$ref": "#/$defs/structuralId"}, "payload": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"}, "bold": {"type": "boolean"}, "italic": {"type": "boolean"}, "underline": {"type": "boolean"}, "footnote_ids": {"type": "array", "maxItems": 32, "uniqueItems": true, "items": {"$ref": "#/$defs/structuralId"}}}
+    },
+    "documentParagraphV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id", "runs"],
+      "properties": {"block_type": {"const": "paragraph"}, "block_id": {"$ref": "#/$defs/structuralId"}, "style_id": {"$ref": "#/$defs/structuralId"}, "runs": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/documentTextRunV2"}}}
+    },
+    "documentHeadingV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id", "level", "runs"],
+      "properties": {"block_type": {"const": "heading"}, "block_id": {"$ref": "#/$defs/structuralId"}, "level": {"type": "integer", "minimum": 1, "maximum": 9}, "style_id": {"$ref": "#/$defs/structuralId"}, "runs": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/documentTextRunV2"}}}
+    },
+    "documentNestedBlockV2": {
+      "oneOf": [{"$ref": "#/$defs/documentParagraphV2"}, {"$ref": "#/$defs/documentOrderedListV2"}, {"$ref": "#/$defs/documentUnorderedListV2"}],
+      "discriminator": {"propertyName": "block_type"}
+    },
+    "documentListItemV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["item_id", "blocks"],
+      "properties": {"item_id": {"$ref": "#/$defs/structuralId"}, "blocks": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/documentNestedBlockV2"}}}
+    },
+    "documentOrderedListV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id", "start_at", "items"],
+      "properties": {"block_type": {"const": "ordered_list"}, "block_id": {"$ref": "#/$defs/structuralId"}, "start_at": {"type": "integer", "minimum": 1, "maximum": 1000000}, "items": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/documentListItemV2"}}}
+    },
+    "documentUnorderedListV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id", "marker", "items"],
+      "properties": {"block_type": {"const": "unordered_list"}, "block_id": {"$ref": "#/$defs/structuralId"}, "marker": {"enum": ["disc", "circle", "square"]}, "items": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/documentListItemV2"}}}
+    },
+    "documentTableCellV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["cell_id", "blocks"],
+      "properties": {"cell_id": {"$ref": "#/$defs/structuralId"}, "blocks": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/documentNestedBlockV2"}}}
+    },
+    "documentTableRowV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_id", "is_header", "cells"],
+      "properties": {"row_id": {"$ref": "#/$defs/structuralId"}, "is_header": {"type": "boolean"}, "cells": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/documentTableCellV2"}}}
+    },
+    "documentTableV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id", "column_count", "rows"],
+      "properties": {"block_type": {"const": "table"}, "block_id": {"$ref": "#/$defs/structuralId"}, "column_count": {"type": "integer", "minimum": 1, "maximum": 100}, "rows": {"type": "array", "minItems": 1, "maxItems": 10000, "items": {"$ref": "#/$defs/documentTableRowV2"}}}
+    },
+    "documentImageV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id", "input_local_id", "width_twips", "height_twips", "alignment", "crop_left_per_mille", "crop_top_per_mille", "crop_right_per_mille", "crop_bottom_per_mille", "alt_text"],
+      "properties": {"block_type": {"const": "image"}, "block_id": {"$ref": "#/$defs/structuralId"}, "input_local_id": {"$ref": "#/$defs/structuralId"}, "width_twips": {"type": "integer", "minimum": 1, "maximum": 31680}, "height_twips": {"type": "integer", "minimum": 1, "maximum": 31680}, "alignment": {"enum": ["left", "center", "right"]}, "crop_left_per_mille": {"type": "integer", "minimum": 0, "maximum": 999}, "crop_top_per_mille": {"type": "integer", "minimum": 0, "maximum": 999}, "crop_right_per_mille": {"type": "integer", "minimum": 0, "maximum": 999}, "crop_bottom_per_mille": {"type": "integer", "minimum": 0, "maximum": 999}, "alt_text": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"}}
+    },
+    "documentPageBreakV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["block_type", "block_id"],
+      "properties": {"block_type": {"const": "page_break"}, "block_id": {"$ref": "#/$defs/structuralId"}}
+    },
+    "documentFlowBlockV2": {
+      "oneOf": [{"$ref": "#/$defs/documentParagraphV2"}, {"$ref": "#/$defs/documentHeadingV2"}, {"$ref": "#/$defs/documentOrderedListV2"}, {"$ref": "#/$defs/documentUnorderedListV2"}, {"$ref": "#/$defs/documentTableV2"}, {"$ref": "#/$defs/documentImageV2"}, {"$ref": "#/$defs/documentPageBreakV2"}],
+      "discriminator": {"propertyName": "block_type"}
+    },
+    "documentRegionV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["region_id", "slot", "blocks"],
+      "properties": {"region_id": {"$ref": "#/$defs/structuralId"}, "slot": {"enum": ["default", "first", "even"]}, "blocks": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/documentNestedBlockV2"}}}
+    },
+    "documentFootnoteV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["footnote_id", "blocks"],
+      "properties": {"footnote_id": {"$ref": "#/$defs/structuralId"}, "blocks": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/documentNestedBlockV2"}}}
+    },
+    "imageBodyV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["canvas", "layers", "operations"],
+      "properties": {
+        "canvas": {"$ref": "#/$defs/imageCanvasV2"},
+        "layers": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/imageLayerV2"}},
+        "operations": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "#/$defs/imageOperationV2"}}
+      }
+    },
+    "imageCanvasV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["width_pixels", "height_pixels", "color_space"],
+      "properties": {"width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "height_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "color_space": {"enum": ["srgb", "grayscale"]}}
+    },
+    "imageLayerV2": {
+      "oneOf": [{"$ref": "#/$defs/imageInputRasterLayerV2"}, {"$ref": "#/$defs/imageTextLayerV2"}, {"$ref": "#/$defs/imageShapeLayerV2"}],
+      "discriminator": {"propertyName": "layer_type"}
+    },
+    "imageInputRasterLayerV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["layer_type", "layer_id", "input_local_id", "x_pixels", "y_pixels", "width_pixels", "height_pixels", "opacity_per_mille"],
+      "properties": {"layer_type": {"const": "input_raster"}, "layer_id": {"$ref": "#/$defs/structuralId"}, "input_local_id": {"$ref": "#/$defs/structuralId"}, "x_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "y_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "height_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "opacity_per_mille": {"type": "integer", "minimum": 0, "maximum": 1000}}
+    },
+    "imageTextLayerV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["layer_type", "layer_id", "x_pixels", "y_pixels", "max_width_pixels", "font_family", "font_size_pixels", "color_rgb_hex", "payload"],
+      "properties": {"layer_type": {"const": "text"}, "layer_id": {"$ref": "#/$defs/structuralId"}, "x_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "y_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "max_width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "font_family": {"type": "string", "minLength": 1, "maxLength": 128}, "font_size_pixels": {"type": "integer", "minimum": 1, "maximum": 1024}, "color_rgb_hex": {"$ref": "#/$defs/rgbHex"}, "payload": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"}}
+    },
+    "imageShapeLayerV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["layer_type", "layer_id", "shape", "x_pixels", "y_pixels", "width_pixels", "height_pixels", "fill_rgb_hex", "opacity_per_mille", "stroke_rgb_hex", "stroke_width_pixels"],
+      "properties": {"layer_type": {"const": "shape"}, "layer_id": {"$ref": "#/$defs/structuralId"}, "shape": {"enum": ["rectangle", "ellipse", "line"]}, "x_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "y_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "height_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "fill_rgb_hex": {"$ref": "#/$defs/rgbHex"}, "opacity_per_mille": {"type": "integer", "minimum": 0, "maximum": 1000}, "stroke_rgb_hex": {"$ref": "#/$defs/rgbHex"}, "stroke_width_pixels": {"type": "integer", "minimum": 0, "maximum": 1024}}
+    },
+    "imageOperationV2": {
+      "oneOf": [{"$ref": "#/$defs/imageCropOperationV2"}, {"$ref": "#/$defs/imageResizeOperationV2"}, {"$ref": "#/$defs/imageRotateOperationV2"}, {"$ref": "#/$defs/imageCompositeOperationV2"}, {"$ref": "#/$defs/imageAnnotateOperationV2"}, {"$ref": "#/$defs/imageColorConvertOperationV2"}, {"$ref": "#/$defs/imageEncodeOperationV2"}],
+      "discriminator": {"propertyName": "operation_type"}
+    },
+    "imageCropOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "x_pixels", "y_pixels", "width_pixels", "height_pixels"], "properties": {"operation_type": {"const": "crop"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "x_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "y_pixels": {"type": "integer", "minimum": 0, "maximum": 40000000}, "width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "height_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}}},
+    "imageResizeOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "width_pixels", "height_pixels", "filter"], "properties": {"operation_type": {"const": "resize"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "width_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "height_pixels": {"type": "integer", "minimum": 1, "maximum": 40000000}, "filter": {"enum": ["nearest", "bilinear", "bicubic", "lanczos"]}}},
+    "imageRotateOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "degrees"], "properties": {"operation_type": {"const": "rotate"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "degrees": {"enum": [90, 180, 270]}}},
+    "imageCompositeOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "layer_ids"], "properties": {"operation_type": {"const": "composite"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "layer_ids": {"type": "array", "minItems": 1, "maxItems": 1000, "uniqueItems": true, "items": {"$ref": "#/$defs/structuralId"}}}},
+    "imageAnnotateOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "layer_id"], "properties": {"operation_type": {"const": "annotate"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "layer_id": {"$ref": "#/$defs/structuralId"}}},
+    "imageColorConvertOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "color_space"], "properties": {"operation_type": {"const": "color_convert"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "color_space": {"enum": ["srgb", "grayscale"]}}},
+    "imageEncodeOperationV2": {"type": "object", "additionalProperties": false, "required": ["operation_type", "operation_id", "mime_type", "quality"], "properties": {"operation_type": {"const": "encode"}, "operation_id": {"$ref": "#/$defs/structuralId"}, "mime_type": {"enum": ["image/png", "image/jpeg"]}, "quality": {"type": "integer", "minimum": 1, "maximum": 100}}},
+    "workbookBodyV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["styles", "sheets", "ranges", "named_ranges", "tables", "charts"],
+      "properties": {
+        "template_local_id": {"$ref": "#/$defs/structuralId"},
+        "styles": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/workbookStyleV2"}},
+        "sheets": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/workbookSheetV2"}},
+        "ranges": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/workbookRangeV2"}},
+        "named_ranges": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/workbookNamedRangeV2"}},
+        "tables": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/workbookTableV2"}},
+        "charts": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/workbookChartV2"}}
+      }
+    },
+    "workbookStyleV2": {"type": "object", "additionalProperties": false, "required": ["style_id", "font_family", "font_size_half_points", "bold", "italic", "underline", "horizontal_alignment", "wrap_text", "number_format_id"], "properties": {"style_id": {"$ref": "#/$defs/structuralId"}, "font_family": {"enum": ["Noto Sans", "Noto Serif", "Noto Sans Mono"]}, "font_size_half_points": {"type": "integer", "minimum": 2, "maximum": 192}, "bold": {"type": "boolean"}, "italic": {"type": "boolean"}, "underline": {"type": "boolean"}, "horizontal_alignment": {"enum": ["left", "center", "right"]}, "wrap_text": {"type": "boolean"}, "number_format_id": {"enum": ["general", "integer", "decimal_2", "percent_0", "percent_2", "currency_usd", "date_iso", "datetime_utc", "text"]}}},
+    "workbookSheetV2": {"type": "object", "additionalProperties": false, "required": ["sheet_id", "name", "cells"], "properties": {"sheet_id": {"$ref": "#/$defs/structuralId"}, "name": {"type": "string", "minLength": 1, "maxLength": 31}, "cells": {"type": "array", "maxItems": 1000000, "items": {"$ref": "#/$defs/workbookCellV2"}}}},
+    "workbookCellV2": {"type": "object", "additionalProperties": false, "required": ["cell_id", "row", "column", "value"], "properties": {"cell_id": {"$ref": "#/$defs/structuralId"}, "row": {"$ref": "#/$defs/workbookRow"}, "column": {"$ref": "#/$defs/workbookColumn"}, "style_id": {"$ref": "#/$defs/structuralId"}, "value": {"$ref": "#/$defs/workbookCellValueV2"}}},
+    "workbookCellValueV2": {"oneOf": [{"$ref": "#/$defs/workbookTextValueV2"}, {"$ref": "#/$defs/workbookNumberValueV2"}, {"$ref": "#/$defs/workbookBooleanValueV2"}, {"$ref": "#/$defs/workbookDateValueV2"}, {"$ref": "#/$defs/workbookDateTimeValueV2"}, {"$ref": "#/$defs/workbookFormulaValueV2"}], "discriminator": {"propertyName": "value_type"}},
+    "workbookTextValueV2": {"type": "object", "additionalProperties": false, "required": ["value_type", "payload"], "properties": {"value_type": {"const": "text"}, "payload": {"$ref": "https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json"}}},
+    "workbookNumberValueV2": {"type": "object", "additionalProperties": false, "required": ["value_type", "value"], "properties": {"value_type": {"const": "number"}, "value": {"type": "number", "minimum": -9007199254740991, "maximum": 9007199254740991}}},
+    "workbookBooleanValueV2": {"type": "object", "additionalProperties": false, "required": ["value_type", "value"], "properties": {"value_type": {"const": "boolean"}, "value": {"type": "boolean"}}},
+    "workbookDateValueV2": {"type": "object", "additionalProperties": false, "required": ["value_type", "value"], "properties": {"value_type": {"const": "date"}, "value": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"}}},
+    "workbookDateTimeValueV2": {"type": "object", "additionalProperties": false, "required": ["value_type", "value"], "properties": {"value_type": {"const": "datetime"}, "value": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"}}},
+    "workbookFormulaValueV2": {"type": "object", "additionalProperties": false, "required": ["value_type", "expression"], "properties": {"value_type": {"const": "formula"}, "expression": {"$ref": "#/$defs/workbookFormulaNodeV2"}}},
+    "workbookFormulaNodeV2": {"oneOf": [{"$ref": "#/$defs/workbookFormulaNumberV2"}, {"$ref": "#/$defs/workbookFormulaBooleanV2"}, {"$ref": "#/$defs/workbookFormulaCellRefV2"}, {"$ref": "#/$defs/workbookFormulaRangeRefV2"}, {"$ref": "#/$defs/workbookFormulaNamedRangeRefV2"}, {"$ref": "#/$defs/workbookFormulaUnaryV2"}, {"$ref": "#/$defs/workbookFormulaBinaryV2"}, {"$ref": "#/$defs/workbookFormulaFunctionV2"}], "discriminator": {"propertyName": "node_type"}},
+    "workbookFormulaNumberV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "value"], "properties": {"node_type": {"const": "number"}, "value": {"type": "number", "minimum": -9007199254740991, "maximum": 9007199254740991}}},
+    "workbookFormulaBooleanV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "value"], "properties": {"node_type": {"const": "boolean"}, "value": {"type": "boolean"}}},
+    "workbookFormulaCellRefV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "cell_id"], "properties": {"node_type": {"const": "cell_ref"}, "cell_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookFormulaRangeRefV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "range_id"], "properties": {"node_type": {"const": "range_ref"}, "range_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookFormulaNamedRangeRefV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "named_range_id"], "properties": {"node_type": {"const": "named_range_ref"}, "named_range_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookFormulaUnaryV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "operator", "operand"], "properties": {"node_type": {"const": "unary"}, "operator": {"enum": ["+", "-"]}, "operand": {"$ref": "#/$defs/workbookFormulaNodeV2"}}},
+    "workbookFormulaBinaryV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "operator", "left", "right"], "properties": {"node_type": {"const": "binary"}, "operator": {"enum": ["+", "-", "*", "/", "^", "&", "=", "<>", "<", "<=", ">", ">="]}, "left": {"$ref": "#/$defs/workbookFormulaNodeV2"}, "right": {"$ref": "#/$defs/workbookFormulaNodeV2"}}},
+    "workbookFormulaFunctionV2": {"type": "object", "additionalProperties": false, "required": ["node_type", "function", "arguments"], "properties": {"node_type": {"const": "function"}, "function": {"enum": ["SUM", "AVERAGE", "MIN", "MAX", "COUNT", "IF", "AND", "OR", "NOT", "ROUND"]}, "arguments": {"type": "array", "minItems": 1, "maxItems": 255, "items": {"$ref": "#/$defs/workbookFormulaNodeV2"}}}},
+    "workbookRangeV2": {"type": "object", "additionalProperties": false, "required": ["range_id", "sheet_id", "start_row", "end_row", "start_column", "end_column"], "properties": {"range_id": {"$ref": "#/$defs/structuralId"}, "sheet_id": {"$ref": "#/$defs/structuralId"}, "start_row": {"$ref": "#/$defs/workbookRow"}, "end_row": {"$ref": "#/$defs/workbookRow"}, "start_column": {"$ref": "#/$defs/workbookColumn"}, "end_column": {"$ref": "#/$defs/workbookColumn"}}},
+    "workbookNamedRangeV2": {"type": "object", "additionalProperties": false, "required": ["named_range_id", "range_id"], "properties": {"named_range_id": {"$ref": "#/$defs/structuralId"}, "range_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookTableV2": {"type": "object", "additionalProperties": false, "required": ["table_id", "range_id", "table_style"], "properties": {"table_id": {"$ref": "#/$defs/structuralId"}, "range_id": {"$ref": "#/$defs/structuralId"}, "table_style": {"enum": ["none", "light_1", "medium_2", "dark_1"]}}},
+    "workbookChartV2": {"type": "object", "additionalProperties": false, "required": ["chart_id", "sheet_id", "chart_type", "anchor_row", "anchor_column", "width_cells", "height_cells", "series"], "properties": {"chart_id": {"$ref": "#/$defs/structuralId"}, "sheet_id": {"$ref": "#/$defs/structuralId"}, "chart_type": {"enum": ["bar", "line", "pie"]}, "anchor_row": {"$ref": "#/$defs/workbookRow"}, "anchor_column": {"$ref": "#/$defs/workbookColumn"}, "width_cells": {"type": "integer", "minimum": 1, "maximum": 100}, "height_cells": {"type": "integer", "minimum": 1, "maximum": 100}, "series": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"$ref": "#/$defs/workbookChartSeriesV2"}}}},
+    "workbookChartSeriesV2": {"type": "object", "additionalProperties": false, "required": ["series_id", "category_range_id", "value_range_id"], "properties": {"series_id": {"$ref": "#/$defs/structuralId"}, "category_range_id": {"$ref": "#/$defs/structuralId"}, "value_range_id": {"$ref": "#/$defs/structuralId"}}},
+    "workbookRow": {"type": "integer", "minimum": 1, "maximum": 1048576},
+    "workbookColumn": {"type": "integer", "minimum": 1, "maximum": 16384},
+    "rgbHex": {"type": "string", "pattern": "^[0-9A-F]{6}$"},
+    "artifactPlanV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "kind", "logical_output_name", "custody_request", "body", "input_refs", "renderer_profile", "renderer_min_version", "output_mime_type", "validation_profile", "disposition", "retention_request", "resource_bounds"],
+      "properties": {
+        "schema_version": {"const": "v2"},
+        "kind": {"enum": ["document", "spreadsheet", "image"]},
+        "logical_output_name": {"$ref": "#/$defs/structuralId"},
+        "custody_request": {"enum": ["ordinary", "vault_private"]},
+        "body": {"oneOf": [{"$ref": "#/$defs/documentBodyV2"}, {"$ref": "#/$defs/workbookBodyV2"}, {"$ref": "#/$defs/imageBodyV2"}]},
+        "input_refs": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/inputRefV2"}},
+        "renderer_profile": {"$ref": "#/$defs/token"},
+        "renderer_min_version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+        "output_mime_type": {"enum": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "image/png", "image/jpeg"]},
+        "validation_profile": {"$ref": "#/$defs/token"},
+        "disposition": {"enum": ["intermediate", "candidate", "final"]},
+        "retention_request": {"type": "object", "additionalProperties": false, "required": ["retention_class"], "properties": {"retention_class": {"$ref": "#/$defs/token"}}},
+        "resource_bounds": {"type": "object", "additionalProperties": false, "required": ["max_output_bytes"], "properties": {"max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_pages": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_sheets": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_cells": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_total_decoded_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_duration_seconds": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}}
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "document"}}}, "then": {"properties": {"body": {"$ref": "#/$defs/documentBodyV2"}, "output_mime_type": {"enum": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]}}}},
+        {"if": {"properties": {"kind": {"const": "spreadsheet"}}}, "then": {"properties": {"body": {"$ref": "#/$defs/workbookBodyV2"}, "output_mime_type": {"const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}}}},
+        {"if": {"properties": {"kind": {"const": "image"}}}, "then": {"properties": {"body": {"$ref": "#/$defs/imageBodyV2"}, "output_mime_type": {"enum": ["image/png", "image/jpeg"]}}}}
+      ]
+    },
+    "vaultArtifactPlanV2": {
+      "oneOf": [
+        {"$ref": "#/$defs/vaultDocxArtifactPlanV2"},
+        {"$ref": "#/$defs/vaultPdfArtifactPlanV2"},
+        {"$ref": "#/$defs/vaultXlsxArtifactPlanV2"},
+        {"$ref": "#/$defs/vaultPngArtifactPlanV2"},
+        {"$ref": "#/$defs/vaultJpegArtifactPlanV2"}
+      ],
+      "discriminator": {"propertyName": "output_mime_type"}
+    },
+    "vaultDocumentArtifactPlanV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "kind", "logical_output_name", "custody_request", "body", "input_refs", "renderer_profile", "renderer_min_version", "output_mime_type", "validation_profile", "disposition", "retention_request", "resource_bounds"],
+      "properties": {
+        "schema_version": {"const": "v2"}, "kind": {"const": "document"}, "logical_output_name": {"$ref": "#/$defs/structuralId"}, "custody_request": {"const": "vault_private"}, "body": {"$ref": "#/$defs/documentBodyV2"}, "input_refs": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/inputRefV2"}}, "renderer_profile": {"$ref": "#/$defs/token"}, "renderer_min_version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"}, "output_mime_type": {"enum": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]}, "validation_profile": {"$ref": "#/$defs/token"}, "disposition": {"enum": ["intermediate", "candidate", "final"]}, "retention_request": {"type": "object", "additionalProperties": false, "required": ["retention_class"], "properties": {"retention_class": {"$ref": "#/$defs/token"}}}, "resource_bounds": {"type": "object", "additionalProperties": false, "required": ["max_output_bytes"], "properties": {"max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_pages": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}}
+      }
+    },
+    "vaultWorkbookArtifactPlanV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "kind", "logical_output_name", "custody_request", "body", "input_refs", "renderer_profile", "renderer_min_version", "output_mime_type", "validation_profile", "disposition", "retention_request", "resource_bounds"],
+      "properties": {
+        "schema_version": {"const": "v2"}, "kind": {"const": "spreadsheet"}, "logical_output_name": {"$ref": "#/$defs/structuralId"}, "custody_request": {"const": "vault_private"}, "body": {"$ref": "#/$defs/workbookBodyV2"}, "input_refs": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/inputRefV2"}}, "renderer_profile": {"$ref": "#/$defs/token"}, "renderer_min_version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"}, "output_mime_type": {"const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}, "validation_profile": {"$ref": "#/$defs/token"}, "disposition": {"enum": ["intermediate", "candidate", "final"]}, "retention_request": {"type": "object", "additionalProperties": false, "required": ["retention_class"], "properties": {"retention_class": {"$ref": "#/$defs/token"}}}, "resource_bounds": {"type": "object", "additionalProperties": false, "required": ["max_output_bytes", "max_sheets", "max_cells"], "properties": {"max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_sheets": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_cells": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}}
+      }
+    },
+    "vaultImageArtifactPlanV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "kind", "logical_output_name", "custody_request", "body", "input_refs", "renderer_profile", "renderer_min_version", "output_mime_type", "validation_profile", "disposition", "retention_request", "resource_bounds"],
+      "properties": {
+        "schema_version": {"const": "v2"}, "kind": {"const": "image"}, "logical_output_name": {"$ref": "#/$defs/structuralId"}, "custody_request": {"const": "vault_private"}, "body": {"$ref": "#/$defs/imageBodyV2"}, "input_refs": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/inputRefV2"}}, "renderer_profile": {"$ref": "#/$defs/token"}, "renderer_min_version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"}, "output_mime_type": {"enum": ["image/png", "image/jpeg"]}, "validation_profile": {"$ref": "#/$defs/token"}, "disposition": {"enum": ["intermediate", "candidate", "final"]}, "retention_request": {"type": "object", "additionalProperties": false, "required": ["retention_class"], "properties": {"retention_class": {"$ref": "#/$defs/token"}}}, "resource_bounds": {"type": "object", "additionalProperties": false, "required": ["max_output_bytes", "max_pixels", "max_total_decoded_pixels"], "properties": {"max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}, "max_total_decoded_pixels": {"type": "integer", "minimum": 1, "maximum": 9007199254740991}}}
+      }
+    },
+    "vaultDocxArtifactPlanV2": {
+      "allOf": [
+        {"$ref": "#/$defs/vaultDocumentArtifactPlanV2"},
+        {"type": "object", "properties": {"output_mime_type": {"const": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}, "renderer_profile": {"const": "document-v1"}, "renderer_min_version": {"const": "1.0.0"}, "validation_profile": {"const": "document-validator-v1"}}}
+      ]
+    },
+    "vaultPdfArtifactPlanV2": {
+      "allOf": [
+        {"$ref": "#/$defs/vaultDocumentArtifactPlanV2"},
+        {"type": "object", "properties": {"output_mime_type": {"const": "application/pdf"}, "renderer_profile": {"const": "document-pdf-v1"}, "renderer_min_version": {"const": "1.0.0"}, "validation_profile": {"const": "document-pdf-validator-v1"}}}
+      ]
+    },
+    "vaultXlsxArtifactPlanV2": {
+      "allOf": [
+        {"$ref": "#/$defs/vaultWorkbookArtifactPlanV2"},
+        {"type": "object", "properties": {"renderer_profile": {"const": "workbook-v1"}, "renderer_min_version": {"const": "1.0.0"}, "validation_profile": {"const": "workbook-validator-v1"}}}
+      ]
+    },
+    "vaultPngImageOperationV2": {
+      "oneOf": [
+        {"$ref": "#/$defs/imageCropOperationV2"},
+        {"$ref": "#/$defs/imageResizeOperationV2"},
+        {"$ref": "#/$defs/imageRotateOperationV2"},
+        {"$ref": "#/$defs/imageCompositeOperationV2"},
+        {"$ref": "#/$defs/imageAnnotateOperationV2"},
+        {"$ref": "#/$defs/imageColorConvertOperationV2"},
+        {"allOf": [{"$ref": "#/$defs/imageEncodeOperationV2"}, {"type": "object", "properties": {"mime_type": {"const": "image/png"}}}]}
+      ],
+      "discriminator": {"propertyName": "operation_type"}
+    },
+    "vaultJpegImageOperationV2": {
+      "oneOf": [
+        {"$ref": "#/$defs/imageCropOperationV2"},
+        {"$ref": "#/$defs/imageResizeOperationV2"},
+        {"$ref": "#/$defs/imageRotateOperationV2"},
+        {"$ref": "#/$defs/imageCompositeOperationV2"},
+        {"$ref": "#/$defs/imageAnnotateOperationV2"},
+        {"$ref": "#/$defs/imageColorConvertOperationV2"},
+        {"allOf": [{"$ref": "#/$defs/imageEncodeOperationV2"}, {"type": "object", "properties": {"mime_type": {"const": "image/jpeg"}}}]}
+      ],
+      "discriminator": {"propertyName": "operation_type"}
+    },
+    "vaultPngArtifactPlanV2": {
+      "allOf": [
+        {"$ref": "#/$defs/vaultImageArtifactPlanV2"},
+        {"type": "object", "properties": {"output_mime_type": {"const": "image/png"}, "renderer_profile": {"const": "image-v1"}, "renderer_min_version": {"const": "1.0.0"}, "validation_profile": {"const": "image-validator-v1"}, "body": {"type": "object", "properties": {"operations": {"type": "array", "contains": {"allOf": [{"$ref": "#/$defs/imageEncodeOperationV2"}, {"type": "object", "properties": {"mime_type": {"const": "image/png"}}}]}, "items": {"$ref": "#/$defs/vaultPngImageOperationV2"}}}}}}
+      ]
+    },
+    "vaultJpegArtifactPlanV2": {
+      "allOf": [
+        {"$ref": "#/$defs/vaultImageArtifactPlanV2"},
+        {"type": "object", "properties": {"output_mime_type": {"const": "image/jpeg"}, "renderer_profile": {"const": "image-v1"}, "renderer_min_version": {"const": "1.0.0"}, "validation_profile": {"const": "image-validator-v1"}, "body": {"type": "object", "properties": {"operations": {"type": "array", "contains": {"allOf": [{"$ref": "#/$defs/imageEncodeOperationV2"}, {"type": "object", "properties": {"mime_type": {"const": "image/jpeg"}}}]}, "items": {"$ref": "#/$defs/vaultJpegImageOperationV2"}}}}}}
+      ]
+    },
+    "vaultDocxArtifactPlanV3": {
+      "allOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/DocumentArtifactPlanV3"},
+        {"type": "object", "properties": {"custody_request": {"const": "vault_private"}, "output_mime_type": {"const": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}, "renderer_profile": {"const": "rich_document_v3"}, "renderer_min_version": {"const": "3.0.0"}, "validation_profile": {"const": "rich_document_validator_v3"}, "body": {"type": "object", "properties": {"pdf": {"type": "null"}}}}}
+      ]
+    },
+    "vaultPdfArtifactPlanV3": {
+      "allOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/DocumentArtifactPlanV3"},
+        {"type": "object", "properties": {"custody_request": {"const": "vault_private"}, "output_mime_type": {"const": "application/pdf"}, "renderer_profile": {"const": "rich_document_pdf_v3"}, "renderer_min_version": {"const": "3.0.0"}, "validation_profile": {"const": "rich_document_pdf_validator_v3"}, "body": {"type": "object", "required": ["pdf"], "properties": {"pdf": {"type": "object"}}}}}
+      ]
+    },
+    "vaultXlsxArtifactPlanV3": {
+      "allOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/WorkbookArtifactPlanV3"},
+        {"type": "object", "properties": {"custody_request": {"const": "vault_private"}, "renderer_profile": {"const": "rich_workbook_v3"}, "renderer_min_version": {"const": "3.0.0"}, "validation_profile": {"const": "rich_workbook_validator_v3"}}}
+      ]
+    },
+    "vaultPptxArtifactPlanV3": {
+      "allOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/PresentationArtifactPlanV3"},
+        {"type": "object", "properties": {"custody_request": {"const": "vault_private"}, "renderer_profile": {"const": "rich_presentation_v3"}, "renderer_min_version": {"const": "3.0.0"}, "validation_profile": {"const": "rich_presentation_validator_v3"}}}
+      ]
+    },
+    "vaultPngArtifactPlanV3": {
+      "allOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/ImageArtifactPlanV3"},
+        {"type": "object", "properties": {"custody_request": {"const": "vault_private"}, "output_mime_type": {"const": "image/png"}, "renderer_profile": {"const": "rich_image_v3"}, "renderer_min_version": {"const": "3.0.0"}, "validation_profile": {"const": "rich_image_validator_v3"}, "body": {"type": "object", "properties": {"output": {"type": "object", "properties": {"format": {"const": "png"}}}}}}}
+      ]
+    },
+    "vaultJpegArtifactPlanV3": {
+      "allOf": [
+        {"$ref": "https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/ImageArtifactPlanV3"},
+        {"type": "object", "properties": {"custody_request": {"const": "vault_private"}, "output_mime_type": {"const": "image/jpeg"}, "renderer_profile": {"const": "rich_image_v3"}, "renderer_min_version": {"const": "3.0.0"}, "validation_profile": {"const": "rich_image_validator_v3"}, "body": {"type": "object", "properties": {"output": {"type": "object", "properties": {"format": {"const": "jpeg"}}}}}}}
+      ]
+    },
+    "vaultArtifactPlanV3": {
+      "oneOf": [
+        {"$ref": "#/$defs/vaultDocxArtifactPlanV3"},
+        {"$ref": "#/$defs/vaultPdfArtifactPlanV3"},
+        {"$ref": "#/$defs/vaultXlsxArtifactPlanV3"},
+        {"$ref": "#/$defs/vaultPptxArtifactPlanV3"},
+        {"$ref": "#/$defs/vaultPngArtifactPlanV3"},
+        {"$ref": "#/$defs/vaultJpegArtifactPlanV3"}
+      ],
+      "discriminator": {"propertyName": "output_mime_type"}
+    },
+    "vaultArtifactPlan": {
+      "oneOf": [
+        {"$ref": "#/$defs/vaultArtifactPlanV2"},
+        {"$ref": "#/$defs/vaultArtifactPlanV3"}
+      ],
+      "discriminator": {"propertyName": "schema_version"}
+    }
+  }
+}

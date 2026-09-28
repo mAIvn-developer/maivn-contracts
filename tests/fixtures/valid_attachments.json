@@ -1,0 +1,23 @@
+[
+  {
+    "attachment_id": "att-invoice-pdf",
+    "filename": "invoice.pdf",
+    "mime_type": "application/pdf",
+    "size_bytes": 1048576,
+    "storage_ref": {
+      "bucket": "memory-resources",
+      "path": "prj-support/resources/invoice.pdf",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "resource_id": "res-invoice-001"
+  },
+  {
+    "attachment_id": "att-note-inline",
+    "filename": "note.txt",
+    "mime_type": "text/plain",
+    "size_bytes": 5,
+    "inline_base64": "SGVsbG8=",
+    "content_hash": "185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969"
+  }
+]

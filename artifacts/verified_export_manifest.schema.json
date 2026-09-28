@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/verified_export_manifest.schema.json",
+  "title": "VerifiedExportManifest",
+  "x-maivn-verified-export-validation": "manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scope",
+    "surface",
+    "correlation_id",
+    "artifact_kind",
+    "mime_type",
+    "public_filename",
+    "content_length",
+    "content_sha256",
+    "proof_receipt_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "verified-export-v1"},
+    "scope": {"$ref": "#/$defs/tenantScope"},
+    "surface": {"$ref": "#/$defs/surfaceIdentity"},
+    "correlation_id": {"$ref": "#/$defs/token"},
+    "artifact_kind": {"enum": ["document", "spreadsheet", "presentation", "image"]},
+    "mime_type": {
+      "enum": [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "image/png",
+        "image/jpeg"
+      ]
+    },
+    "public_filename": {"$ref": "#/$defs/verifiedExportFilename"},
+    "content_length": {"type": "integer", "minimum": 1, "maximum": 52428800},
+    "content_sha256": {"$ref": "#/$defs/sha256Hex"},
+    "proof_receipt_id": {"$ref": "#/$defs/token"}
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "artifact_kind": {"const": "document"},
+            "mime_type": {"const": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+            "public_filename": {"type": "string", "pattern": "\\.docx$"}
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {"const": "document"},
+            "mime_type": {"const": "application/pdf"},
+            "public_filename": {"type": "string", "pattern": "\\.pdf$"}
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {"const": "spreadsheet"},
+            "mime_type": {"const": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+            "public_filename": {"type": "string", "pattern": "\\.xlsx$"}
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {"const": "presentation"},
+            "mime_type": {"const": "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
+            "public_filename": {"type": "string", "pattern": "\\.pptx$"}
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {"const": "image"},
+            "mime_type": {"const": "image/png"},
+            "public_filename": {"type": "string", "pattern": "\\.png$"}
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {"const": "image"},
+            "mime_type": {"const": "image/jpeg"},
+            "public_filename": {"type": "string", "pattern": "\\.jpeg$"}
+          }
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "sha256Hex": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "verifiedExportFilename": {
+      "type": "string",
+      "pattern": "^(?!(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9]) *(?:\\.|$))[A-Za-z0-9](?:[A-Za-z0-9._ ()-]{0,253}[A-Za-z0-9_()-])?$"
+    },
+    "tenantScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organization_id", "project_id"],
+      "properties": {
+        "organization_id": {"$ref": "#/$defs/token"},
+        "project_id": {"$ref": "#/$defs/token"}
+      }
+    },
+    "surfaceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_invocation_id", "session_id", "checkpoint_id", "caller_id"],
+      "properties": {
+        "root_invocation_id": {"$ref": "#/$defs/token"},
+        "session_id": {"$ref": "#/$defs/token"},
+        "checkpoint_id": {"$ref": "#/$defs/token"},
+        "caller_id": {"$ref": "#/$defs/token"}
+      }
+    }
+  }
+}

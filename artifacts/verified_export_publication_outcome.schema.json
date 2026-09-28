@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/verified_export_publication_outcome.schema.json",
+  "title": "VerifiedExportPublicationOutcome",
+  "x-maivn-verified-export-validation": "publication-outcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["receipt", "ordinary_deletion_ref"],
+  "properties": {
+    "receipt": {"$ref": "#/$defs/redactedExportReceipt"},
+    "ordinary_deletion_ref": {"$ref": "#/$defs/token"}
+  },
+  "$defs": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"},
+    "rfc3339UtcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+    },
+    "redactedExportReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "ordinary_artifact", "correlation_id", "occurred_at"],
+      "properties": {
+        "receipt_id": {"$ref": "#/$defs/token"},
+        "ordinary_artifact": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/ordinaryArtifactRef"
+        },
+        "correlation_id": {"$ref": "#/$defs/token"},
+        "occurred_at": {"$ref": "#/$defs/rfc3339UtcTimestamp"}
+      }
+    }
+  }
+}

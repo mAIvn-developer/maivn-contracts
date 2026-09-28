@@ -1,0 +1,445 @@
+{
+  "_meta": {
+    "name": "replay",
+    "version": "0.1.0",
+    "lossy": true,
+    "note": "Durable session replay preserves append order and curated visible timeline facts. It never copies canonical payloads, tool arguments or results, raw stream frames, memory internals, or canvas-only paint hints.",
+    "reserved_future_kinds": [
+      "approval.approved",
+      "approval.rejected"
+    ],
+    "reserved_note": "Approval decisions are not canonical spine event types yet. Add the vocabulary event first, then promote the mapping into replay."
+  },
+  "target_events": [
+    "tool_event",
+    "interrupt_request",
+    "interrupt_required",
+    "assignment_received",
+    "assignment_completed",
+    "model_tool_complete",
+    "progress_update",
+    "model_routing",
+    "status_message",
+    "final",
+    "error",
+    "system_tool_start",
+    "system_tool_complete",
+    "system_tool_error",
+    "redaction_previewed",
+    "message_redaction_applied",
+    "trigger.fired",
+    "trigger.skipped",
+    "trigger.failed",
+    "trigger.disabled",
+    "trigger.enabled",
+    "tool.dispatch_started",
+    "tool.dispatch_completed",
+    "session.completed"
+  ],
+  "mappings": {
+    "connection.event_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Provider payloads are not copied into session replay."
+    },
+    "email.received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Email content is not copied into session replay."
+    },
+    "conversation.reply_received": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Conversation content is not copied into session replay."
+    },
+    "memory.record_changed": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory mutation routing is not part of session replay."
+    },
+    "storage.object_uploaded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Storage mutation routing is not part of session replay."
+    },
+    "trigger.fire_requested": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "The visible system-tool frame already represents this durable request."
+    },
+    "tool_event": {
+      "target": "tool_event",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "interrupt_request": {
+      "target": "interrupt_request",
+      "curated_fields": ["reason_code"],
+      "payload_fields": ["reason_code"]
+    },
+    "interrupt_required": {
+      "target": "interrupt_required",
+      "curated_fields": ["reason_code"],
+      "payload_fields": ["reason_code"]
+    },
+    "assignment_received": {
+      "target": "assignment_received",
+      "curated_fields": ["assignment_uuid"],
+      "payload_fields": ["assignment_uuid"]
+    },
+    "assignment_completed": {
+      "target": "assignment_completed",
+      "curated_fields": ["assignment_uuid", "status"],
+      "payload_fields": ["assignment_uuid", "status"]
+    },
+    "model_tool_complete": {
+      "target": "model_tool_complete",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "heartbeat": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Transport keepalives are not visible replay frames."
+    },
+    "update": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Raw chunks and deltas are not durable replay frames."
+    },
+    "progress_update": {
+      "target": "progress_update",
+      "curated_fields": ["phase", "progress", "percent"],
+      "payload_fields": ["phase", "progress", "percent"]
+    },
+    "model_routing": {
+      "target": "model_routing",
+      "curated_fields": ["mode", "profile"],
+      "payload_fields": ["mode", "profile"]
+    },
+    "status_message": {
+      "target": "status_message",
+      "curated_fields": ["message"],
+      "payload_fields": ["message", "data.text", "text"]
+    },
+    "status_message_chunk": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Raw chunks and deltas are not durable replay frames."
+    },
+    "final": {
+      "target": "final",
+      "curated_fields": [
+        "stop_reason",
+        "reason_code",
+        "input_tokens",
+        "output_tokens",
+        "cache_read_input_tokens",
+        "cache_creation_input_tokens"
+      ],
+      "payload_fields": [
+        "stop_reason",
+        "reason_code",
+        "usage.input_tokens",
+        "usage.output_tokens",
+        "usage.cache_read_input_tokens",
+        "usage.cache_creation_input_tokens"
+      ]
+    },
+    "error": {
+      "target": "error",
+      "curated_fields": [
+        "stop_reason",
+        "reason_code",
+        "input_tokens",
+        "output_tokens",
+        "cache_read_input_tokens",
+        "cache_creation_input_tokens"
+      ],
+      "payload_fields": [
+        "stop_reason",
+        "reason_code",
+        "usage.input_tokens",
+        "usage.output_tokens",
+        "usage.cache_read_input_tokens",
+        "usage.cache_creation_input_tokens"
+      ]
+    },
+    "system_tool_start": {
+      "target": "system_tool_start",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "system_tool_chunk": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Raw chunks and deltas are not durable replay frames."
+    },
+    "system_tool_complete": {
+      "target": "system_tool_complete",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "system_tool_error": {
+      "target": "system_tool_error",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "hook_fired": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Developer hook internals are not visible replay frames."
+    },
+    "enrichment": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "evaluating": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "planning": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "searching_tools": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "loading_tools": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "planning_assignments": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "executing_assignments": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "executing_actions": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "synthesizing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "finalizing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "reevaluate_accrued": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Orchestration internals are not visible replay frames."
+    },
+    "memory_summarizing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_summarized": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_retrieving": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_retrieved": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_indexing": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_indexed": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_graph_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_skill_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_insight_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_skill_extracted": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "memory_insight_extracted": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Memory internals are not visible in session replay."
+    },
+    "redaction_previewed": {
+      "target": "redaction_previewed",
+      "curated_fields": ["entity_count", "redaction_count"],
+      "payload_fields": ["entity_count", "redaction_count"]
+    },
+    "message_redaction_applied": {
+      "target": "message_redaction_applied",
+      "curated_fields": ["entity_count", "redaction_count"],
+      "payload_fields": ["entity_count", "redaction_count"]
+    },
+    "resource_registering": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource internals are not visible replay frames."
+    },
+    "resource_registered": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource internals are not visible replay frames."
+    },
+    "resource_dedup_reused": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource internals are not visible replay frames."
+    },
+    "resource_version_superseded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource internals are not visible replay frames."
+    },
+    "resource_extracting": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource internals are not visible replay frames."
+    },
+    "resource_extracted": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Resource internals are not visible replay frames."
+    },
+    "document_analysis_selected": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Document strategy telemetry is not a visible replay frame."
+    },
+    "document_evidence_coverage": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Document evidence telemetry is not a visible replay frame."
+    },
+    "trigger.fired": {
+      "target": "trigger.fired",
+      "curated_fields": ["trigger_id", "reason_code"],
+      "payload_fields": ["trigger_id", "reason_code"]
+    },
+    "trigger.skipped": {
+      "target": "trigger.skipped",
+      "curated_fields": ["trigger_id", "reason_code"],
+      "payload_fields": ["trigger_id", "reason_code"]
+    },
+    "trigger.failed": {
+      "target": "trigger.failed",
+      "curated_fields": ["trigger_id", "reason_code"],
+      "payload_fields": ["trigger_id", "reason_code"]
+    },
+    "trigger.disabled": {
+      "target": "trigger.disabled",
+      "curated_fields": ["trigger_id", "reason_code"],
+      "payload_fields": ["trigger_id", "reason_code"]
+    },
+    "trigger.enabled": {
+      "target": "trigger.enabled",
+      "curated_fields": ["trigger_id", "reason_code"],
+      "payload_fields": ["trigger_id", "reason_code"]
+    },
+    "agent.thinking": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas-only paint hints are not durable replay frames."
+    },
+    "agent.tool_selected": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas-only paint hints are not durable replay frames."
+    },
+    "tool.dispatch_started": {
+      "target": "tool.dispatch_started",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "tool.dispatch_completed": {
+      "target": "tool.dispatch_completed",
+      "curated_fields": ["tool_name", "status", "duration_ms"],
+      "payload_fields": ["tool_name", "tool_type", "status"]
+    },
+    "agent.responded": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Canvas-only paint hints are not durable replay frames."
+    },
+    "artifact.reserved": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.uploaded": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.validation_started": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.validated": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.available": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.rejected": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.failed": {"target": null, "drop": true, "drop_reason": "Artifact lifecycle is not copied into session replay; selected refs live on final messages."},
+    "artifact.selected": {"target": null, "drop": true, "drop_reason": "Selected immutable refs are carried by final messages and thread replay."},
+    "artifact.delivery_queued": {"target": null, "drop": true, "drop_reason": "Artifact delivery lifecycle is not a session replay frame."},
+    "artifact.delivery_started": {"target": null, "drop": true, "drop_reason": "Artifact delivery lifecycle is not a session replay frame."},
+    "artifact.delivery_succeeded": {"target": null, "drop": true, "drop_reason": "Artifact delivery lifecycle is not a session replay frame."},
+    "artifact.delivery_failed": {"target": null, "drop": true, "drop_reason": "Artifact delivery lifecycle is not a session replay frame."},
+    "artifact.expired": {"target": null, "drop": true, "drop_reason": "Artifact retention lifecycle is not a session replay frame."},
+    "artifact.deletion_requested": {"target": null, "drop": true, "drop_reason": "Artifact deletion lifecycle is not a session replay frame."},
+    "artifact.deletion_started": {"target": null, "drop": true, "drop_reason": "Artifact deletion lifecycle is not a session replay frame."},
+    "artifact.deletion_pending_backup_expiry": {"target": null, "drop": true, "drop_reason": "Vault deletion lifecycle is not a session replay frame."},
+    "artifact.deleted": {"target": null, "drop": true, "drop_reason": "Artifact deletion lifecycle is not a session replay frame."},
+    "artifact.delete_incomplete": {"target": null, "drop": true, "drop_reason": "Artifact deletion lifecycle is not a session replay frame."},
+    "artifact.vault_authorization_pending": {"target": null, "drop": true, "drop_reason": "Vault authorization lifecycle is not a session replay frame."},
+    "artifact.vault_authorization_denied": {"target": null, "drop": true, "drop_reason": "Vault authorization lifecycle is not a session replay frame."},
+    "artifact.vault_render_started": {"target": null, "drop": true, "drop_reason": "Vault rendering lifecycle is not a session replay frame."},
+    "artifact.vault_render_failed": {"target": null, "drop": true, "drop_reason": "Vault rendering lifecycle is not a session replay frame."},
+    "session.completed": {
+      "target": "session.completed",
+      "curated_fields": [
+        "stop_reason",
+        "reason_code",
+        "input_tokens",
+        "output_tokens",
+        "cache_read_input_tokens",
+        "cache_creation_input_tokens"
+      ],
+      "payload_fields": [
+        "stop_reason",
+        "reason_code",
+        "usage.input_tokens",
+        "usage.output_tokens",
+        "usage.cache_read_input_tokens",
+        "usage.cache_creation_input_tokens"
+      ]
+    }
+  }
+}

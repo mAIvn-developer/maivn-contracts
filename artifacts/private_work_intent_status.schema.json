@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/artifacts/private_work_intent_status.schema.json",
+  "title": "PrivateWorkIntentStatus",
+  "x-maivn-closed-union-validation": true,
+  "x-maivn-private-work-status-validation": true,
+  "oneOf": [
+    {"$ref": "#/$defs/createCommittedStatus"},
+    {"$ref": "#/$defs/reworkCommittedStatus"},
+    {"$ref": "#/$defs/ingestCommittedStatus"},
+    {"$ref": "#/$defs/deleteCommittedStatus"},
+    {"$ref": "#/$defs/retrieveCommittedStatus"},
+    {"$ref": "#/$defs/redactedExportCommittedStatus"},
+    {"$ref": "#/$defs/nonCommittedStatus"}
+  ],
+  "$defs": {
+    "createCommittedStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "operation", "correlation_id", "idempotency_key", "expires_at", "state", "artifact"],
+      "properties": {"intent_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "operation": {"const": "create"}, "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "idempotency_key": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "expires_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}, "state": {"const": "committed"}, "artifact": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactRef"}}
+    },
+    "reworkCommittedStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "operation", "correlation_id", "idempotency_key", "expires_at", "state", "artifact"],
+      "properties": {"intent_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "operation": {"const": "rework"}, "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "idempotency_key": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "expires_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}, "state": {"const": "committed"}, "artifact": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactRef"}}
+    },
+    "ingestCommittedStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent_id",
+        "operation",
+        "correlation_id",
+        "idempotency_key",
+        "expires_at",
+        "state",
+        "artifact"
+      ],
+      "properties": {
+        "intent_id": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"
+        },
+        "operation": {
+          "const": "ingest_file"
+        },
+        "correlation_id": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"
+        },
+        "idempotency_key": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"
+        },
+        "expires_at": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"
+        },
+        "state": {
+          "const": "committed"
+        },
+        "artifact": {
+          "$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactRef"
+        }
+      }
+    },
+    "deleteCommittedStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "operation", "correlation_id", "idempotency_key", "expires_at", "state", "lifecycle_receipt"],
+      "properties": {"intent_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "operation": {"const": "delete"}, "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "idempotency_key": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "expires_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}, "state": {"const": "committed"}, "lifecycle_receipt": {"$ref": "#/$defs/privateArtifactLifecycleReceipt"}}
+    },
+    "retrieveCommittedStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "operation", "correlation_id", "idempotency_key", "expires_at", "state", "retrieval_action"],
+      "properties": {"intent_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "operation": {"const": "retrieve_session"}, "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "idempotency_key": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "expires_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}, "state": {"const": "committed"}, "retrieval_action": {"$ref": "#/$defs/vaultRetrievalAction"}}
+    },
+    "redactedExportCommittedStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "operation", "correlation_id", "idempotency_key", "expires_at", "state", "redacted_export_receipt"],
+      "properties": {"intent_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "operation": {"const": "redacted_export"}, "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "idempotency_key": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "expires_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}, "state": {"const": "committed"}, "redacted_export_receipt": {"$ref": "#/$defs/redactedExportReceipt"}}
+    },
+    "nonCommittedStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "operation", "correlation_id", "idempotency_key", "expires_at", "state"],
+      "properties": {"intent_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "operation": {"enum": ["create", "rework", "ingest_file", "retrieve_session", "delete", "redacted_export"]}, "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "idempotency_key": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"}, "expires_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}, "state": {"enum": ["planned", "authorization_pending", "executing_in_vault", "authorization_denied", "grant_expired", "failed"]}}
+    },
+    "vaultRetrievalAction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["relation"],
+      "properties": {"relation": {"const": "artifact.vault_download_authorization"}}
+    },
+    "privateArtifactLifecycleReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "artifact_id", "operation", "state", "correlation_id", "occurred_at"],
+      "properties": {
+        "receipt_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+        "artifact_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+        "operation": {"enum": ["create", "rework", "delete"]},
+        "state": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/privateArtifactState"},
+        "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+        "occurred_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}
+      }
+    },
+    "redactedExportReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "ordinary_artifact", "correlation_id", "occurred_at"],
+      "properties": {
+        "receipt_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+        "ordinary_artifact": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/ordinaryArtifactRef"},
+        "correlation_id": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/tokenId"},
+        "occurred_at": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/rfc3339UtcTimestamp"}
+      }
+    }
+  }
+}
