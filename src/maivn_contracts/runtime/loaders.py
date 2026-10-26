@@ -4,22 +4,23 @@ from __future__ import annotations
 
 import copy
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 from pydantic import TypeAdapter
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.messages import load_message_schema
 from maivn_contracts.messages.loaders import materialize_message_schema
 from maivn_contracts.runtime.model import Command, RunConfig, RunState, StreamPart
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'runtime'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'runtime'
 _COMMAND_SCHEMA_ID = 'https://schemas.maivn.dev/runtime/command.schema.json'
 _COMMAND_ADAPTER: TypeAdapter[Command] = TypeAdapter(Command)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):

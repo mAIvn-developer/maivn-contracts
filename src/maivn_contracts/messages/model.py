@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import string
 from typing import Annotated, Literal, TypeAlias
 
 from pydantic import (
@@ -47,6 +48,8 @@ HIPAA_SAFE_HARBOR_CATEGORIES: frozenset[str] = frozenset(
 )
 _MIN_WHITELIST_VALUE_LENGTH = 3
 _MIN_WHITELIST_JUSTIFICATION_LENGTH = 8
+# One-character strings a whitelist pattern must not match (patterns compile case-insensitively).
+_PERMISSIVE_PATTERN_PROBES = ('', *string.ascii_lowercase, *string.digits, *string.punctuation)
 
 
 class _AttachmentSourceError(ValueError):
@@ -335,7 +338,7 @@ class PIIWhitelistEntry(BaseModel):
         except re.error as exc:
             message = f'invalid regex pattern: {exc}'
             raise ValueError(message) from exc
-        if compiled.match('') is not None and compiled.match('a') is not None:
+        if any(compiled.match(probe) is not None for probe in _PERMISSIVE_PATTERN_PROBES):
             message = (
                 'pattern is too permissive (matches empty or single-character strings); '
                 'narrow the pattern or use entity_type'

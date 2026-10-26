@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import copy
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.agents import load_agent_version_schema, load_message_binding_schema
 from maivn_contracts.artifacts import load_artifact_ref_schema
 from maivn_contracts.flows import load_flow_graph_schema
@@ -20,12 +20,13 @@ from maivn_contracts.scenarios.model import (
     TriggerLaunch,
 )
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'scenarios'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'scenarios'
 _TRIGGER_SCHEMA_ID = 'https://schemas.maivn.dev/scenarios/trigger.schema.json'
 _SCENARIO_SCHEMA_ID = 'https://schemas.maivn.dev/scenarios/scenario.schema.json'
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):

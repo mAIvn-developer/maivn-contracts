@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.maivn.dev/runtime/hosted_job_options.schema.json",
+  "$defs": {
+    "ScenarioAgentBinding": {
+      "additionalProperties": false,
+      "description": "Agent version pin for a scenario.",
+      "properties": {
+        "agent_id": {
+          "description": "Agent identity used by scenario.",
+          "minLength": 1,
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "version": {
+          "description": "Immutable scenario agent version.",
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "agent_id",
+        "version"
+      ],
+      "title": "ScenarioAgentBinding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Required opt-in bounds; ordinary invocation defaults are unaffected.",
+  "properties": {
+    "idempotency_key": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "max_steps": {
+      "exclusiveMinimum": 0,
+      "title": "Max Steps",
+      "type": "integer"
+    },
+    "max_duration_seconds": {
+      "exclusiveMinimum": 0,
+      "maximum": 1800,
+      "title": "Max Duration Seconds",
+      "type": "number"
+    },
+    "registered_agent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScenarioAgentBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "max_steps",
+    "max_duration_seconds"
+  ],
+  "title": "HostedJobOptions",
+  "type": "object"
+}

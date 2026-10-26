@@ -53,4 +53,4 @@ jobs:
           uv pip install --python .ci/bin/python dist/*.whl
 
       - name: Import smoke test
-        run: .ci/bin/python -c "import maivn_contracts; print(maivn_contracts.__name__)"
+        run: .ci/bin/python scripts/consumer_smoke.py

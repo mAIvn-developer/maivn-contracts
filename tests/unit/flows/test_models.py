@@ -302,3 +302,134 @@ def test_flow_graph_rejects_incomplete_or_ambiguous_scope(scope: dict[str, Any])
 
     with pytest.raises(ValidationError):
         FlowGraph.model_validate(body)
+
+
+def _edges(body: GraphBody) -> list[GraphBody]:
+    return cast('list[GraphBody]', body['edges'])
+
+
+def _resource(node_id: str = 'crm') -> GraphBody:
+    return {
+        'node_id': node_id,
+        'kind': 'resource',
+        'relationship': 'capability',
+        'component_ref': {'component_id': f'cmp-{node_id}', 'version': 1, 'component_kind': 'tool'},
+    }
+
+
+def _with_resource(*edges: GraphBody) -> GraphBody:
+    body = _minimal_graph()
+    cast('list[GraphBody]', body['nodes']).append(_resource())
+    cast('GraphBody', cast('GraphBody', body['layout'])['node_positions'])['crm'] = {'x': 0, 'y': 0}
+    _edges(body).extend(edges)
+    return body
+
+
+def _second_control(body: GraphBody) -> None:
+    _edges(body).append(
+        {'edge_id': 'again', 'kind': 'control', 'source': 'trigger', 'target': 'scope'}
+    )
+
+
+def _reversed_control(body: GraphBody) -> None:
+    _edges(body)[0] = {'edge_id': 'start', 'kind': 'control', 'source': 'scope', 'target': 'output'}
+
+
+def _second_result(body: GraphBody) -> None:
+    _edges(body).append(
+        {'edge_id': 'again', 'kind': 'result', 'source': 'scope', 'target': 'output'}
+    )
+
+
+def _result_from_trigger(body: GraphBody) -> None:
+    _edges(body)[1] = {
+        'edge_id': 'finish',
+        'kind': 'result',
+        'source': 'trigger',
+        'target': 'output',
+    }
+
+
+def _nested_flow_with_component(body: GraphBody) -> None:
+    scope = cast('list[GraphBody]', body['nodes'])[1]
+    scope['scope_kind'] = 'nested_flow'
+    scope['nested_flow_ref'] = {'flow_id': 'flow-child', 'version': 1}
+
+
+def _nested_flow_without_ref(body: GraphBody) -> None:
+    scope = cast('list[GraphBody]', body['nodes'])[1]
+    scope['scope_kind'] = 'nested_flow'
+    del scope['component_ref']
+
+
+def _agent_with_nested_ref(body: GraphBody) -> None:
+    cast('list[GraphBody]', body['nodes'])[1]['nested_flow_ref'] = {
+        'flow_id': 'flow-child',
+        'version': 1,
+    }
+
+
+def _swarm_with_agent_component(body: GraphBody) -> None:
+    cast('list[GraphBody]', body['nodes'])[1]['scope_kind'] = 'swarm'
+
+
+TOPOLOGY_RULES: list[tuple[GraphMutation, str]] = [
+    (_second_control, 'exactly one trigger-to-scope control edge'),
+    (_reversed_control, 'exactly one trigger-to-scope control edge'),
+    (_second_result, 'exactly one scope-to-output result edge'),
+    (_result_from_trigger, 'exactly one scope-to-output result edge'),
+    (_nested_flow_with_component, 'a Nested Flow scope requires only nested_flow_ref'),
+    (_nested_flow_without_ref, 'a Nested Flow scope requires only nested_flow_ref'),
+    (_agent_with_nested_ref, 'an agent or swarm scope cannot carry nested_flow_ref'),
+    (_swarm_with_agent_component, 'scope_kind must match component_ref.component_kind'),
+]
+
+
+@pytest.mark.parametrize(
+    ('mutate', 'message'),
+    TOPOLOGY_RULES,
+    ids=[mutate.__name__.lstrip('_') for mutate, _ in TOPOLOGY_RULES],
+)
+def test_flow_graph_execution_edges_and_scope_selectors_name_the_broken_rule(
+    mutate: GraphMutation,
+    message: str,
+) -> None:
+    """Each execution-edge and scope-selector rule refuses with its own reason."""
+    body = _minimal_graph()
+    mutate(body)
+    with pytest.raises(ValidationError, match=message):
+        FlowGraph.model_validate(body)
+
+
+def test_nested_flow_scope_without_component_is_accepted() -> None:
+    """A Nested Flow scope names only its nested flow."""
+    body = _minimal_graph()
+    _nested_flow_without_ref(body)
+    cast('list[GraphBody]', body['nodes'])[1]['nested_flow_ref'] = {
+        'flow_id': 'flow-child',
+        'version': 1,
+    }
+    assert FlowGraph.model_validate(body).nodes[1].kind == 'scope'
+
+
+CAPABILITY = {'edge_id': 'use', 'kind': 'capability', 'source': 'scope', 'target': 'crm'}
+
+
+@pytest.mark.parametrize(
+    ('edges', 'message'),
+    [
+        ((), 'Every Flow resource requires one root relationship edge'),
+        (({**CAPABILITY, 'source': 'trigger'},), 'must match a root resource relationship'),
+        (({**CAPABILITY, 'target': 'output'},), 'must match a root resource relationship'),
+        (({**CAPABILITY, 'kind': 'knowledge'},), 'must match a root resource relationship'),
+        ((CAPABILITY, {**CAPABILITY, 'edge_id': 'use-2'}), 'exactly one incoming relationship'),
+    ],
+)
+def test_flow_resources_need_exactly_one_matching_root_edge(
+    edges: tuple[GraphBody, ...],
+    message: str,
+) -> None:
+    """Every resource is reached once, from the scope, by its declared relationship."""
+    with pytest.raises(ValidationError, match=message):
+        FlowGraph.model_validate(_with_resource(*edges))
+    assert FlowGraph.model_validate(_with_resource(CAPABILITY))

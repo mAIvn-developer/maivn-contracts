@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, cast
 
 import pytest
@@ -1102,3 +1104,262 @@ def test_vault_effect_status_binding_keeps_three_identities_separate() -> None:
     for invalid in invalid_bindings:
         with pytest.raises(ValueError, match='vault effect/status identity binding mismatch'):
             artifacts.validate_vault_effect_status_binding(*invalid)
+
+
+def _refused_by_model(payload: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        artifacts.VaultWorkRequest.model_validate(payload)
+
+
+def test_rework_replacement_must_keep_the_source_format_identity() -> None:
+    """A DOCX source cannot be replaced by a PDF plan, even though both are documents."""
+    payload = _rework('v2', 'docx')
+    patch = cast('dict[str, Any]', payload['patch'])
+    patch['replacement_plan'] = _plan('v2', 'pdf')
+    _refused_by_model(payload)
+
+
+def test_rework_source_bounds_must_match_the_source_kind() -> None:
+    """Source evidence carries exactly its kind's resource bounds."""
+    payload = _rework('v3', 'docx')
+    patch = cast('dict[str, Any]', payload['patch'])
+    patch['source_resource_bounds'] = _bounds('xlsx')
+    _refused_by_model(payload)
+
+
+def test_rework_placeholders_cannot_name_an_admitted_vault_handle() -> None:
+    """A private placeholder spelled like a record or generation handle is refused."""
+    for handle in ('record_0001', 'generation_0007'):
+        payload = _rework('v2', 'docx')
+        patch = cast('dict[str, Any]', payload['patch'])
+        replacement = cast('dict[str, Any]', patch['replacement_plan'])
+        blocks = cast('list[dict[str, Any]]', replacement['body']['blocks'])
+        runs = cast('list[dict[str, Any]]', blocks[0]['runs'])
+        runs[0]['payload']['fragments'][0]['text'] = f'Hello {{_{{{handle}}}_}}.'
+        _refused_by_model(payload)
+
+    payload = _rework('v2', 'docx')
+    patch = cast('dict[str, Any]', payload['patch'])
+    replacement = cast('dict[str, Any]', patch['replacement_plan'])
+    blocks = cast('list[dict[str, Any]]', replacement['body']['blocks'])
+    runs = cast('list[dict[str, Any]]', blocks[0]['runs'])
+    runs[0]['payload']['fragments'][0]['text'] = 'Hello {_{customer_name}_}.'
+    assert artifacts.VaultWorkRequest.model_validate(payload).patch is not None
+
+
+def test_create_requires_exactly_a_plan_its_bounds_and_its_inputs() -> None:
+    """Create carries a plan (never a patch), the plan's bounds and exactly its inputs."""
+    without_plan = _create('v2', 'docx')
+    del without_plan['plan']
+    with_patch = _create('v2', 'docx')
+    with_patch['patch'] = cast('dict[str, Any]', _rework('v2', 'docx')['patch'])
+    other_bounds = _create('v2', 'docx')
+    other_bounds['bounds'] = {'max_output_bytes': 999_999, 'max_pages': 10}
+    extra_handle = _create('v2', 'docx')
+    extra_handle['input_handles'] = [
+        {
+            'local_id': 'template_1',
+            'record_handle': 'record_0001',
+            'generation_handle': 'generation_0001',
+            'role': 'template',
+        },
+    ]
+    for payload in (without_plan, with_patch, other_bounds, extra_handle):
+        _refused_by_model(payload)
+
+
+def _private_base_ref() -> dict[str, Any]:
+    refs = json.loads(
+        (Path(__file__).resolve().parents[2] / 'fixtures' / 'valid_artifact_refs.json').read_text(
+            encoding='utf-8',
+        ),
+    )
+    private = [ref for ref in cast('list[dict[str, Any]]', refs) if ref['custody'] != 'ordinary']
+    return private[0]
+
+
+def _ingest(*, base: bool) -> dict[str, Any]:
+    request = _request('ingest_file')
+    request['client_proof_digest'] = 'a' * 64
+    intake: dict[str, Any] = {
+        'kind': 'image',
+        'mime_type': 'image/png',
+        'output_commitment': 'b' * 64,
+        'source_commitment': 'c' * 64,
+        'max_source_bytes': 1024,
+    }
+    request['file_intake'] = intake
+    if base:
+        intake['expected_base_ref'] = _private_base_ref()
+        request['input_handles'] = [
+            {
+                'local_id': 'source_1',
+                'record_handle': 'out_image_0001',
+                'generation_handle': 'art_private_0001',
+                'role': 'source_artifact',
+            },
+        ]
+    return request
+
+
+def test_ingest_binds_its_single_source_handle_to_the_expected_base() -> None:
+    """A based intake names exactly one source handle equal to the base identity."""
+    assert artifacts.VaultWorkRequest.model_validate(_ingest(base=True)).file_intake
+    assert artifacts.VaultWorkRequest.model_validate(_ingest(base=False)).file_intake
+
+    unbased_with_handle = _ingest(base=False)
+    unbased_with_handle['input_handles'] = _ingest(base=True)['input_handles']
+    with_plan = _ingest(base=False)
+    with_plan['plan'] = _plan('v2', 'pdf')
+    invalid = [unbased_with_handle, with_plan]
+    for field, value in (
+        ('role', 'template'),
+        ('generation_handle', 'art_private_9999'),
+        ('record_handle', 'out_image_9999'),
+    ):
+        mismatched = _ingest(base=True)
+        mismatched['input_handles'][0][field] = value
+        invalid.append(mismatched)
+    two_handles = _ingest(base=True)
+    two_handles['input_handles'].append(
+        {
+            'local_id': 'template_1',
+            'record_handle': 'record_0002',
+            'generation_handle': 'generation_0002',
+            'role': 'template',
+        },
+    )
+    invalid.append(two_handles)
+    for payload in invalid:
+        _refused_by_model(payload)
+
+
+def _single_source(operation: str) -> dict[str, Any]:
+    request = _request(operation)
+    request['input_handles'] = [
+        {
+            'local_id': 'source_1',
+            'record_handle': 'record_0001',
+            'generation_handle': 'generation_0001',
+            'role': 'source_artifact',
+        },
+    ]
+    if operation == 'delete':
+        request['deletion_scope'] = {'mode': 'private_only'}
+    if operation == 'retrieve_session':
+        request['client_proof_digest'] = 'a' * 64
+    if operation == 'redacted_export':
+        request['export_filename'] = 'report.pdf'
+    return request
+
+
+@pytest.mark.parametrize('operation', ['delete', 'retrieve_session', 'redacted_export'])
+def test_source_operations_take_exactly_one_source_and_no_plan(operation: str) -> None:
+    """Delete, retrieval and export address one source artifact and carry no plan or patch."""
+    assert artifacts.VaultWorkRequest.model_validate(_single_source(operation))
+    with_plan = _single_source(operation)
+    with_plan['plan'] = _plan('v2', 'pdf')
+    with_patch = _single_source(operation)
+    with_patch['patch'] = cast('dict[str, Any]', _rework('v2', 'pdf')['patch'])
+    no_source = _single_source(operation)
+    no_source['input_handles'] = []
+    template = _single_source(operation)
+    template['input_handles'][0]['role'] = 'template'
+    two = _single_source(operation)
+    two['input_handles'].append(
+        {
+            'local_id': 'source_2',
+            'record_handle': 'record_0002',
+            'generation_handle': 'generation_0002',
+            'role': 'source_artifact',
+        },
+    )
+    retrieval_part = _single_source(operation)
+    retrieval_part['retrieval_part'] = 'editable_source'
+    cases = [with_plan, with_patch, no_source, template, two]
+    if operation != 'retrieve_session':
+        cases.append(retrieval_part)
+    for payload in cases:
+        _refused_by_model(payload)
+
+
+def test_effect_accepted_server_and_operation_ids_must_differ() -> None:
+    """The queue handle never reuses the client operation id as the server id."""
+    with pytest.raises(ValidationError):
+        artifacts.VaultEffectAccepted.model_validate(
+            {
+                'server_intent_id': 'same_0001',
+                'operation_id': 'same_0001',
+                'operation': 'create',
+                'state': 'queued',
+            },
+        )
+
+
+def _template_rework(template_handle: dict[str, str]) -> dict[str, Any]:
+    payload = _rework('v2', 'docx')
+    patch = cast('dict[str, Any]', payload['patch'])
+    replacement = cast('dict[str, Any]', patch['replacement_plan'])
+    local_id = template_handle['local_id']
+    cast('dict[str, Any]', replacement['body'])['template_local_id'] = local_id
+    cast('list[dict[str, Any]]', replacement['input_refs']).append(
+        {'local_id': local_id, 'ref_type': 'template', 'template_id': 'tpl', 'revision': 1},
+    )
+    cast('list[dict[str, Any]]', payload['input_handles']).append(
+        {**template_handle, 'role': 'template'},
+    )
+    return payload
+
+
+def test_input_handles_are_unique_per_local_id_record_and_generation() -> None:
+    """Two admitted handles never share a local id, record handle or generation handle."""
+    distinct = {
+        'local_id': 'template_1',
+        'record_handle': 'record_template_1',
+        'generation_handle': 'generation_template_1',
+    }
+    assert artifacts.VaultWorkRequest.model_validate(_template_rework(distinct))
+    for field, value in (
+        ('local_id', 'source_1'),
+        ('record_handle', 'record_0001'),
+        ('generation_handle', 'generation_0007'),
+    ):
+        _refused_by_model(_template_rework({**distinct, field: value}))
+
+
+def test_rework_without_a_lineage_source_is_refused() -> None:
+    """A rework whose only handle is not the source artifact is a validation error."""
+    payload = _rework('v2', 'docx')
+    cast('list[dict[str, Any]]', payload['input_handles'])[0]['role'] = 'template'
+    _refused_by_model(payload)
+
+
+@pytest.mark.parametrize('version', ['v2', 'v3'])
+def test_vault_plans_must_request_vault_custody(version: str) -> None:
+    """An ordinary-custody plan never enters the vault, as a create or as a replacement."""
+    create = _create(version, 'docx')
+    cast('dict[str, Any]', create['plan'])['custody_request'] = 'ordinary'
+    rework = _rework(version, 'docx')
+    patch = cast('dict[str, Any]', rework['patch'])
+    cast('dict[str, Any]', patch['replacement_plan'])['custody_request'] = 'ordinary'
+    for payload in (create, rework):
+        _refused_by_model(payload)
+
+
+@pytest.mark.parametrize(
+    'bounds',
+    [
+        {'max_output_bytes': 1_000_000},
+        {'max_output_bytes': 1_000_000, 'max_pages': 10, 'max_sheets': 2},
+        {'max_output_bytes': 1_000_000, 'max_pages': 10, 'max_pixels': 10},
+    ],
+)
+def test_vault_plan_bounds_are_exactly_the_kinds_bounds(bounds: dict[str, int]) -> None:
+    """A vault document plan carries max_pages and no other kind's bounds."""
+    create = _create('v2', 'docx')
+    cast('dict[str, Any]', create['plan'])['resource_bounds'] = bounds
+    create['bounds'] = bounds
+    source = _rework('v2', 'docx')
+    cast('dict[str, Any]', source['patch'])['source_resource_bounds'] = bounds
+    for payload in (create, source):
+        _refused_by_model(payload)

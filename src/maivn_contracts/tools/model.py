@@ -7,6 +7,7 @@ from typing import Annotated, Any, Literal, TypeAlias
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, model_validator
 
 from maivn_contracts.artifacts import ArtifactRef
+from maivn_contracts.tools.authorization import ToolSafetyLabels
 
 IdempotencyHint: TypeAlias = Literal['idempotent', 'non_idempotent', 'unknown']
 AuthScheme: TypeAlias = Literal['api_key', 'bearer', 'basic', 'oauth', 'custom']
@@ -57,7 +58,7 @@ MCPServerRef: TypeAlias = Annotated[
 ]
 
 
-class ToolSpec(BaseModel):
+class ToolSpec(ToolSafetyLabels):
     """Shared fields for every owned tool specification."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)
@@ -400,7 +401,7 @@ ToolOutcomeVariant: TypeAlias = Annotated[
 ]
 
 
-class ToolDispatch(BaseModel):
+class ToolDispatch(ToolSafetyLabels):
     """JSON-only external tool delivery envelope."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)

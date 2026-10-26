@@ -22,7 +22,8 @@
     "trace.trigger_skipped",
     "trace.hook",
     "trace.routing",
-    "trace.model_stream"
+    "trace.model_stream",
+    "trace.decision"
   ],
   "mappings": {
     "connection.event_received": {
@@ -263,7 +264,7 @@
     "progress_update": {
       "target": null,
       "drop": true,
-      "drop_reason": "Internal progress accounting; usage lands on the run node instead."
+      "drop_reason": "Internal progress accounting; usage lands on the run node instead. The trace assembler lifts only closed stages out of it: model-call lifecycle and decision_completed, which becomes trace.decision (model, duration and origin; never inputs or outputs)."
     },
     "status_message": {
       "target": null,

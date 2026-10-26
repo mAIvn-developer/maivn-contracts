@@ -29,6 +29,7 @@ _MEMORY_HIT_COUNT = 4
 _MEMORY_KIND_COUNT = 2
 _ANSWERED_PAUSE_MS = 20_000
 _UNANSWERED_PAUSE_MS = 30_000
+_DECISION_MS = 412
 
 
 def _event(  # noqa: PLR0913 - event construction mirrors the wire record.
@@ -577,6 +578,115 @@ def test_a_failed_hook_is_a_failed_node_not_a_completed_one() -> None:
 
     assert hooks['guard'] == 'failed'
     assert hooks['audit'] == 'completed'
+
+
+def _decision(index: int, *, ts: str, status: str = 'completed', **extra: Any) -> Event:
+    return _event(
+        index,
+        'progress_update',
+        payload={
+            'stage': 'decision_completed',
+            'decision_model': 'jev-1.13.0',
+            'duration_ms': _DECISION_MS,
+            'status': status,
+            'origin': 'platform',
+            **extra,
+        },
+        ts=ts,
+    )
+
+
+def test_a_decision_call_is_its_own_step_that_discloses_nothing() -> None:
+    """A decision node says which model ran and for how long - never what it decided."""
+    events = [
+        _event(1, 'assignment_received', ts='2026-07-13T22:00:00Z'),
+        _decision(
+            2,
+            ts='2026-07-13T22:00:02.500Z',
+            question='Is Dana Reyes eligible?',
+            choices=['yes', 'no'],
+            verdict='yes',
+            confidence=0.93,
+            role='E04',
+        ),
+        _event(3, 'final', ts='2026-07-13T22:00:03Z'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    decision = next(child for child in trace.root.children if child.kind == 'decision')
+
+    assert decision.name == 'Decision'
+    assert decision.status == 'completed'
+    assert decision.detail == {
+        'model': 'jev-1.13.0',
+        'duration_ms': _DECISION_MS,
+        'origin': 'platform',
+    }
+    assert decision.started_at == '2026-07-13T22:00:02.088Z'
+    assert decision.ended_at == '2026-07-13T22:00:02.500Z'
+    assert decision.duration_ms == _DECISION_MS
+    assert decision.children == []
+    assert 'Dana Reyes' not in decision.model_dump_json()
+    assert 'E04' not in decision.model_dump_json()
+
+
+def test_adjacent_decisions_stay_separate_steps() -> None:
+    """Two back-to-back decision calls read as two, never one merged span."""
+    events = [
+        _event(1, 'assignment_received', ts='2026-07-13T22:00:00Z'),
+        _decision(2, ts='2026-07-13T22:00:01Z'),
+        _decision(3, ts='2026-07-13T22:00:02Z'),
+        _event(4, 'final', ts='2026-07-13T22:00:03Z'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    decisions = [child for child in trace.root.children if child.kind == 'decision']
+
+    assert [d.node_id for d in decisions] == ['decision--evt-2', 'decision--evt-3']
+    assert [d.started_at for d in decisions] == [
+        '2026-07-13T22:00:00.588Z',
+        '2026-07-13T22:00:01.588Z',
+    ]
+
+
+def test_a_malformed_decision_keeps_only_the_fields_it_can_vouch_for() -> None:
+    """Unknown origins and unusable durations are dropped, never echoed."""
+    events = [
+        _event(1, 'assignment_received'),
+        _decision(2, ts='2026-07-13T22:00:01.250000+00:00', origin='tenant', duration_ms=True),
+        _decision(3, ts='2026-07-13T22:00:02.500000+00:00', origin='sdk', duration_ms=5),
+        _decision(4, ts='not-a-timestamp'),
+        _event(5, 'final'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    first, second, third = (c for c in trace.root.children if c.kind == 'decision')
+
+    assert first.detail == {'model': 'jev-1.13.0'}
+    assert first.started_at == first.ended_at == '2026-07-13T22:00:01.250000+00:00'
+    assert first.duration_ms is None
+    assert second.detail == {'model': 'jev-1.13.0', 'duration_ms': 5, 'origin': 'sdk'}
+    assert second.started_at == '2026-07-13T22:00:02.495000+00:00'
+    assert third.started_at == 'not-a-timestamp'
+
+
+def test_a_failed_decision_is_a_failed_node() -> None:
+    """A decision call that failed must not read as a success."""
+    events = [
+        _event(1, 'assignment_received'),
+        _decision(2, ts='2026-07-13T22:00:01Z', status='failed'),
+        _event(3, 'final'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    decision = next(child for child in trace.root.children if child.kind == 'decision')
+
+    assert decision.status == 'failed'
+    assert decision.detail == {
+        'model': 'jev-1.13.0',
+        'duration_ms': _DECISION_MS,
+        'origin': 'platform',
+    }
 
 
 def test_failed_and_skipped_triggers_explain_a_run_that_never_happened() -> None:
@@ -2131,7 +2241,7 @@ def test_a_child_run_says_which_kind_of_run_it_is() -> None:
 
 
 def test_a_run_says_whether_it_was_an_agent_or_a_swarm() -> None:
-    """`_run_name` returns agent_id or swarm_id as a bare string and drops which it was.
+    """`run_name` returns agent_id or swarm_id as a bare string and drops which it was.
 
     Nothing downstream could then tell a swarm root from an agent - counting them once
     reported a swarm root plus two delegates as three agents - and the trace cannot be
@@ -2171,6 +2281,31 @@ def test_a_run_says_whether_it_was_an_agent_or_a_swarm() -> None:
     # The byte-frozen single-level trace must not gain the field.
     single = assemble_session_trace(events, session_id=_PARENT)
     assert 'scope_type' not in single.root.detail
+
+
+def test_a_decision_only_run_is_a_decision_scope_not_an_agent() -> None:
+    """A decision run names itself in `agent_id` but has no agent: its scope is `decision`."""
+    events = [
+        _event(
+            1,
+            'assignment_received',
+            payload={
+                'run_config': {
+                    'agent_id': 'Triage tickets',
+                    'user_id': 'u',
+                    'child_run_kind': 'decision_run',
+                },
+            },
+            ts='2026-07-13T22:00:00Z',
+        ),
+        _event(2, 'session.completed', ts='2026-07-13T22:00:01Z'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT, recursive=True)
+
+    assert trace.root.name == 'Triage tickets'
+    assert trace.root.detail['scope_type'] == 'decision'
+    assert trace.root.detail['child_run_kind'] == 'decision_run'
 
 
 def _tool_named(root: TraceNode, name: str) -> TraceNode:
@@ -2298,3 +2433,213 @@ def test_ordinary_tool_completion_leaves_a_pause_waiting() -> None:
 
     root = assemble_session_trace(events, session_id=_PARENT).root
     assert _interrupts(root)[0].status == 'waiting'
+
+
+def _private_pause_events(*, redacted_keys: list[str] | None = None) -> list[Event]:
+    events = [
+        _event(1, 'assignment_received', ts='2026-07-13T22:00:00Z'),
+        _event(
+            2, 'interrupt_required', payload={'interrupt_id': 'int-1'}, ts='2026-07-13T22:00:01Z'
+        ),
+        _event(
+            3,
+            'system_tool_start',
+            payload={
+                'tool_name': 'request_human_input',
+                'tool_call': {'arguments': {'question': 'What is your SSN?'}},
+            },
+            correlation_id='call-ask',
+            ts='2026-07-13T22:00:20Z',
+        ),
+        _event(
+            4,
+            'system_tool_complete',
+            payload={
+                'tool_name': 'request_human_input',
+                'result': {'answer': '123-45-6789', 'answer_format': {'type': 'string'}},
+            },
+            correlation_id='call-ask',
+            ts='2026-07-13T22:00:21Z',
+        ),
+    ]
+    if redacted_keys is not None:
+        events.append(
+            _event(
+                5,
+                'enrichment',
+                payload={
+                    'phase': 'tool_result_redaction_applied',
+                    'redaction': {'redacted_value_count': 1, 'redacted_keys': redacted_keys},
+                },
+                ts='2026-07-13T22:00:22Z',
+            ),
+        )
+    return events
+
+
+@pytest.mark.parametrize(
+    ('redacted_key', 'raw_value'),
+    [('answer', '123-45-6789'), ('question', 'What is your SSN?')],
+)
+def test_redaction_receipt_reaches_the_pause_a_human_answered(
+    redacted_key: str,
+    raw_value: str,
+) -> None:
+    """A receipt that removes a human-input value removes the pause's copy of it too."""
+    trace = assemble_session_trace(
+        _private_pause_events(redacted_keys=[redacted_key]),
+        session_id=_PARENT,
+    )
+    pause = _interrupts(trace.root)[0]
+
+    assert pause.status == 'completed'
+    assert pause.detail[redacted_key] == '[REDACTED]'
+    assert raw_value not in trace.model_dump_json()
+
+
+def test_staff_projection_drops_the_pause_question_and_answer() -> None:
+    """Staff reading another tenant's run never see what the run asked or what came back."""
+    tenant = assemble_session_trace(_private_pause_events(), session_id=_PARENT)
+    staff = project_trace_for_staff(tenant)
+    pause = _interrupts(staff.root)[0]
+
+    assert pause.status == 'completed'
+    assert pause.detail['answered_by'] == 'human'
+    assert 'question' not in pause.detail
+    assert 'answer' not in pause.detail
+    serialized = staff.model_dump_json()
+    for leaked in ('What is your SSN?', '123-45-6789'):
+        assert leaked not in serialized
+
+
+def _inspect_events(
+    first: int,
+    call_id: str,
+    serial: str,
+    *,
+    session_id: str = _PARENT,
+    parent_session_id: str | None = None,
+) -> list[Event]:
+    return [
+        _event(
+            first,
+            'system_tool_start',
+            session_id=session_id,
+            parent_session_id=parent_session_id,
+            payload={'tool_name': 'inspect', 'tool_call': {'arguments': {}}},
+            correlation_id=call_id,
+        ),
+        _event(
+            first + 1,
+            'system_tool_complete',
+            session_id=session_id,
+            parent_session_id=parent_session_id,
+            payload={
+                'tool_name': 'inspect',
+                'outcome': {'status': 'ok', 'result': {'serial_number': serial}},
+            },
+            correlation_id=call_id,
+        ),
+    ]
+
+
+def _serial_receipt(
+    index: int, *, session_id: str = _PARENT, parent_session_id: str | None = None
+) -> Event:
+    return _event(
+        index,
+        'enrichment',
+        session_id=session_id,
+        parent_session_id=parent_session_id,
+        payload={
+            'phase': 'tool_result_redaction_applied',
+            'redaction': {'redacted_value_count': 1, 'redacted_keys': ['serial_number']},
+        },
+    )
+
+
+def test_redaction_receipt_scrubs_the_tool_it_follows_not_an_earlier_one() -> None:
+    """A receipt names the most recent tool's result; earlier tools keep their own values."""
+    events = [
+        _event(1, 'assignment_received'),
+        *_inspect_events(2, 'call-public', 'SN-PUBLIC'),
+        *_inspect_events(4, 'call-private', 'SN-PRIVATE-3'),
+        _serial_receipt(6),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    first, second = (child for child in trace.root.children if child.kind == 'tool')
+
+    assert first.detail['result'] == {'serial_number': 'SN-PUBLIC'}
+    assert second.detail['result'] == {'serial_number': '[REDACTED]'}
+    assert 'SN-PRIVATE-3' not in trace.model_dump_json()
+
+
+def test_redaction_receipt_scrubs_a_tool_inside_a_child_run() -> None:
+    """Receipts emitted by a delegated child session redact that child's tool too."""
+    events = [
+        _event(1, 'assignment_received'),
+        _event(
+            2,
+            'assignment_received',
+            session_id=_CHILD,
+            parent_session_id=_PARENT,
+            payload={'run_config': {'agent_id': 'researcher'}},
+        ),
+        *_inspect_events(
+            3, 'call-child-private', 'SN-PRIVATE-4', session_id=_CHILD, parent_session_id=_PARENT
+        ),
+        _serial_receipt(5, session_id=_CHILD, parent_session_id=_PARENT),
+        _event(6, 'final', session_id=_CHILD, parent_session_id=_PARENT),
+        _event(7, 'final'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    child_run = next(node for node in trace.root.children if node.kind == 'run')
+    tool = next(node for node in child_run.children if node.kind == 'tool')
+
+    assert tool.detail['result'] == {'serial_number': '[REDACTED]'}
+    assert 'SN-PRIVATE-4' not in trace.model_dump_json()
+
+
+def test_redaction_receipt_reaches_only_the_pause_of_its_own_tool() -> None:
+    """A receipt for one human-input call leaves another call's pause untouched."""
+
+    def ask(first: int, interrupt_id: str, call_id: str, answer: str) -> list[Event]:
+        return [
+            _event(first, 'interrupt_required', payload={'interrupt_id': interrupt_id}),
+            _event(
+                first + 1,
+                'system_tool_start',
+                payload={
+                    'tool_name': 'request_human_input',
+                    'tool_call': {'arguments': {'question': 'Q?'}},
+                },
+                correlation_id=call_id,
+            ),
+            _event(
+                first + 2,
+                'system_tool_complete',
+                payload={'tool_name': 'request_human_input', 'result': {'answer': answer}},
+                correlation_id=call_id,
+            ),
+        ]
+
+    events = [
+        _event(1, 'assignment_received'),
+        *ask(2, 'int-private', 'call-ask-private', '123-45-6789'),
+        _event(
+            5,
+            'enrichment',
+            payload={
+                'phase': 'tool_result_redaction_applied',
+                'redaction': {'redacted_value_count': 1, 'redacted_keys': ['answer']},
+            },
+        ),
+        *ask(6, 'int-public', 'call-ask-public', 'blue'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+    answers = [pause.detail.get('answer') for pause in _interrupts(trace.root)]
+
+    assert answers == ['[REDACTED]', 'blue']

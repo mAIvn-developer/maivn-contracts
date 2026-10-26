@@ -13,7 +13,8 @@
     "user_id": {
       "type": "string",
       "minLength": 1,
-      "description": "Authenticated user identifier used for runtime ownership and shielding."
+      "maxLength": 256,
+      "description": "Developer-asserted customer subject within the authenticated project; not independently verified end-user authentication. sdk-user disables private memory."
     },
     "thread_id": {
       "type": "string",
@@ -124,9 +125,10 @@
       "enum": [
         "root",
         "swarm_member",
-        "tool_job"
+        "tool_job",
+        "decision_run"
       ],
-      "description": "Absent means an ordinary root invocation. What KIND of child run this is, not merely that it is one: a swarm member and a decomposed tool job both report job_depth 1."
+      "description": "Absent means an ordinary root invocation. What KIND of child run this is, not merely that it is one: a swarm member and a decomposed tool job both report job_depth 1. `decision_run` also marks a decision-only run, which is a root run with no model loop."
     },
     "plan_node_id": {
       "type": "string",
@@ -159,6 +161,14 @@
       "type": "string",
       "minLength": 1,
       "description": "Optional self-reported invoking client, display/filter only, never consulted for authorization. Conventional starting set: studio, alpha, portal, sdk. Not an enforced enum - unrecognized values from newer clients are accepted and read back as-is; absent on historical rows."
+    },
+    "max_expense_usd": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9][0-9]{0,17})(?:\\.[0-9]{1,12})?$",
+      "not": {
+        "pattern": "^0(?:\\.0+)?$"
+      },
+      "description": "Optional lower exact USD execution expense ceiling; excludes paid hosted search/sandbox and background enrichment."
     }
   },
   "$defs": {
@@ -168,7 +178,13 @@
       "properties": {
         "tier": {
           "type": "string",
-          "enum": ["auto", "fast", "balanced", "max", "ultra"]
+          "enum": [
+            "auto",
+            "fast",
+            "balanced",
+            "max",
+            "ultra"
+          ]
         },
         "model_id": {
           "type": "string",
@@ -176,8 +192,26 @@
         }
       },
       "oneOf": [
-        {"required": ["tier"], "not": {"required": ["model_id"]}},
-        {"required": ["model_id"], "not": {"required": ["tier"]}}
+        {
+          "required": [
+            "tier"
+          ],
+          "not": {
+            "required": [
+              "model_id"
+            ]
+          }
+        },
+        {
+          "required": [
+            "model_id"
+          ],
+          "not": {
+            "required": [
+              "tier"
+            ]
+          }
+        }
       ]
     },
     "planningChoice": {
@@ -185,16 +219,23 @@
       "additionalProperties": false,
       "properties": {
         "tier": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "enum": [
             "auto",
             "standard",
             "advanced",
-            "deep"
+            "deep",
+            null
           ]
         },
         "model_id": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         }
       },
@@ -214,6 +255,9 @@
                 "advanced",
                 "deep"
               ]
+            },
+            "model_id": {
+              "type": "null"
             }
           }
         },
@@ -224,6 +268,9 @@
             "model_id"
           ],
           "properties": {
+            "tier": {
+              "type": "null"
+            },
             "model_id": {
               "type": "string",
               "minLength": 1

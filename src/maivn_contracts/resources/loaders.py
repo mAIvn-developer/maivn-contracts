@@ -4,19 +4,20 @@ from __future__ import annotations
 
 import copy
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.messages import load_attachment_schema
 from maivn_contracts.resources.model import DerivedArtifact, ProcessingState, ResourcePolicy
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'resources'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'resources'
 _RESOURCE_POLICY_SCHEMA_ID = 'https://schemas.maivn.dev/resources/resource_policy.schema.json'
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):

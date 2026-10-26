@@ -353,9 +353,6 @@
         "expires_at": {
           "$ref": "#/$defs/rfc3339UtcTimestamp"
         },
-        "retrieval_part": {
-          "const": "editable_source"
-        },
         "file_intake": {
           "$ref": "#/$defs/fileIntakeManifest"
         }

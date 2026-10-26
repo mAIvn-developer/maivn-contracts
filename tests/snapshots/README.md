@@ -1,0 +1,1 @@
+Wire snapshots of every contract model, compared byte-for-byte by `tests/contract/test_wire_snapshots.py` (its docstring describes the format: one JSON line per model, export, shared `$defs` entry or instance set). Regenerate only for an approved contract change, then review the diff: `MAIVN_CONTRACTS_UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/test_wire_snapshots.py`.

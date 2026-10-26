@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from maivn_contracts.swarms import Swarm
+from maivn_contracts.swarms import Swarm, validate_swarm
 
 _RESOLUTION_VERSION = 3
 
@@ -77,3 +77,23 @@ def test_swarm_rejects_extra_fields_and_invalid_agent_versions() -> None:
 
     with pytest.raises(ValidationError):
         Swarm.model_validate(base | {'agents': [{'agent_id': 'agt-triage', 'version': 0}]})
+
+
+def test_validate_swarm_returns_the_typed_model() -> None:
+    """The public validator projects a mapping onto the closed Swarm model."""
+    payload: dict[str, Any] = {
+        'swarm_id': 'swm-a',
+        'org_id': 'org-acme',
+        'name': 'A',
+        'model': {'tier': 'balanced'},
+        'agents': [{'agent_id': 'agt-a', 'version': 'latest'}],
+        'global_tools': [],
+        'global_tool_sets': [],
+        'shared_skill_ids': [],
+        'shared_skill_set_ids': [],
+        'created_at': '2026-07-06T15:00:00Z',
+        'updated_at': '2026-07-06T15:00:00Z',
+    }
+    assert validate_swarm(payload) == Swarm.model_validate(payload)
+    with pytest.raises(ValidationError):
+        validate_swarm({**payload, 'unexpected': True})

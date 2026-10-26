@@ -192,18 +192,10 @@ class ImagePlanBodyV2(ClosedModel):
 
     @model_validator(mode='after')
     def _validate_graph(self) -> ImagePlanBodyV2:
-        layer_ids = tuple(layer.layer_id for layer in self.layers)
-        operation_ids = tuple(operation.operation_id for operation in self.operations)
-        fragment_ids = tuple(
-            fragment.structural_id
-            for layer in self.layers
-            if isinstance(layer, ImageTextLayerV2)
-            for fragment in layer.payload.fragments
-        )
-        identifiers = (*layer_ids, *operation_ids, *fragment_ids)
+        identifiers = self.structural_ids()
         if len(identifiers) != len(set(identifiers)):
             raise ArtifactRefInvariantError
-        layer_id_set = set(layer_ids)
+        layer_id_set = {layer.layer_id for layer in self.layers}
         for operation in self.operations:
             if isinstance(operation, ImageCompositeOperationV2):
                 if len(operation.layer_ids) != len(set(operation.layer_ids)) or not set(

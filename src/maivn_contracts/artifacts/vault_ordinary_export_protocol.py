@@ -90,7 +90,7 @@ def _parse_timestamp(value: str) -> datetime:
     return datetime.fromisoformat(value[:-1] + '+00:00').astimezone(timezone.utc)
 
 
-def _canonical_base64url(value: object, *, size: int) -> bytes:
+def _canonical_base64url(value: object, *, size: int | None) -> bytes:
     if not isinstance(value, str) or not value or '=' in value:
         raise ValueError(_TRANSPORT_INVALID)
     try:
@@ -107,7 +107,8 @@ def _canonical_base64url(value: object, *, size: int) -> bytes:
         )
     except (binascii.Error, ValueError) as error:
         raise ValueError(_TRANSPORT_INVALID) from error
-    if len(decoded) != size or base64.urlsafe_b64encode(decoded).rstrip(b'=') != encoded:
+    canonical = base64.urlsafe_b64encode(decoded).rstrip(b'=') == encoded
+    if not canonical or (size is not None and len(decoded) != size):
         raise ValueError(_TRANSPORT_INVALID)
     return decoded
 
@@ -120,8 +121,13 @@ def _validate_nonce(value: str) -> str:
 NonceBase64Url: TypeAlias = Annotated[StrictStr, AfterValidator(_validate_nonce)]
 
 
-def _value_free_invalid() -> dict[str, str]:
-    return {'schema_version': 'invalid'}
+def _value_free_preflight(envelope: type[_ClosedModel], value: object) -> object:
+    """Replace any invalid input with one fixed value-free document before validation."""
+    try:
+        parsed = envelope.model_validate(value)
+    except (TypeError, ValueError):
+        return {'schema_version': 'invalid'}
+    return parsed.model_dump(mode='json')
 
 
 def _require_bytes(value: object, error_code: str) -> bytes:
@@ -168,11 +174,7 @@ class VaultOrdinaryExportServiceAssertion(_ServiceAssertionEnvelope):
     @model_validator(mode='before')
     @classmethod
     def _preflight_value_free_input(cls, value: object) -> object:
-        try:
-            parsed = _ServiceAssertionEnvelope.model_validate(value)
-        except (TypeError, ValueError):
-            return _value_free_invalid()
-        return parsed.model_dump(mode='json')
+        return _value_free_preflight(_ServiceAssertionEnvelope, value)
 
     def __repr__(self) -> str:
         """Keep service claims out of diagnostic representations."""
@@ -214,11 +216,7 @@ class VaultOrdinaryExportTrustEntry(_TrustEntryEnvelope):
     @model_validator(mode='before')
     @classmethod
     def _preflight_value_free_input(cls, value: object) -> object:
-        try:
-            parsed = _TrustEntryEnvelope.model_validate(value)
-        except (TypeError, ValueError):
-            return _value_free_invalid()
-        return parsed.model_dump(mode='json')
+        return _value_free_preflight(_TrustEntryEnvelope, value)
 
     def __repr__(self) -> str:
         """Keep pinned trust claims out of diagnostic representations."""
@@ -258,11 +256,7 @@ class VaultOrdinaryExportTrustDocument(_TrustDocumentEnvelope):
     @model_validator(mode='before')
     @classmethod
     def _preflight_value_free_input(cls, value: object) -> object:
-        try:
-            parsed = _TrustDocumentEnvelope.model_validate(value)
-        except (TypeError, ValueError):
-            return _value_free_invalid()
-        return parsed.model_dump(mode='json')
+        return _value_free_preflight(_TrustDocumentEnvelope, value)
 
     def __repr__(self) -> str:
         """Keep the mounted trust set out of diagnostic representations."""
@@ -306,33 +300,11 @@ def encode_vault_ordinary_export_signature(signature: bytes) -> str:
     return base64.urlsafe_b64encode(checked).rstrip(b'=').decode('ascii')
 
 
-def _decode_unbounded_base64url(value: object) -> bytes:
-    if not isinstance(value, str) or not value or '=' in value:
-        raise ValueError(_TRANSPORT_INVALID)
-    try:
-        encoded = value.encode('ascii')
-    except UnicodeEncodeError as error:
-        raise ValueError(_TRANSPORT_INVALID) from error
-    if any(character not in _BASE64URL_CHARS for character in encoded):
-        raise ValueError(_TRANSPORT_INVALID)
-    try:
-        decoded = base64.b64decode(
-            encoded + (b'=' * (-len(encoded) % 4)),
-            altchars=b'-_',
-            validate=True,
-        )
-    except (binascii.Error, ValueError) as error:
-        raise ValueError(_TRANSPORT_INVALID) from error
-    if base64.urlsafe_b64encode(decoded).rstrip(b'=') != encoded:
-        raise ValueError(_TRANSPORT_INVALID)
-    return decoded
-
-
 def decode_vault_ordinary_export_assertion(
     value: object,
 ) -> VaultOrdinaryExportServiceAssertion:
     """Decode one canonical assertion transport with duplicate-key refusal."""
-    raw = _decode_unbounded_base64url(value)
+    raw = _canonical_base64url(value, size=None)
 
     def _closed_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
         result: dict[str, object] = {}
@@ -372,10 +344,7 @@ def _strict_transport_header_value(raw_name: bytes, raw_value: bytes) -> str:
         )
     ):
         raise ValueError(_TRANSPORT_INVALID)
-    try:
-        return raw_value.decode('ascii')
-    except UnicodeDecodeError as error:
-        raise ValueError(_TRANSPORT_INVALID) from error
+    return raw_value.decode('ascii')
 
 
 def decode_vault_ordinary_export_assertion_headers(

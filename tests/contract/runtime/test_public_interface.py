@@ -36,6 +36,7 @@ def _param_names(method: Callable[..., object]) -> list[str]:
 def test_public_interface_exports_are_pinned() -> None:
     """Expose the pinned public runtime module exports."""
     assert set(runtime.__all__) == {
+        'ExpenseCeilingUsd',
         'CancelCommand',
         'ChildRunKind',
         'Command',

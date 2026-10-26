@@ -4,20 +4,21 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.artifacts.loaders import materialize_artifact_lifecycle_event_schema
 from maivn_contracts.events.model import Event
 
 ProjectionName = Literal['audit', 'billing', 'canvas', 'replay', 'trace', 'webhook']
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'events'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'events'
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):
@@ -131,11 +132,7 @@ def _schema_for_validation(schema: dict[str, Any]) -> dict[str, Any]:
         raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'event.schema.json')
     definitions = cast('dict[str, Any]', cast('dict[str, Any]', loaded).setdefault('$defs', {}))
     lifecycle = materialize_artifact_lifecycle_event_schema(
-        _read_json(
-            Path(__file__).resolve().parents[3]
-            / 'artifacts'
-            / 'artifact_lifecycle_event.schema.json'
-        )
+        _read_json(SCHEMA_ROOT / 'artifacts' / 'artifact_lifecycle_event.schema.json')
     )
     lifecycle.pop('$id', None)
     lifecycle.pop('$schema', None)

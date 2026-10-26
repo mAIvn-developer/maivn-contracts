@@ -142,29 +142,34 @@ def _quantity(payload: Mapping[str, Any], unit: Mapping[str, Any]) -> int | None
     return total if found else None
 
 
+_MISSING = object()
+
+
+def _value_at_path(payload: Mapping[str, Any], path: str) -> object:
+    value: object = payload
+    for part in path.split('.'):
+        if not isinstance(value, Mapping) or part not in value:
+            return _MISSING
+        value = cast('Mapping[str, object]', value)[part]
+    return value
+
+
 def _integer_at_path(
     payload: Mapping[str, Any],
     path: str,
     *,
     missing_is_zero: bool = False,
 ) -> int | None:
-    value: object = payload
-    for part in path.split('.'):
-        if not isinstance(value, Mapping) or part not in value:
-            return 0 if missing_is_zero else None
-        value = cast('Mapping[str, object]', value)[part]
+    value = _value_at_path(payload, path)
+    if value is _MISSING:
+        return 0 if missing_is_zero else None
     if isinstance(value, bool) or not isinstance(value, int):
         return None
     return value
 
 
 def _path_exists(payload: Mapping[str, Any], path: str) -> bool:
-    value: object = payload
-    for part in path.split('.'):
-        if not isinstance(value, Mapping) or part not in value:
-            return False
-        value = cast('Mapping[str, object]', value)[part]
-    return True
+    return _value_at_path(payload, path) is not _MISSING
 
 
 __all__ = [

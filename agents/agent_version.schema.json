@@ -449,16 +449,23 @@
       "additionalProperties": false,
       "properties": {
         "tier": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "enum": [
             "auto",
             "standard",
             "advanced",
-            "deep"
+            "deep",
+            null
           ]
         },
         "model_id": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         }
       },
@@ -478,6 +485,9 @@
                 "advanced",
                 "deep"
               ]
+            },
+            "model_id": {
+              "type": "null"
             }
           }
         },
@@ -488,6 +498,9 @@
             "model_id"
           ],
           "properties": {
+            "tier": {
+              "type": "null"
+            },
             "model_id": {
               "type": "string",
               "minLength": 1
@@ -655,6 +668,11 @@
       "additionalProperties": false,
       "required": ["name", "description", "parameters_schema", "execution"],
       "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["read", "write", "delete", "export", "import", "admin", "impersonate"]}
+        },
+        "destructive": {"type": "boolean"},
         "tool_id": {
           "type": "string",
           "minLength": 1,

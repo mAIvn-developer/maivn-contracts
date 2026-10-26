@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import base64
-import binascii
 import hashlib
 import hmac
 import json
@@ -62,16 +61,11 @@ def _decode_canonical_base64url(value: object, error_code: str) -> bytes:
     ):
         raise ValueError(error_code)
     encoded = value.encode('ascii')
-    try:
-        decoded = base64.b64decode(
-            encoded + (b'=' * (-len(encoded) % 4)),
-            altchars=b'-_',
-            validate=True,
-        )
-    except (binascii.Error, ValueError):
-        decoded = None
-    if decoded is None:
-        raise ValueError(error_code)
+    decoded = base64.b64decode(
+        encoded + (b'=' * (-len(encoded) % 4)),
+        altchars=b'-_',
+        validate=True,
+    )
     if base64.urlsafe_b64encode(decoded).rstrip(b'=').decode('ascii') != value:
         raise ValueError(error_code)
     return decoded
@@ -458,6 +452,50 @@ class VaultIntentStatusRequest(_ClosedVaultProtocolModel):
     server_intent_id: OpaqueTokenId
 
 
+def _retain_credential_only_when_valid(
+    value: Any,
+    *,
+    credential_field: str,
+    digest_field: str,
+    envelope: type[_ClosedVaultProtocolModel],
+    digest: Callable[[str], Sha256Hex],
+) -> Any:
+    """Pass a raw credential on only with a valid envelope and a matching first delivery.
+
+    Any other input that carries a credential becomes one fixed value-free document, so
+    the credential can never surface in a validation error.
+    """
+    if not isinstance(value, dict):
+        return value
+    raw = cast('dict[str, object]', value)
+    credential = raw.get(credential_field)
+    if credential is None:
+        return raw
+    sanitized = dict(raw)
+    sanitized.pop(credential_field, None)
+    envelope_valid = False
+    try:
+        envelope.model_validate(sanitized)
+        envelope_valid = True
+    except PydanticValidationError:
+        pass
+    valid_delivery = False
+    try:
+        if envelope_valid and isinstance(credential, str):
+            _decode_canonical_base64url(credential, _INVALID_BASE64URL)
+            expected_digest = raw.get(digest_field)
+            valid_delivery = (
+                raw.get('credential_delivery') == 'delivered'
+                and isinstance(expected_digest, str)
+                and hmac.compare_digest(digest(credential), expected_digest)
+            )
+    except (TypeError, ValueError):
+        valid_delivery = False
+    if valid_delivery:
+        return raw
+    return {'credential_delivery': 'invalid_sensitive_delivery'}
+
+
 class _VaultGrantDeliveryEnvelope(_ClosedVaultProtocolModel):
     """Credential-free preflight for every stable grant-delivery field."""
 
@@ -484,35 +522,13 @@ class VaultGrantCredentialDelivery(_ClosedVaultProtocolModel):
     @classmethod
     def _remove_raw_credential_from_invalid_input(cls, value: Any) -> Any:
         """Retain a raw grant only after its complete safe envelope is valid."""
-        if not isinstance(value, dict):
-            return value
-        raw = cast('dict[str, object]', value)
-        credential = raw.get('grant_credential')
-        if credential is None:
-            return raw
-        sanitized = dict(raw)
-        sanitized.pop('grant_credential', None)
-        envelope_valid = False
-        try:
-            _VaultGrantDeliveryEnvelope.model_validate(sanitized)
-            envelope_valid = True
-        except PydanticValidationError:
-            pass
-        valid_delivery = False
-        try:
-            if envelope_valid and isinstance(credential, str):
-                _decode_canonical_base64url(credential, _INVALID_BASE64URL)
-                digest = raw.get('grant_credential_digest')
-                valid_delivery = (
-                    raw.get('credential_delivery') == 'delivered'
-                    and isinstance(digest, str)
-                    and hmac.compare_digest(vault_grant_header_digest(credential), digest)
-                )
-        except (TypeError, ValueError):
-            valid_delivery = False
-        if valid_delivery:
-            return raw
-        return {'credential_delivery': 'invalid_sensitive_delivery'}
+        return _retain_credential_only_when_valid(
+            value,
+            credential_field='grant_credential',
+            digest_field='grant_credential_digest',
+            envelope=_VaultGrantDeliveryEnvelope,
+            digest=vault_grant_header_digest,
+        )
 
     @model_validator(mode='after')
     def _validate_one_shot_delivery(self) -> VaultGrantCredentialDelivery:
@@ -553,38 +569,13 @@ class VaultRetrievalSessionCredentialDelivery(_ClosedVaultProtocolModel):
     @classmethod
     def _remove_raw_credential_from_invalid_input(cls, value: Any) -> Any:
         """Make every sensitive validation failure retain only fixed safe input."""
-        if not isinstance(value, dict):
-            return value
-        raw = cast('dict[str, object]', value)
-        credential = raw.get('session_credential')
-        if credential is None:
-            return raw
-        sanitized = dict(raw)
-        sanitized.pop('session_credential', None)
-        envelope_valid = False
-        try:
-            _VaultRetrievalSessionDeliveryEnvelope.model_validate(sanitized)
-            envelope_valid = True
-        except PydanticValidationError:
-            pass
-        valid_delivery = False
-        try:
-            if envelope_valid and isinstance(credential, str):
-                _decode_canonical_base64url(credential, _INVALID_BASE64URL)
-                digest = raw.get('session_credential_digest')
-                valid_delivery = (
-                    raw.get('credential_delivery') == 'delivered'
-                    and isinstance(digest, str)
-                    and hmac.compare_digest(
-                        vault_retrieval_session_credential_digest(credential),
-                        digest,
-                    )
-                )
-        except (TypeError, ValueError):
-            valid_delivery = False
-        if valid_delivery:
-            return raw
-        return {'credential_delivery': 'invalid_sensitive_delivery'}
+        return _retain_credential_only_when_valid(
+            value,
+            credential_field='session_credential',
+            digest_field='session_credential_digest',
+            envelope=_VaultRetrievalSessionDeliveryEnvelope,
+            digest=vault_retrieval_session_credential_digest,
+        )
 
     @model_validator(mode='after')
     def _validate_one_shot_delivery(self) -> VaultRetrievalSessionCredentialDelivery:

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, Protocol, TypeAlias, TypeVar, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 from pydantic import AfterValidator, TypeAdapter
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.artifacts.lifecycle import (
     ArtifactLifecycleEventPayload,
     parse_artifact_lifecycle_event_payload,
@@ -43,8 +43,9 @@ from maivn_contracts.artifacts.vault_protocol import VaultIntentStatusRequest
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'artifacts'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'artifacts'
 
 
 class _JsonSchemaValidator(Protocol):
@@ -96,26 +97,6 @@ _ARTIFACT_LIFECYCLE_EVENT_ADAPTER: TypeAdapter[ArtifactLifecycleEventPayload] = 
 _ContractModel = TypeVar('_ContractModel')
 
 
-def load_artifact_ref_schema() -> dict[str, Any]:
-    """Load the canonical immutable ArtifactRef schema."""
-    path = _CONTRACTS_ROOT / 'artifact_ref.schema.json'
-    loaded = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(path)
-    return cast('dict[str, Any]', loaded)
-
-
-def validate_artifact_ref(obj: Mapping[str, Any]) -> ArtifactRef:
-    """Validate a mapping against schema authority and return its typed projection."""
-    schema = load_artifact_ref_schema()
-    check_schema = cast('Callable[[object], None]', Draft202012Validator.check_schema)
-    check_schema(schema)
-    validator_factory = cast('Callable[..., _JsonSchemaValidator]', Draft202012Validator)
-    validator = validator_factory(schema, format_checker=FormatChecker())
-    validator.validate(obj)
-    return _ARTIFACT_REF_ADAPTER.validate_python(obj)
-
-
 def _load_schema(filename: str) -> dict[str, Any]:
     path = _CONTRACTS_ROOT / filename
     loaded = json.loads(path.read_text(encoding='utf-8'))
@@ -124,112 +105,109 @@ def _load_schema(filename: str) -> dict[str, Any]:
     return cast('dict[str, Any]', loaded)
 
 
-def _validate_schema_and_project(
-    schema: dict[str, Any], obj: Mapping[str, Any], adapter: TypeAdapter[_ContractModel]
-) -> _ContractModel:
+def _check_against_schema(schema: dict[str, Any], obj: Mapping[str, Any]) -> None:
     check_schema = cast('Callable[[object], None]', Draft202012Validator.check_schema)
     check_schema(schema)
     validator_factory = cast('Callable[..., _JsonSchemaValidator]', Draft202012Validator)
-    validator = validator_factory(schema, format_checker=FormatChecker())
-    validator.validate(obj)
+    validator_factory(schema, format_checker=FormatChecker()).validate(obj)
+
+
+def _validate_schema_and_project(
+    schema: dict[str, Any], obj: Mapping[str, Any], adapter: TypeAdapter[_ContractModel]
+) -> _ContractModel:
+    _check_against_schema(schema, obj)
     return adapter.validate_python(obj)
 
 
-def _materialize_artifact_ref(schema: dict[str, Any]) -> dict[str, Any]:
-    materialized = deepcopy(schema)
-    artifact_defs = deepcopy(load_artifact_ref_schema()['$defs'])
-    artifact_defs = json.loads(
-        json.dumps(artifact_defs).replace('"#/$defs/', '"#/$defs/artifactRef/'),
-    )
-    if not isinstance(artifact_defs, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'artifact_ref.schema.json')
-    defs = materialized.setdefault('$defs', {})
-    defs['artifactRef'] = artifact_defs
-    serialized = json.dumps(materialized)
-    serialized = serialized.replace(
-        'https://schemas.maivn.dev/artifacts/artifact_ref.schema.json#/$defs/',
-        '#/$defs/artifactRef/',
-    )
+def load_artifact_ref_schema() -> dict[str, Any]:
+    """Load the canonical immutable ArtifactRef schema."""
+    return _load_schema('artifact_ref.schema.json')
+
+
+def validate_artifact_ref(obj: Mapping[str, Any]) -> ArtifactRef:
+    """Validate a mapping against schema authority and return its typed projection."""
+    return _validate_schema_and_project(load_artifact_ref_schema(), obj, _ARTIFACT_REF_ADAPTER)
+
+
+def _rewritten_schema(
+    value: object,
+    source: str,
+    *replacements: tuple[str, str],
+) -> dict[str, Any]:
+    """Rewrite reference strings through the JSON text form of one schema object."""
+    serialized = json.dumps(value)
+    for old, new in replacements:
+        serialized = serialized.replace(old, new)
     loaded = json.loads(serialized)
     if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'artifact_ref.schema.json')
+        raise _ContractObjectTypeError(_CONTRACTS_ROOT / source)
     return cast('dict[str, Any]', loaded)
+
+
+def _inline_defs(schema: dict[str, Any], key: str, filename: str) -> dict[str, Any]:
+    """Copy one stored schema's `$defs` under `key` and point its references there."""
+    materialized = deepcopy(schema)
+    materialized.setdefault('$defs', {})[key] = _rewritten_schema(
+        _load_schema(filename)['$defs'],
+        filename,
+        ('"#/$defs/', f'"#/$defs/{key}/'),
+    )
+    return _rewritten_schema(
+        materialized,
+        filename,
+        (f'https://schemas.maivn.dev/artifacts/{filename}#/$defs/', f'#/$defs/{key}/'),
+    )
+
+
+def _materialize_artifact_ref(schema: dict[str, Any]) -> dict[str, Any]:
+    return _inline_defs(schema, 'artifactRef', 'artifact_ref.schema.json')
 
 
 def _materialize_redacted_payload(schema: dict[str, Any]) -> dict[str, Any]:
     materialized = deepcopy(schema)
-    payload_schema = deepcopy(load_redacted_artifact_payload_schema())
-    payload_schema = json.loads(
-        json.dumps(payload_schema).replace('"#/$defs/', '"#/$defs/redactedPayload/$defs/'),
+    materialized.setdefault('$defs', {})['redactedPayload'] = _embed_schema(
+        load_redacted_artifact_payload_schema(),
+        'redactedPayload',
     )
-    if not isinstance(payload_schema, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'redacted_artifact_payload.schema.json')
-    payload_schema = cast('dict[str, Any]', payload_schema)
-    payload_schema.pop('$id', None)
-    payload_schema.pop('$schema', None)
-    defs = materialized.setdefault('$defs', {})
-    defs['redactedPayload'] = payload_schema
-    serialized = json.dumps(materialized).replace(
-        'https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json',
-        '#/$defs/redactedPayload',
+    return _rewritten_schema(
+        materialized,
+        'redacted_artifact_payload.schema.json',
+        (
+            'https://schemas.maivn.dev/artifacts/redacted_artifact_payload.schema.json',
+            '#/$defs/redactedPayload',
+        ),
     )
-    loaded = json.loads(serialized)
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'redacted_artifact_payload.schema.json')
-    return cast('dict[str, Any]', loaded)
 
 
 def _materialize_artifact_plan_defs(schema: dict[str, Any]) -> dict[str, Any]:
-    materialized = deepcopy(schema)
-    plan_defs = deepcopy(load_artifact_plan_schema()['$defs'])
-    plan_defs = json.loads(
-        json.dumps(plan_defs).replace('"#/$defs/', '"#/$defs/artifactPlan/'),
-    )
-    if not isinstance(plan_defs, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'artifact_plan.schema.json')
-    defs = materialized.setdefault('$defs', {})
-    defs['artifactPlan'] = plan_defs
-    serialized = json.dumps(materialized).replace(
-        'https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/',
-        '#/$defs/artifactPlan/',
-    )
-    loaded = json.loads(serialized)
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'artifact_plan.schema.json')
-    return cast('dict[str, Any]', loaded)
+    return _inline_defs(schema, 'artifactPlan', 'artifact_plan.schema.json')
 
 
 def _embed_schema(schema: dict[str, Any], key: str) -> dict[str, Any]:
     embedded = deepcopy(schema)
     embedded.pop('$id', None)
     embedded.pop('$schema', None)
-    loaded = json.loads(
-        json.dumps(embedded).replace('"#/$defs/', f'"#/$defs/{key}/$defs/'),
+    return _rewritten_schema(
+        embedded,
+        f'{key}.schema.json',
+        ('"#/$defs/', f'"#/$defs/{key}/$defs/'),
     )
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / f'{key}.schema.json')
-    return cast('dict[str, Any]', loaded)
 
 
 def _materialize_verified_export_manifest(schema: dict[str, Any]) -> dict[str, Any]:
     materialized = deepcopy(schema)
-    manifest = _embed_schema(
+    materialized.setdefault('$defs', {})['verifiedExportManifest'] = _embed_schema(
         load_verified_export_manifest_schema(),
         'verifiedExportManifest',
     )
-    defs = materialized.setdefault('$defs', {})
-    defs['verifiedExportManifest'] = manifest
-    loaded = json.loads(
-        json.dumps(materialized).replace(
+    return _rewritten_schema(
+        materialized,
+        'verified_export_publication_request.schema.json',
+        (
             'https://schemas.maivn.dev/artifacts/verified_export_manifest.schema.json',
             '#/$defs/verifiedExportManifest',
-        )
+        ),
     )
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(
-            _CONTRACTS_ROOT / 'verified_export_publication_request.schema.json'
-        )
-    return cast('dict[str, Any]', loaded)
 
 
 def _materialize_vault_work_request(schema: dict[str, Any]) -> dict[str, Any]:
@@ -245,41 +223,18 @@ def _materialize_vault_work_request(schema: dict[str, Any]) -> dict[str, Any]:
         load_vault_value_map_handle_schema(),
         'vaultValueMapHandle',
     )
-    serialized = json.dumps(materialized)
-    serialized = (
-        serialized.replace(
-            'https://schemas.maivn.dev/artifacts/artifact_plan.schema.json#/$defs/',
-            '#/$defs/artifactPlan/$defs/',
-        )
-        .replace(
-            'https://schemas.maivn.dev/artifacts/artifact_plan.schema.json',
-            '#/$defs/artifactPlan',
-        )
-        .replace(
-            'https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json#/$defs/',
-            '#/$defs/artifactPlanV3/$defs/',
-        )
-        .replace(
-            'https://schemas.maivn.dev/artifacts/artifact_plan_v3.schema.json',
-            '#/$defs/artifactPlanV3',
-        )
-        .replace(
-            'https://schemas.maivn.dev/artifacts/artifact_patch.schema.json#/$defs/',
-            '#/$defs/artifactPatch/$defs/',
-        )
-        .replace(
-            'https://schemas.maivn.dev/artifacts/artifact_patch.schema.json',
-            '#/$defs/artifactPatch',
-        )
-        .replace(
-            'https://schemas.maivn.dev/artifacts/vault_value_map_handle.schema.json',
-            '#/$defs/vaultValueMapHandle',
-        )
+    root = 'https://schemas.maivn.dev/artifacts/'
+    return _rewritten_schema(
+        materialized,
+        'vault_work_request.schema.json',
+        (f'{root}artifact_plan.schema.json#/$defs/', '#/$defs/artifactPlan/$defs/'),
+        (f'{root}artifact_plan.schema.json', '#/$defs/artifactPlan'),
+        (f'{root}artifact_plan_v3.schema.json#/$defs/', '#/$defs/artifactPlanV3/$defs/'),
+        (f'{root}artifact_plan_v3.schema.json', '#/$defs/artifactPlanV3'),
+        (f'{root}artifact_patch.schema.json#/$defs/', '#/$defs/artifactPatch/$defs/'),
+        (f'{root}artifact_patch.schema.json', '#/$defs/artifactPatch'),
+        (f'{root}vault_value_map_handle.schema.json', '#/$defs/vaultValueMapHandle'),
     )
-    loaded = json.loads(serialized)
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'vault_work_request.schema.json')
-    return cast('dict[str, Any]', loaded)
 
 
 def load_artifact_reservation_schema() -> dict[str, Any]:
@@ -584,11 +539,7 @@ def validate_artifact_lifecycle_event_payload(
     obj: Mapping[str, Any],
 ) -> ArtifactLifecycleEventPayload:
     """Validate one exact value-free artifact lifecycle payload variant."""
-    schema = _materialize_artifact_error(load_artifact_lifecycle_event_schema())
-    check_schema = cast('Callable[[object], None]', Draft202012Validator.check_schema)
-    check_schema(schema)
-    validator_factory = cast('Callable[..., _JsonSchemaValidator]', Draft202012Validator)
-    validator_factory(schema, format_checker=FormatChecker()).validate(obj)
+    _check_against_schema(_materialize_artifact_error(load_artifact_lifecycle_event_schema()), obj)
     return parse_artifact_lifecycle_event_payload(obj)
 
 
@@ -599,19 +550,18 @@ def materialize_artifact_lifecycle_event_schema(schema: dict[str, Any]) -> dict[
 
 def _materialize_artifact_error(schema: dict[str, Any]) -> dict[str, Any]:
     materialized = deepcopy(schema)
-    error_schema = deepcopy(load_artifact_error_schema())
+    error_schema = load_artifact_error_schema()
     error_schema.pop('$id', None)
     error_schema.pop('$schema', None)
-    definitions = cast('dict[str, Any]', materialized.setdefault('$defs', {}))
-    definitions['artifactError'] = error_schema
-    serialized = json.dumps(materialized).replace(
-        '"https://schemas.maivn.dev/artifacts/artifact_error.schema.json"',
-        '"#/$defs/artifactError"',
+    materialized.setdefault('$defs', {})['artifactError'] = error_schema
+    return _rewritten_schema(
+        materialized,
+        'artifact_lifecycle_event.schema.json',
+        (
+            '"https://schemas.maivn.dev/artifacts/artifact_error.schema.json"',
+            '"#/$defs/artifactError"',
+        ),
     )
-    loaded = json.loads(serialized)
-    if not isinstance(loaded, dict):
-        raise _ContractObjectTypeError(_CONTRACTS_ROOT / 'artifact_lifecycle_event.schema.json')
-    return cast('dict[str, Any]', loaded)
 
 
 def validate_artifact_error(obj: Mapping[str, Any]) -> ArtifactError:

@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, cast
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, model_validator
 
+from maivn_contracts.tools.authorization import ToolSafetyLabels
+
 if TYPE_CHECKING:
     from maivn_contracts.tools import FunctionToolSpec, ToolDependencyEdge
 
@@ -150,14 +152,21 @@ class PlanningChoice(BaseModel):
                     'additionalProperties': False,
                     'required': ['tier'],
                     'properties': {
-                        'tier': {'type': 'string', 'enum': ['auto', 'standard', 'advanced', 'deep']}
+                        'tier': {
+                            'type': 'string',
+                            'enum': ['auto', 'standard', 'advanced', 'deep'],
+                        },
+                        'model_id': {'type': 'null'},
                     },
                 },
                 {
                     'type': 'object',
                     'additionalProperties': False,
                     'required': ['model_id'],
-                    'properties': {'model_id': {'type': 'string', 'minLength': 1}},
+                    'properties': {
+                        'tier': {'type': 'null'},
+                        'model_id': {'type': 'string', 'minLength': 1},
+                    },
                 },
             ],
         },
@@ -291,7 +300,7 @@ ToolExecution: TypeAlias = Annotated[
 ]
 
 
-class ToolSnapshot(BaseModel):
+class ToolSnapshot(ToolSafetyLabels):
     """Version-pinned tool shape captured at deployment time."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)

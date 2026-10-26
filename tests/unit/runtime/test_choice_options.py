@@ -2,7 +2,7 @@
 
 import pytest
 
-from maivn_contracts.runtime.choice_options import resolve_choice_options
+from maivn_contracts.runtime.choice_options import choice_values, resolve_choice_options
 
 
 @pytest.mark.parametrize('multiple', [False, True])
@@ -45,3 +45,30 @@ def test_empty_and_long_declared_values_are_not_limited_by_model_label_bounds() 
     """Application enums remain complete even beyond model-authored presentation limits."""
     values = ['', *[f'value-{i}' for i in range(20)], 'long-' * 40]
     assert [option['value'] for option in resolve_choice_options({'enum': values}, [])] == values
+
+
+@pytest.mark.parametrize(
+    'schema',
+    [
+        {'type': 'array', 'items': 'not-a-schema'},
+        {'enum': []},
+        {'enum': 'abc'},
+        {'enum': ['a', 1]},
+        {'type': 'string'},
+    ],
+)
+def test_choice_values_refuse_to_invent_a_domain(schema: dict[str, object]) -> None:
+    """Only a non-empty all-string enum (or array item enum) is a choice domain."""
+    assert choice_values(schema) is None
+
+
+def test_options_without_string_label_or_value_are_skipped() -> None:
+    """An option whose label or value is not text never becomes a choice."""
+    options: list[dict[str, object]] = [
+        {'label': 7, 'value': 'a'},
+        {'label': 'A', 'value': 3},
+        {'label': 'B', 'value': 'b', 'description': 4},
+    ]
+    assert resolve_choice_options({'type': 'string'}, options) == (
+        {'label': 'B', 'value': 'b', 'description': ''},
+    )

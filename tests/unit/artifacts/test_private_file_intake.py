@@ -1,6 +1,7 @@
 """Proof-bound output and editable-source commitments for direct Vault intake."""
 
 import importlib
+from typing import Any
 
 import pytest
 from jsonschema.exceptions import ValidationError as SchemaValidationError
@@ -124,3 +125,35 @@ def test_ingest_work_uses_exact_file_commitments_without_legacy_plan_or_value_ma
         VaultWorkRequest.model_validate(deletion)
     with pytest.raises((ValueError, SchemaValidationError)):
         validate_vault_work_request(deletion)
+
+
+def test_ingest_work_schema_refuses_a_retrieval_part() -> None:
+    """The schema, not only the model, keeps retrieval_part to retrieve_session."""
+    request: dict[str, Any] = {
+        'schema_version': 'vault-work-v1',
+        'intent_id': 'intake',
+        'idempotency_key': 'retry',
+        'operation': 'ingest_file',
+        'scope': {'organization_id': 'org', 'project_id': 'project'},
+        'surface': {
+            'root_invocation_id': 'root',
+            'session_id': 'session',
+            'checkpoint_id': 'checkpoint',
+            'caller_id': 'caller',
+        },
+        'input_handles': [],
+        'bounds': {'max_output_bytes': 1048576},
+        'retention_policy_id': 'policy',
+        'client_proof_digest': 'a' * 64,
+        'expires_at': '2030-01-01T00:00:00Z',
+        'file_intake': {
+            'kind': 'document',
+            'mime_type': 'application/pdf',
+            'output_commitment': 'b' * 64,
+            'source_commitment': 'c' * 64,
+            'max_source_bytes': 1048576,
+        },
+    }
+    assert validate_vault_work_request(request).operation == 'ingest_file'
+    with pytest.raises(SchemaValidationError):
+        validate_vault_work_request({**request, 'retrieval_part': 'editable_source'})

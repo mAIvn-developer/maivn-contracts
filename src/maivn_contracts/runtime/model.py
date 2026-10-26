@@ -2,15 +2,25 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from importlib import import_module
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, cast
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictStr,
+    field_validator,
+)
 
 from maivn_contracts.agents import (
     ModelChoice,  # noqa: TC001 - Pydantic resolves this field at runtime.
     PlanningChoice,  # noqa: TC001 - Pydantic resolves this field at runtime.
 )
+from maivn_contracts.runtime.customer_scope import memory_owner_user_id
 
 if TYPE_CHECKING:
     from maivn_contracts.messages import Message
@@ -41,8 +51,23 @@ NonNegativeStrictInt: TypeAlias = Annotated[int, Field(ge=0, strict=True)]
 RecursionLimit: TypeAlias = Annotated[int, Field(ge=1, le=1000, strict=True)]
 # What produced this run. `root` is an ordinary top-level invocation; `swarm_member`
 # is an agent the swarm planner selected; `tool_job` is a subgraph the job planner
-# cut out of a tool graph and gave its own execution context.
-ChildRunKind: TypeAlias = Literal['root', 'swarm_member', 'tool_job']
+# cut out of a tool graph and gave its own execution context; `decision_run` marks a
+# decision-only run, a root run with no model loop that holds only Decision steps.
+ChildRunKind: TypeAlias = Literal['root', 'swarm_member', 'tool_job', 'decision_run']
+
+
+def _positive_expense_ceiling(value: str) -> str:
+    if Decimal(value) <= 0:
+        message = 'expense ceiling must be positive'
+        raise ValueError(message)
+    return value
+
+
+ExpenseCeilingUsd: TypeAlias = Annotated[
+    StrictStr,
+    Field(pattern=r'^(?:0|[1-9][0-9]{0,17})(?:\.[0-9]{1,12})?$'),
+    AfterValidator(_positive_expense_ceiling),
+]
 
 
 class SystemModelChoices(BaseModel):
@@ -72,8 +97,20 @@ class RunConfig(BaseModel):
     user_id: StrictStr = Field(
         ...,
         min_length=1,
-        description='Authenticated user identifier used for runtime ownership and shielding.',
+        max_length=256,
+        description=(
+            'Developer-asserted customer subject within the authenticated project; '
+            'not independently verified end-user authentication. sdk-user disables private memory.'
+        ),
     )
+
+    @field_validator('user_id')
+    @classmethod
+    def validate_customer_subject(cls, value: str) -> str:
+        """Validate without normalizing the thread and memory owner."""
+        memory_owner_user_id(value)
+        return value
+
     thread_id: StrictStr = Field(
         ...,
         min_length=1,
@@ -140,6 +177,14 @@ class RunConfig(BaseModel):
             "Absent preserves each tool's internal default profile."
         ),
     )
+    max_expense_usd: ExpenseCeilingUsd | None = Field(
+        default=None,
+        description=(
+            'Optional lower total mAIvn execution expense ceiling in exact USD. '
+            'Capped runs exclude paid hosted search/sandbox and background enrichment. '
+            'This limits new work and never changes customer billing rates.'
+        ),
+    )
     planning: PlanningChoice | None = Field(
         default=None,
         description='Optional model choice for framework-owned planning.',
@@ -165,7 +210,8 @@ class RunConfig(BaseModel):
             'What KIND of child run this is, not merely that it is one. '
             '`job_depth` alone cannot answer this: a swarm member and a decomposed '
             'tool job both report depth 1, so any consumer trying to prove a job ran '
-            'was reduced to guessing from names.'
+            'was reduced to guessing from names. `decision_run` also marks a '
+            'decision-only run, which is a root run with no model loop.'
         ),
     )
     plan_node_id: StrictStr | None = Field(

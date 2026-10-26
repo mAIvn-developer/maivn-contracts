@@ -101,6 +101,24 @@
         "passthrough"
       ],
       "description": "MCP schema handling policy. Passthrough means the server-published schemas are preserved without rewriting."
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "write",
+          "delete",
+          "export",
+          "import",
+          "admin",
+          "impersonate"
+        ]
+      }
+    },
+    "destructive": {
+      "type": "boolean"
     }
   },
   "oneOf": [
@@ -353,7 +371,10 @@
               },
               "result_scope": {
                 "type": "string",
-                "enum": ["invocation", "conversation"],
+                "enum": [
+                  "invocation",
+                  "conversation"
+                ],
                 "default": "invocation",
                 "description": "Conversation permits reuse of a retained producer result in the same thread."
               },
@@ -380,6 +401,24 @@
           "items": {
             "$ref": "#/$defs/toolArgumentDependency"
           }
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write",
+              "delete",
+              "export",
+              "import",
+              "admin",
+              "impersonate"
+            ]
+          }
+        },
+        "destructive": {
+          "type": "boolean"
         }
       }
     },
@@ -506,6 +545,24 @@
         "output_schema": {
           "description": "Optional MCP-published JSON Schema object for tool results.",
           "additionalProperties": {}
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write",
+              "delete",
+              "export",
+              "import",
+              "admin",
+              "impersonate"
+            ]
+          }
+        },
+        "destructive": {
+          "type": "boolean"
         }
       }
     },
@@ -572,6 +629,24 @@
         "output_schema": {
           "description": "Optional JSON Schema object for system tool results.",
           "additionalProperties": {}
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write",
+              "delete",
+              "export",
+              "import",
+              "admin",
+              "impersonate"
+            ]
+          }
+        },
+        "destructive": {
+          "type": "boolean"
         }
       }
     }

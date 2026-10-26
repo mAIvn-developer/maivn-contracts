@@ -4,19 +4,20 @@ from __future__ import annotations
 
 import copy
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.tools import load_tool_callback_schema, load_tool_dispatch_schema
 from maivn_contracts.tools.loaders import materialize_tool_outcome_schema
 from maivn_contracts.workers.model import WorkerConnection, WorkerFrame
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'workers'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'workers'
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):
@@ -95,7 +96,7 @@ def _replace_callback_outcome(schema: dict[str, Any]) -> dict[str, Any]:
     properties = cast('dict[str, Any]', prepared['properties'])
     properties['outcome'] = materialize_tool_outcome_schema(
         _read_json(
-            Path(__file__).resolve().parents[3] / 'tools' / 'tool_outcome.schema.json',
+            SCHEMA_ROOT / 'tools' / 'tool_outcome.schema.json',
         )
     )
     return prepared

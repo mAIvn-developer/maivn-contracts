@@ -8,7 +8,7 @@ skip-excluded-dirs = true
 
 [project]
 name = "maivn-contracts"
-version = "0.1.0"
+version = "0.1.1"
 description = "Canonical schema contracts for mAIvn Platform v2."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,6 +20,8 @@ dependencies = [
   "rfc8785==0.1.4",
   # typing_extensions.Self: typing.Self needs 3.11 and this package floors at 3.10.
   "typing-extensions>=4.12",
+  # zoneinfo needs a time-zone database; hosts without one (Windows, slim images) use this.
+  "tzdata",
 ]
 
 [dependency-groups]
@@ -78,3 +80,16 @@ inline-quotes = "single"
 # basedpyright is configured in pyrightconfig.json because that file takes
 # precedence over a pyproject section. Keep its Python version aligned with the
 # `requires-python` floor so type checks cover the oldest supported interpreter.
+
+# Root JSON remains canonical; only wheel builds map it into package data.
+[tool.hatch.build.targets.wheel.force-include]
+"agents" = "maivn_contracts/_schemas/agents"
+"artifacts" = "maivn_contracts/_schemas/artifacts"
+"events" = "maivn_contracts/_schemas/events"
+"flows" = "maivn_contracts/_schemas/flows"
+"messages" = "maivn_contracts/_schemas/messages"
+"resources" = "maivn_contracts/_schemas/resources"
+"runtime" = "maivn_contracts/_schemas/runtime"
+"scenarios" = "maivn_contracts/_schemas/scenarios"
+"tools" = "maivn_contracts/_schemas/tools"
+"workers" = "maivn_contracts/_schemas/workers"

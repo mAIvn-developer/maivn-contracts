@@ -1,0 +1,16 @@
+[
+  {
+    "idempotency_key": "bounded-v1",
+    "max_steps": 4,
+    "max_duration_seconds": 30
+  },
+  {
+    "idempotency_key": "bounded-v1",
+    "max_steps": 4,
+    "max_duration_seconds": 30,
+    "registered_agent": {
+      "agent_id": "agent-1",
+      "version": 1
+    }
+  }
+]

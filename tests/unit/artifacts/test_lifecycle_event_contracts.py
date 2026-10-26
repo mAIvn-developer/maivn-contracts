@@ -437,3 +437,13 @@ def test_event_rejects_lifecycle_discriminator_mismatch_but_keeps_generic_events
         Event.model_validate(_event(available, 'artifact.expired'))
     generic = validate_event(_event({'unconstrained': {'still': 'supported'}}, 'planning'))
     assert generic.payload == {'unconstrained': {'still': 'supported'}}
+
+
+def test_frozen_artifact_payload_dumps_as_plain_nested_python_containers() -> None:
+    """Python-mode dumps thaw every nested frozen mapping back into plain dicts."""
+    event = Event.model_validate(_event(_payloads()['artifact.failed'], 'artifact.failed'))
+
+    dumped = cast('dict[str, object]', event.model_dump()['payload'])
+    assert dumped == _payloads()['artifact.failed']
+    assert type(dumped) is dict
+    assert type(dumped['error']) is dict

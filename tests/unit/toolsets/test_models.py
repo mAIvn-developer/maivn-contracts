@@ -8,7 +8,12 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from maivn_contracts.toolsets import ToolSet, ToolSetRef
+from maivn_contracts.toolsets import (
+    ToolSet,
+    ToolSetRef,
+    validate_tool_set,
+    validate_tool_set_member,
+)
 
 
 def test_tool_set_accepts_tool_and_nested_tool_set_members() -> None:
@@ -88,3 +93,31 @@ def test_tool_set_rejects_extra_fields_and_missing_member_discriminator() -> Non
                 ],
             },
         )
+
+
+def test_tool_set_validators_return_typed_models_and_refuse_bad_members() -> None:
+    """The public validators project mappings onto the closed ToolSet models."""
+    member = {
+        'kind': 'toolset',
+        'toolset_id': 'tset-http',
+        'namespace': 'connectors.http',
+        'version': '1',
+    }
+    assert validate_tool_set_member(member) == ToolSetRef.model_validate(member)
+    tool_set = validate_tool_set(
+        {
+            'toolset_id': 'tset-a',
+            'org_id': 'org-acme',
+            'name': 'A',
+            'members': [member],
+            'created_at': '2026-07-06T15:00:00Z',
+            'updated_at': '2026-07-06T15:00:00Z',
+        },
+    )
+    assert isinstance(tool_set, ToolSet)
+    assert tool_set.members == [ToolSetRef.model_validate(member)]
+    with pytest.raises(ValidationError):
+        validate_tool_set({**tool_set.model_dump(), 'members': [{'kind': 'skill'}]})
+    for invalid in ({**member, 'kind': 'skill'}, {**member, 'namespace': '9bad'}):
+        with pytest.raises(ValidationError):
+            validate_tool_set_member(invalid)

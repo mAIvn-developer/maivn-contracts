@@ -366,17 +366,7 @@ class WorkbookPlanBodyV2(ClosedModel):
             if isinstance(cell.value, WorkbookTextValueV2)
             for fragment in cell.value.payload.fragments
         )
-        identifiers = (
-            *(style.style_id for style in self.styles),
-            *(sheet.sheet_id for sheet in self.sheets),
-            *(cell.cell_id for cell in cells),
-            *(item.range_id for item in self.ranges),
-            *(item.named_range_id for item in self.named_ranges),
-            *(item.table_id for item in self.tables),
-            *(item.chart_id for item in self.charts),
-            *(item.series_id for item in series),
-            *(fragment.structural_id for fragment in text_fragments),
-        )
+        identifiers = self.structural_ids()
         if len(identifiers) != len(set(identifiers)) or len(cells) > MAX_WORKBOOK_CELLS:
             raise ArtifactRefInvariantError
         if len({sheet.name.casefold() for sheet in self.sheets}) != len(self.sheets):

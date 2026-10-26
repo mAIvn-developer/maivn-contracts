@@ -11,9 +11,13 @@ from typing import Any, TypeAlias, cast
 import pytest
 from jsonschema.exceptions import ValidationError
 from pydantic import BaseModel
+from pydantic import ValidationError as PydanticValidationError
 
 from maivn_contracts.resources import (
+    DerivedArtifact,
     ResourceTierDowngradeError,
+    ResourceTierResolutionError,
+    UnknownResourceTierError,
     load_derived_artifact_schema,
     load_processing_state_schema,
     load_resource_policy_schema,
@@ -212,3 +216,27 @@ def test_resolve_tier_rejects_redacted_message_downgrades(policy_tier: str) -> N
     """Reject explicit lower tiers on redacted messages."""
     with pytest.raises(ResourceTierDowngradeError, match='secure floor'):
         resolve_tier(message_has_redaction=True, policy_tier=policy_tier)
+
+
+@pytest.mark.parametrize('message_has_redaction', [True, False])
+def test_resolve_tier_refuses_unknown_tiers_before_any_floor(
+    message_has_redaction: bool,  # noqa: FBT001
+) -> None:
+    """An unknown tier is refused as unknown, redaction or not."""
+    with pytest.raises(UnknownResourceTierError, match="Unknown resource tier: 'Secure'") as caught:
+        resolve_tier(message_has_redaction, 'Secure')
+    assert isinstance(caught.value, ResourceTierResolutionError)
+
+
+@pytest.mark.parametrize(
+    'bodies',
+    [{}, {'inline_text': '# Policy', 'storage_ref': {'bucket': 'b', 'path': 'p.md'}}],
+)
+def test_derived_artifact_carries_exactly_one_body(bodies: dict[str, object]) -> None:
+    """A derived artifact stores its body in storage or inline, never both or neither."""
+    fixture = _load_fixture('valid_derived_artifacts.json')[0]
+    payload = {
+        key: value for key, value in fixture.items() if key not in {'storage_ref', 'inline_text'}
+    }
+    with pytest.raises(PydanticValidationError, match='exactly one of storage_ref or inline_text'):
+        DerivedArtifact.model_validate({**payload, **bodies})

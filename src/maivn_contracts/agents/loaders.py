@@ -3,21 +3,22 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 from pydantic import TypeAdapter
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.agents.model import Agent, AgentVersion, MessageBinding
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'agents'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'agents'
 _MESSAGE_BINDING_ADAPTER: TypeAdapter[MessageBinding] = TypeAdapter[MessageBinding](
     MessageBinding,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):

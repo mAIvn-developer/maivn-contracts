@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.flows.model import FlowGraph
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'flows'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'flows'
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):

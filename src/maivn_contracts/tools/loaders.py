@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import copy
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from jsonschema import Draft202012Validator, FormatChecker
 from pydantic import TypeAdapter
 
+from maivn_contracts._schema_root import SCHEMA_ROOT
 from maivn_contracts.artifacts import load_artifact_ref_schema
 from maivn_contracts.tools.model import (
     ToolCall,
@@ -19,7 +19,7 @@ from maivn_contracts.tools.model import (
     ToolSpecVariant,
 )
 
-_CONTRACTS_ROOT = Path(__file__).resolve().parents[3] / 'tools'
+_CONTRACTS_ROOT = SCHEMA_ROOT / 'tools'
 _ARTIFACT_REF_SCHEMA_ID = 'https://schemas.maivn.dev/artifacts/artifact_ref.schema.json'
 _TOOL_SPEC_ADAPTER: TypeAdapter[ToolSpecVariant] = TypeAdapter[ToolSpecVariant](
     ToolSpecVariant,
@@ -30,6 +30,7 @@ _TOOL_OUTCOME_ADAPTER: TypeAdapter[ToolOutcomeVariant] = TypeAdapter[ToolOutcome
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from pathlib import Path
 
 
 class _JsonSchemaValidator(Protocol):

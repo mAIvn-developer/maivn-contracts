@@ -148,7 +148,8 @@
         "trace.trigger_skipped",
         "trace.hook",
         "trace.routing",
-        "trace.model_stream"
+        "trace.model_stream",
+        "trace.decision"
     ],
     "audit": [
       "audit.entry"

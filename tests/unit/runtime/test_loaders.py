@@ -151,6 +151,7 @@ def test_load_run_config_schema_exposes_v1_grounded_defaults() -> None:
     assert schema['$schema'] == 'https://json-schema.org/draft/2020-12/schema'
     assert schema['additionalProperties'] is False
     assert set(schema['properties']) == {
+        'max_expense_usd',
         'user_id',
         'thread_id',
         'session_id',

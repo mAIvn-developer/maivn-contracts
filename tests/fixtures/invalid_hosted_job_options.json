@@ -1,0 +1,17 @@
+[
+  {
+    "idempotency_key": "bounded-v1",
+    "max_steps": 0,
+    "max_duration_seconds": 30
+  },
+  {
+    "idempotency_key": "bounded-v1",
+    "max_steps": true,
+    "max_duration_seconds": 30
+  },
+  {
+    "idempotency_key": "bounded-v1",
+    "max_steps": 4,
+    "max_duration_seconds": 1801
+  }
+]

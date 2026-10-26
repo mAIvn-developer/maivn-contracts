@@ -51,6 +51,8 @@ def test_load_tool_spec_schema_exposes_function_mcp_and_system_kinds() -> None:
     assert schema['$schema'] == 'https://json-schema.org/draft/2020-12/schema'
     assert schema['additionalProperties'] is False
     assert set(schema['properties']) == {
+        'permissions',
+        'destructive',
         'tool_id',
         'kind',
         'namespace',

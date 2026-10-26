@@ -1,0 +1,19 @@
+[
+  {
+    "session_id": "job-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "state": "running",
+    "deadline_at": "2026-10-22T23:00:00Z",
+    "max_steps": 4,
+    "steps_used": 0,
+    "max_expense_usd": "1.00"
+  },
+  {
+    "session_id": "job-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "state": "failed",
+    "deadline_at": "2026-10-22T23:00:00Z",
+    "max_steps": 4,
+    "steps_used": 0,
+    "max_expense_usd": "1.00",
+    "terminal_reason": "deadline_exceeded"
+  }
+]
