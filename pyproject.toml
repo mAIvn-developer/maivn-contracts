@@ -8,7 +8,7 @@ skip-excluded-dirs = true
 
 [project]
 name = "maivn-contracts"
-version = "0.1.1"
+version = "0.1.2"
 description = "Canonical schema contracts for mAIvn Platform v2."
 readme = "README.md"
 requires-python = ">=3.10"

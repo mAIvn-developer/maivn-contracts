@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-28
+
+### Added
+- Redaction preview request and response models, including the exact approved request on the response, staff cover regions, free labels and justified whitelist values.
+- `RunConfig.redaction_preview_id`, so a run can use an approved redaction.
+
 ## [0.1.1] - 2026-10-23
 
 ### Added
