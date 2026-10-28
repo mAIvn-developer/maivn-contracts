@@ -7,6 +7,7 @@ import string
 from typing import Annotated, Literal, TypeAlias
 
 from pydantic import (
+    AliasChoices,
     BaseModel,
     ConfigDict,
     Field,
@@ -401,10 +402,45 @@ class PIIWhitelist(BaseModel):
         return self
 
 
+class CoverRegion(BaseModel):
+    """An unconditional cover on the crop-box/rotation or EXIF-upright page frame."""
+
+    model_config = ConfigDict(extra='forbid', frozen=True, hide_input_in_errors=True)
+
+    attachment_id: StrictStr = Field(min_length=1)
+    page: StrictInt = Field(ge=1)
+    bbox: tuple[
+        Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)],
+        Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)],
+        Annotated[float, Field(gt=0, le=1, allow_inf_nan=False)],
+        Annotated[float, Field(gt=0, le=1, allow_inf_nan=False)],
+    ] = Field(validation_alias=AliasChoices('bbox', 'box'))
+    pii_type: StrictStr = Field(default='other', min_length=1, max_length=128)
+    label: StrictStr | None = Field(default=None, min_length=1, max_length=128)
+    name: StrictStr | None = Field(
+        default=None,
+        min_length=1,
+        max_length=128,
+        pattern=r'^[A-Za-z_][A-Za-z0-9_]*$',
+        validation_alias=AliasChoices('name', 'key'),
+    )
+    description: StrictStr | None = Field(default=None, min_length=1, max_length=512)
+
+    @model_validator(mode='after')
+    def _within_page(self) -> CoverRegion:
+        x, y, width, height = self.bbox
+        if x + width > 1 or y + height > 1:
+            message = 'cover rectangle must fit within its page'
+            raise ValueError(message)
+        return self
+
+
 class RedactionConfig(BaseModel):
     """Redacted-message boundary config carried on a Message."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)
+
+    cover_regions: list[CoverRegion] | None = Field(default=None, max_length=256)
 
     pii_whitelist: PIIWhitelist | None = Field(
         default=None,

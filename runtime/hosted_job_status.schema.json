@@ -144,6 +144,107 @@
       "title": "AudioSafePreview",
       "type": "object"
     },
+    "CoverRegion": {
+      "additionalProperties": false,
+      "description": "An unconditional cover on the crop-box/rotation or EXIF-upright page frame.",
+      "properties": {
+        "attachment_id": {
+          "minLength": 1,
+          "title": "Attachment Id",
+          "type": "string"
+        },
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "pii_type": {
+          "default": "other",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Pii Type",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        }
+      },
+      "required": [
+        "attachment_id",
+        "page",
+        "bbox"
+      ],
+      "title": "CoverRegion",
+      "type": "object"
+    },
     "DocumentContentBlock": {
       "additionalProperties": false,
       "description": "PDF document content block backed by an Attachment entity.",
@@ -1184,6 +1285,22 @@
       "additionalProperties": false,
       "description": "Redacted-message boundary config carried on a Message.",
       "properties": {
+        "cover_regions": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CoverRegion"
+              },
+              "maxItems": 256,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cover Regions"
+        },
         "pii_whitelist": {
           "anyOf": [
             {

@@ -306,6 +306,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "cover_regions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"$ref": "#/$defs/coverRegion"}
+        },
         "pii_whitelist": {
           "$ref": "#/$defs/piiWhitelist"
         },
@@ -340,6 +345,34 @@
         }
       },
       "description": "Presence of this object marks the redacted-message boundary. Attachments on this message inherit the same redaction config and are floored to secure processing by the resource plane."
+    },
+    "coverRegion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attachment_id", "page", "bbox"],
+      "properties": {
+        "attachment_id": {"type": "string", "minLength": 1},
+        "page": {"type": "integer", "minimum": 1},
+        "bbox": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+            {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+          ]
+        },
+        "pii_type": {"type": "string", "minLength": 1, "maxLength": 128},
+        "label": {"type": "string", "minLength": 1, "maxLength": 128},
+        "name": {
+          "type": "string", "minLength": 1, "maxLength": 128,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "description": {"type": "string", "minLength": 1, "maxLength": 512}
+      },
+      "description": "Unconditional cover on the upright PDF crop-box/rotation or EXIF frame. Bbox is x,y,width,height in page fractions; the rectangle must fit within the page."
     },
     "knownPrivateData": {
       "type": "object",

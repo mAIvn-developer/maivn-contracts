@@ -173,6 +173,7 @@ def test_load_run_config_schema_exposes_v1_grounded_defaults() -> None:
         'plan_node_id',
         'decomposition_depth',
         'recursion_limit',
+        'redaction_preview_id',
         'durability',
         'origin',
     }

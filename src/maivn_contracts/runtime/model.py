@@ -121,6 +121,12 @@ class RunConfig(BaseModel):
         min_length=1,
         description='Optional session identifier used for tool execution context.',
     )
+    redaction_preview_id: StrictStr | None = Field(
+        default=None,
+        min_length=1,
+        repr=False,
+        description='Opaque sealed redaction preview approval; consumed once by the data plane.',
+    )
     invocation_id: StrictStr | None = Field(
         default=None,
         min_length=1,

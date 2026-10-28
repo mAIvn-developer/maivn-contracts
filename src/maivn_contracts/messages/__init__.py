@@ -17,6 +17,7 @@ from maivn_contracts.messages.model import (
     Attachment,
     AttachmentStorageRef,
     ContentBlock,
+    CoverRegion,
     DocumentContentBlock,
     ImageContentBlock,
     KnownPrivateData,
@@ -29,11 +30,16 @@ from maivn_contracts.messages.model import (
     TextContentBlock,
     VideoContentBlock,
 )
+from maivn_contracts.messages.redaction_preview import (
+    RedactionPreviewRequest,
+    RedactionPreviewResponse,
+)
 
 __all__ = [
     'Attachment',
     'AttachmentStorageRef',
     'ContentBlock',
+    'CoverRegion',
     'DocumentContentBlock',
     'ImageContentBlock',
     'KnownPrivateData',
@@ -43,6 +49,8 @@ __all__ = [
     'PIIWhitelist',
     'PIIWhitelistEntry',
     'RedactionConfig',
+    'RedactionPreviewRequest',
+    'RedactionPreviewResponse',
     'TextContentBlock',
     'VideoContentBlock',
     'load_attachment_schema',

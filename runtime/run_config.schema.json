@@ -26,6 +26,11 @@
       "minLength": 1,
       "description": "Optional session identifier used for tool execution context."
     },
+    "redaction_preview_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque sealed redaction preview approval; consumed once by the data plane."
+    },
     "invocation_id": {
       "type": "string",
       "minLength": 1,
