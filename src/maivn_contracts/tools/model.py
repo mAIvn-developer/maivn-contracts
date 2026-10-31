@@ -4,7 +4,15 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    StrictBool,
+    StrictStr,
+    model_validator,
+)
 
 from maivn_contracts.artifacts import ArtifactRef
 from maivn_contracts.tools.authorization import ToolSafetyLabels
@@ -322,6 +330,9 @@ class ToolCall(BaseModel):
     """Model-emitted request to invoke a referenced ToolSpec."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)
+
+    # Runtime-only approval capability. Never accepted from JSON or serialized to clients.
+    _authorization: object | None = PrivateAttr(default=None)
 
     call_id: StrictStr = Field(
         ...,

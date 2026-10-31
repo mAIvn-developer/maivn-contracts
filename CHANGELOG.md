@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-29
+
+### Added
+- An optional `approval_policy` (`deny`, `ask` or `allow`) on tool specs, tool dispatch and agent versions, so a privileged tool can opt in to asking a person before it runs. Omitted policies stay absent from serialized instances.
+
 ## [0.1.2] - 2026-10-28
 
 ### Added

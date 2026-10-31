@@ -18,6 +18,14 @@ class ToolSafetyLabels(BaseModel):
     model_config = ConfigDict(extra='forbid', frozen=True)
     permissions: tuple[ToolPermission, ...] | None = Field(default=None)
     destructive: StrictBool | None = Field(default=None)
+    approval_policy: Literal['deny', 'ask', 'allow'] | None = Field(
+        default=None,
+        exclude_if=lambda value: value is None,
+        description=(
+            'Caller-authored privileged-tool policy. Omitted means deny; '
+            'allow is an explicit opt-out.'
+        ),
+    )
 
     @property
     def requires_approval(self) -> bool:

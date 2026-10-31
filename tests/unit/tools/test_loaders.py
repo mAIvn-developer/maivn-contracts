@@ -53,6 +53,7 @@ def test_load_tool_spec_schema_exposes_function_mcp_and_system_kinds() -> None:
     assert set(schema['properties']) == {
         'permissions',
         'destructive',
+        'approval_policy',
         'tool_id',
         'kind',
         'namespace',

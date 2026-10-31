@@ -672,6 +672,7 @@
           "type": "array",
           "items": {"type": "string", "enum": ["read", "write", "delete", "export", "import", "admin", "impersonate"]}
         },
+        "approval_policy": {"type": "string", "enum": ["deny", "ask", "allow"]},
         "destructive": {"type": "boolean"},
         "tool_id": {
           "type": "string",

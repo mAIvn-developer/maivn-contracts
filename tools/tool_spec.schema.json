@@ -117,6 +117,7 @@
         ]
       }
     },
+    "approval_policy": {"type": "string", "enum": ["deny", "ask", "allow"]},
     "destructive": {
       "type": "boolean"
     }
@@ -417,6 +418,7 @@
             ]
           }
         },
+        "approval_policy": {"type": "string", "enum": ["deny", "ask", "allow"]},
         "destructive": {
           "type": "boolean"
         }
@@ -561,6 +563,7 @@
             ]
           }
         },
+        "approval_policy": {"type": "string", "enum": ["deny", "ask", "allow"]},
         "destructive": {
           "type": "boolean"
         }
@@ -645,6 +648,7 @@
             ]
           }
         },
+        "approval_policy": {"type": "string", "enum": ["deny", "ask", "allow"]},
         "destructive": {
           "type": "boolean"
         }
