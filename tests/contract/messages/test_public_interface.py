@@ -34,6 +34,8 @@ def test_public_interface_exports_are_pinned() -> None:
         'PIIWhitelist',
         'PIIWhitelistEntry',
         'RedactionConfig',
+        'RedactionPreviewApprovalRequest',
+        'RedactionPreviewEditRequest',
         'RedactionPreviewRequest',
         'RedactionPreviewResponse',
         'TextContentBlock',

@@ -125,7 +125,9 @@ class RunConfig(BaseModel):
         default=None,
         min_length=1,
         repr=False,
-        description='Opaque sealed redaction preview approval; consumed once by the data plane.',
+        description=(
+            'Opaque preview approval; legacy tickets are single-use, thread approvals are reusable.'
+        ),
     )
     invocation_id: StrictStr | None = Field(
         default=None,

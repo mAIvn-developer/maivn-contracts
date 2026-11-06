@@ -31,6 +31,8 @@ from maivn_contracts.messages.model import (
     VideoContentBlock,
 )
 from maivn_contracts.messages.redaction_preview import (
+    RedactionPreviewApprovalRequest,
+    RedactionPreviewEditRequest,
     RedactionPreviewRequest,
     RedactionPreviewResponse,
 )
@@ -49,6 +51,8 @@ __all__ = [
     'PIIWhitelist',
     'PIIWhitelistEntry',
     'RedactionConfig',
+    'RedactionPreviewApprovalRequest',
+    'RedactionPreviewEditRequest',
     'RedactionPreviewRequest',
     'RedactionPreviewResponse',
     'TextContentBlock',

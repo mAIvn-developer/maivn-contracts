@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-06
+
+### Added
+- Typed thread-bound redaction review and approval contracts, including value-free key merges, undo, releases, customer scope and persistent approved previews.
+
 ## [0.1.3] - 2026-10-29
 
 ### Added

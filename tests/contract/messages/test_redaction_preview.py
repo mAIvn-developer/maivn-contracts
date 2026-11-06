@@ -5,13 +5,18 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from maivn_contracts.messages import RedactionPreviewRequest, RedactionPreviewResponse
+from maivn_contracts.messages import (
+    RedactionPreviewApprovalRequest,
+    RedactionPreviewEditRequest,
+    RedactionPreviewRequest,
+    RedactionPreviewResponse,
+)
 from maivn_contracts.messages.redaction_preview import PreviewItem, PreviewRegion
 
 
-def test_preview_request_rejects_thread_and_pattern_controls() -> None:
-    """The endpoint cannot be used to create or resume a conversation."""
-    for field in ('thread_id', 'redact_patterns', 'run_config'):
+def test_preview_request_rejects_pattern_and_run_controls() -> None:
+    """Review scope does not allow callers to change run or matching controls."""
+    for field in ('redact_patterns', 'run_config'):
         with pytest.raises(ValidationError):
             RedactionPreviewRequest.model_validate({'prompt': 'hello', field: 'forbidden'})
 
@@ -63,3 +68,21 @@ def test_approved_request_is_hidden_from_repr_and_round_trips() -> None:
     assert 'candidate' not in repr(response)
     with pytest.raises(ValidationError):
         RedactionPreviewResponse.model_validate({'inputs': [], 'approved_request': []})
+
+
+def test_review_scope_and_key_only_edits_round_trip() -> None:
+    """Review scope is explicit, while edits carry keys without replacement values."""
+    scope = {'thread_id': 'review-thread', 'user_id': 'customer'}
+    request = RedactionPreviewRequest(prompt='hello', thread_id='review-thread', user_id='customer')
+    assert request.thread_id == 'review-thread'
+    assert request.user_id == 'customer'
+    assert 'review-thread' not in repr(request)
+    assert RedactionPreviewRequest(prompt='hello').user_id == 'sdk-user'
+    edit = RedactionPreviewEditRequest(
+        preview_id='rpv2_sealed', merge_keys=[['first', 'second']], released_keys=[], **scope
+    )
+    assert RedactionPreviewEditRequest.model_validate_json(edit.model_dump_json()) == edit
+    for model in (RedactionPreviewEditRequest, RedactionPreviewApprovalRequest):
+        for extra in ({'private_data': {'first': 'value'}}, {'values': ['value']}):
+            with pytest.raises(ValidationError):
+                model.model_validate({'preview_id': 'rpv2_sealed', **scope, **extra})

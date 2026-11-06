@@ -25,6 +25,8 @@ class RedactionPreviewRequest(_PreviewModel):
     prompt: StrictStr | Message | Annotated[list[Message], Field(min_length=1, max_length=128)] = (
         Field(repr=False)
     )
+    thread_id: StrictStr | None = Field(default=None, min_length=1, max_length=256, repr=False)
+    user_id: StrictStr = Field(default='sdk-user', min_length=1, max_length=256, repr=False)
     attachments: list[Attachment] = Field(default_factory=list, max_length=32, repr=False)
     resources: list[StrictStr] = Field(default_factory=list, max_length=32)
     pii_whitelist: PIIWhitelist | None = Field(default=None, repr=False)
@@ -42,9 +44,35 @@ class RedactionPreviewRequest(_PreviewModel):
     )
 
 
+class RedactionPreviewApprovalRequest(_PreviewModel):
+    """Approve one immutable encrypted preview within its explicitly named thread."""
+
+    preview_id: StrictStr = Field(min_length=1, max_length=16 * 1024 * 1024, repr=False)
+    thread_id: StrictStr = Field(min_length=1, max_length=256, repr=False)
+    user_id: StrictStr = Field(default='sdk-user', min_length=1, max_length=256, repr=False)
+
+
+class RedactionPreviewEditRequest(RedactionPreviewApprovalRequest):
+    """Replace key-only edits; null keeps earlier edits and [] undoes them."""
+
+    merge_keys: (
+        list[
+            Annotated[
+                list[Annotated[StrictStr, Field(min_length=1, max_length=256)]],
+                Field(min_length=2, max_length=256),
+            ]
+        ]
+        | None
+    ) = Field(default=None, max_length=256)
+    released_keys: list[Annotated[StrictStr, Field(min_length=1, max_length=256)]] | None = Field(
+        default=None, max_length=256
+    )
+
+
 class PreviewSpan(_PreviewModel):
     """Offsets into original and provider-bound text; never the covered value."""
 
+    input_index: int | None = Field(default=None, ge=0)
     start: int = Field(ge=0)
     end: int = Field(ge=0)
     redacted_start: int = Field(ge=0)
@@ -57,6 +85,7 @@ class PreviewRegion(_PreviewModel):
     PDF crop box after rotation; images after EXIF transpose, matching PictureReport.
     """
 
+    input_index: int | None = Field(default=None, ge=0)
     page: int = Field(ge=1)
     bbox: tuple[
         Annotated[float, Field(ge=0, le=1)],
@@ -79,6 +108,8 @@ class PreviewItem(_PreviewModel):
     spans: list[PreviewSpan] = Field(default_factory=list)
     regions: list[PreviewRegion] = Field(default_factory=list)
     confidence: float | None = None
+    member_keys: list[str] = Field(default_factory=list)
+    released: bool = False
 
 
 class PreviewStats(_PreviewModel):
@@ -122,6 +153,9 @@ class RedactionPreviewResponse(_PreviewModel):
     """Safe renderings, placement metadata and optional sealed approved-copy ticket."""
 
     preview_id: str | None = Field(default=None, repr=False)
+    thread_id: str | None = Field(default=None, repr=False)
+    user_id: str = Field(default='sdk-user', repr=False)
+    approved: bool = False
     approved_request: list[Message] | None = Field(
         default=None,
         min_length=1,
