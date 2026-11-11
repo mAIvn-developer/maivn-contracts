@@ -37,6 +37,11 @@
     "session.completed"
   ],
   "mappings": {
+    "task_list_updated": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Task lists replay through the positioned session event stream, not the curated scalar timeline."
+    },
     "connection.event_received": {
       "target": null,
       "drop": true,

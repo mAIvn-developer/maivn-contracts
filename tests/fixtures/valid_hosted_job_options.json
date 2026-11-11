@@ -12,5 +12,11 @@
       "agent_id": "agent-1",
       "version": 1
     }
+  },
+  {
+    "idempotency_key": "extended-v1",
+    "max_steps": 16,
+    "max_duration_seconds": 7200,
+    "profile": "extended"
   }
 ]

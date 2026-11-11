@@ -26,6 +26,11 @@
     "trace.decision"
   ],
   "mappings": {
+    "task_list_updated": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "The tool has a trace node; task titles are confined to the session stream."
+    },
     "connection.event_received": {
       "target": null,
       "drop": true,

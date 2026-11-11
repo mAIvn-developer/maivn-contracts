@@ -52,6 +52,7 @@
         "system_tool_chunk",
         "system_tool_complete",
         "system_tool_error",
+        "task_list_updated",
         "hook_fired",
         "enrichment",
         "evaluating",
@@ -195,6 +196,40 @@
     }
   },
   "allOf": [
+    {
+      "if": {"properties": {"type": {"const": "task_list_updated"}}, "required": ["type"]},
+      "then": {
+        "required": ["correlation_id"],
+        "properties": {
+          "correlation_id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+          "parent_session_id": {"type": "null"},
+          "parent_assignment_uuid": {"type": "null"},
+          "job_depth": {"const": 0},
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["items"],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 20,
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["id", "title", "status"],
+                  "properties": {
+                    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,47}$"},
+                    "title": {"type": "string", "minLength": 1, "maxLength": 160, "pattern": "\\S"},
+                    "status": {"enum": ["pending", "in_progress", "completed"]}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     {"if": {"properties": {"type": {"pattern": "^artifact\\."}}, "required": ["type"]}, "then": {"properties": {"payload": {"$ref": "https://schemas.maivn.dev/artifacts/artifact_lifecycle_event.schema.json"}}}},
     {"oneOf": [
       {"properties":{"type":{"const":"artifact.reserved"},"payload":{"properties":{"event_type":{"const":"artifact.reserved"}}}}},{"properties":{"type":{"const":"artifact.uploaded"},"payload":{"properties":{"event_type":{"const":"artifact.uploaded"}}}}},{"properties":{"type":{"const":"artifact.validation_started"},"payload":{"properties":{"event_type":{"const":"artifact.validation_started"}}}}},{"properties":{"type":{"const":"artifact.validated"},"payload":{"properties":{"event_type":{"const":"artifact.validated"}}}}},{"properties":{"type":{"const":"artifact.available"},"payload":{"properties":{"event_type":{"const":"artifact.available"}}}}},{"properties":{"type":{"const":"artifact.rejected"},"payload":{"properties":{"event_type":{"const":"artifact.rejected"}}}}},{"properties":{"type":{"const":"artifact.failed"},"payload":{"properties":{"event_type":{"const":"artifact.failed"}}}}},{"properties":{"type":{"const":"artifact.selected"},"payload":{"properties":{"event_type":{"const":"artifact.selected"}}}}},{"properties":{"type":{"const":"artifact.delivery_queued"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_queued"}}}}},{"properties":{"type":{"const":"artifact.delivery_started"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_started"}}}}},{"properties":{"type":{"const":"artifact.delivery_succeeded"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_succeeded"}}}}},{"properties":{"type":{"const":"artifact.delivery_failed"},"payload":{"properties":{"event_type":{"const":"artifact.delivery_failed"}}}}},{"properties":{"type":{"const":"artifact.expired"},"payload":{"properties":{"event_type":{"const":"artifact.expired"}}}}},{"properties":{"type":{"const":"artifact.deletion_requested"},"payload":{"properties":{"event_type":{"const":"artifact.deletion_requested"}}}}},{"properties":{"type":{"const":"artifact.deletion_started"},"payload":{"properties":{"event_type":{"const":"artifact.deletion_started"}}}}},{"properties":{"type":{"const":"artifact.deletion_pending_backup_expiry"},"payload":{"properties":{"event_type":{"const":"artifact.deletion_pending_backup_expiry"}}}}},{"properties":{"type":{"const":"artifact.deleted"},"payload":{"properties":{"event_type":{"const":"artifact.deleted"}}}}},{"properties":{"type":{"const":"artifact.delete_incomplete"},"payload":{"properties":{"event_type":{"const":"artifact.delete_incomplete"}}}}},{"properties":{"type":{"const":"artifact.vault_authorization_pending"},"payload":{"properties":{"event_type":{"const":"artifact.vault_authorization_pending"}}}}},{"properties":{"type":{"const":"artifact.vault_authorization_denied"},"payload":{"properties":{"event_type":{"const":"artifact.vault_authorization_denied"}}}}},{"properties":{"type":{"const":"artifact.vault_render_started"},"payload":{"properties":{"event_type":{"const":"artifact.vault_render_started"}}}}},{"properties":{"type":{"const":"artifact.vault_render_failed"},"payload":{"properties":{"event_type":{"const":"artifact.vault_render_failed"}}}}},

@@ -27,6 +27,11 @@
     "audit.entry"
   ],
   "mappings": {
+    "task_list_updated": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "The task list is run presentation, not an audit record."
+    },
     "connection.event_received": {
       "target": "audit.entry",
       "action": "connection.event_received",

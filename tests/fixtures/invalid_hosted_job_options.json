@@ -13,5 +13,17 @@
     "idempotency_key": "bounded-v1",
     "max_steps": 4,
     "max_duration_seconds": 1801
+  },
+  {
+    "idempotency_key": "bounded-v1",
+    "max_steps": 4,
+    "max_duration_seconds": 1801,
+    "profile": "standard"
+  },
+  {
+    "idempotency_key": "extended-v1",
+    "max_steps": 4,
+    "max_duration_seconds": 7201,
+    "profile": "extended"
   }
 ]

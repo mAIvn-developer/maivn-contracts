@@ -31,6 +31,7 @@
       "system_tool_chunk",
       "system_tool_complete",
       "system_tool_error",
+      "task_list_updated",
       "hook_fired",
       "enrichment"
     ],

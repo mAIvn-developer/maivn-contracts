@@ -20,6 +20,11 @@
     "api_key.revoked"
   ],
   "mappings": {
+    "task_list_updated": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Task titles remain scoped to the authenticated session event stream."
+    },
     "connection.event_received": {
       "target": "checkpoint.created",
       "note": "A durable normalized provider receipt maps to the existing checkpoint vocabulary."

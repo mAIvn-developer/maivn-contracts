@@ -29,6 +29,23 @@
   },
   "additionalProperties": false,
   "description": "Required opt-in bounds; ordinary invocation defaults are unaffected.",
+  "else": {
+    "properties": {
+      "max_duration_seconds": {
+        "maximum": 1800
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "profile": {
+        "const": "extended"
+      }
+    },
+    "required": [
+      "profile"
+    ]
+  },
   "properties": {
     "idempotency_key": {
       "maxLength": 200,
@@ -44,7 +61,7 @@
     },
     "max_duration_seconds": {
       "exclusiveMinimum": 0,
-      "maximum": 1800,
+      "maximum": 7200,
       "title": "Max Duration Seconds",
       "type": "number"
     },
@@ -58,6 +75,16 @@
         }
       ],
       "default": null
+    },
+    "profile": {
+      "default": "standard",
+      "description": "Standard permits up to 1800 seconds. Extended permits up to 7200 seconds and expires after 600 seconds without durable progress.",
+      "enum": [
+        "standard",
+        "extended"
+      ],
+      "title": "Profile",
+      "type": "string"
     }
   },
   "required": [

@@ -19,6 +19,11 @@
     "session.completed"
   ],
   "mappings": {
+    "task_list_updated": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Task lists do not change the canvas execution state."
+    },
     "connection.event_received": {
       "target": null,
       "drop": true,

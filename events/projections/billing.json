@@ -13,6 +13,11 @@
     "billing.unit"
   ],
   "mappings": {
+    "task_list_updated": {
+      "target": null,
+      "drop": true,
+      "drop_reason": "Task list snapshots are not billable units."
+    },
     "connection.event_received": { "target": null, "drop": true, "drop_reason": "Connection receipt is not billable until trigger admission creates a fire." },
     "email.received": { "target": null, "drop": true, "drop_reason": "Email receipt is not billable until trigger admission creates a fire." },
     "conversation.reply_received": { "target": null, "drop": true, "drop_reason": "Conversation receipt is not billable until trigger admission creates a fire." },

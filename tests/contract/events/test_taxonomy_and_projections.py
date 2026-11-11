@@ -175,5 +175,9 @@ def test_webhook_projection_targets_existing_v1_webhook_vocabulary() -> None:
         'api_key.revoked',
     }
 
-    for mapping in projection['mappings'].values():
+    for event_type, mapping in projection['mappings'].items():
+        if event_type == 'task_list_updated':
+            assert mapping['target'] is None
+            assert mapping['drop'] is True
+            continue
         assert mapping['target'] in allowed_targets

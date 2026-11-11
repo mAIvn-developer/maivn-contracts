@@ -1,7 +1,8 @@
 """Proof-bound output and editable-source commitments for direct Vault intake."""
 
+import hmac
 import importlib
-from typing import Any
+from typing import Any, Literal, cast
 
 import pytest
 from jsonschema.exceptions import ValidationError as SchemaValidationError
@@ -11,7 +12,10 @@ from maivn_contracts.artifacts import (
     VaultFileIntakeManifest,
     VaultWorkRequest,
     validate_vault_work_request,
+    vault_file_intake_hasher,
 )
+from maivn_contracts.artifacts.primitives import ArtifactRefInvariantError
+from maivn_contracts.artifacts.private_file_intake import initialize_file_intake_commitment
 
 
 def test_private_generic_file_intake_requires_opaque_download_identity() -> None:
@@ -47,6 +51,32 @@ def test_private_file_intake_commitments_bind_part_proof_and_content() -> None:
     assert first != commit(other_proof, 'private_original', payload)
     with pytest.raises(ValueError, match=r'.'):
         commit('invalid', 'private_original', payload)
+
+
+def test_intake_primitives_share_validated_canonical_framing() -> None:
+    """The service can choose the primitive with the same framing the public API uses."""
+    proof = 'cHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHA'
+    part = 'editable_source'
+    calls: list[tuple[bytes, bytes]] = []
+
+    def start(key: bytes, prefix: bytes) -> hmac.HMAC:
+        calls.append((key, prefix))
+        return hmac.new(key, prefix, 'sha256')
+
+    selected = initialize_file_intake_commitment(proof, part, start)
+    assert calls == [(proof.encode('ascii'), b'maivn-vault-file-intake-v1\0editable_source\0')]
+    public = vault_file_intake_hasher(proof, part)
+    assert isinstance(public, hmac.HMAC)
+    assert selected.digest() == public.digest()
+    with pytest.raises(ValueError, match=r'.'):
+        initialize_file_intake_commitment('invalid', part, start)
+    with pytest.raises(ArtifactRefInvariantError, match=r'^$'):
+        initialize_file_intake_commitment(
+            proof,
+            cast("Literal['editable_source']", 'invalid'),
+            start,
+        )
+    assert len(calls) == 1
 
 
 @pytest.mark.parametrize(

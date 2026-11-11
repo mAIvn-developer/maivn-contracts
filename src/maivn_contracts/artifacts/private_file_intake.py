@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hmac
-from typing import Literal
+from typing import TYPE_CHECKING, Literal, TypeVar
 
 from pydantic import Field, StrictInt, model_validator
 
@@ -19,8 +19,12 @@ from maivn_contracts.artifacts.primitives import (
 )
 from maivn_contracts.artifacts.refs import PrivateArtifactRef  # noqa: TC001 - Pydantic field.
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 _DOMAIN = b'maivn-vault-file-intake-v1\0'
 _MAX_SOURCE_BYTES = 52_428_800
+_Commitment = TypeVar('_Commitment')
 
 
 class VaultFileIntakeManifest(ClosedModel):
@@ -78,6 +82,19 @@ def vault_file_intake_hasher(
     part: Literal['private_original', 'editable_source'],
 ) -> hmac.HMAC:
     """Start a streaming exact-content commitment under a private client proof."""
+    return initialize_file_intake_commitment(
+        client_proof,
+        part,
+        lambda key, prefix: hmac.new(key, prefix, 'sha256'),
+    )
+
+
+def initialize_file_intake_commitment(
+    client_proof: str,
+    part: Literal['private_original', 'editable_source'],
+    factory: Callable[[bytes, bytes], _Commitment],
+) -> _Commitment:
+    """Start the chosen HMAC-SHA256 primitive with the canonical key and prefix."""
     # Delay this import because vault_work imports the manifest above.
     from maivn_contracts.artifacts.vault_protocol import (  # noqa: PLC0415
         vault_client_proof_header_digest,
@@ -86,7 +103,7 @@ def vault_file_intake_hasher(
     vault_client_proof_header_digest(client_proof)
     if part not in {'private_original', 'editable_source'}:
         raise ArtifactRefInvariantError
-    return hmac.new(client_proof.encode('ascii'), _DOMAIN + part.encode('ascii') + b'\0', 'sha256')
+    return factory(client_proof.encode('ascii'), _DOMAIN + part.encode('ascii') + b'\0')
 
 
 def vault_file_intake_commitment(

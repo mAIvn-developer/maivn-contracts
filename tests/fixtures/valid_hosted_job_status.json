@@ -15,5 +15,16 @@
     "steps_used": 0,
     "max_expense_usd": "1.00",
     "terminal_reason": "deadline_exceeded"
+  },
+  {
+    "session_id": "job-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "state": "failed",
+    "deadline_at": "2026-10-22T23:00:00Z",
+    "idle_deadline_at": "2026-10-22T21:10:00Z",
+    "profile": "extended",
+    "max_steps": 4,
+    "steps_used": 1,
+    "max_expense_usd": "1.00",
+    "terminal_reason": "idle_timeout"
   }
 ]

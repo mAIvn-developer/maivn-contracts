@@ -20,6 +20,7 @@ from maivn_contracts.artifacts import (
     ARTIFACT_LIFECYCLE_EVENT_TYPES,
 )
 from maivn_contracts.artifacts.lifecycle import parse_artifact_lifecycle_event_payload
+from maivn_contracts.events.task_list import TaskListSnapshot
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -84,6 +85,7 @@ EventType: TypeAlias = Literal[
     'system_tool_chunk',
     'system_tool_complete',
     'system_tool_error',
+    'task_list_updated',
     'hook_fired',
     'enrichment',
     'evaluating',
@@ -298,6 +300,22 @@ class Event(BaseModel):
             msg = 'trace_id must not be the all-zero identifier'
             raise ValueError(msg)
         return value
+
+    @model_validator(mode='after')
+    def validate_task_list_snapshot(self) -> Event:
+        """Bind a task list snapshot to a correlated root tool call."""
+        if self.type == 'task_list_updated':
+            if (
+                self.parent_session_id is not None
+                or self.parent_assignment_uuid is not None
+                or self.job_depth != 0
+                or not (self.correlation_id or '').strip()
+            ):
+                message = 'task list updates require a root tool call'
+                raise ValueError(message)
+            payload = TaskListSnapshot.model_validate(self.payload)
+            object.__setattr__(self, 'payload', _FrozenMapping(payload.model_dump(mode='json')))
+        return self
 
     @model_validator(mode='after')
     def validate_artifact_lifecycle_payload(self) -> Event:
