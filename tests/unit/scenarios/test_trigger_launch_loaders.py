@@ -86,3 +86,16 @@ def test_validate_trigger_launch_rejects_malformed_conversation_context(
 
     with pytest.raises(ValidationError):
         validate_trigger_launch(fixture)
+
+
+@pytest.mark.parametrize('level', ['minimal', 'low', 'medium', 'high', 'xhigh', 'max'])
+def test_validate_trigger_launch_carries_every_reasoning_level(level: str) -> None:
+    """Deliver the reasoning level of the pinned agent version, xhigh and max included."""
+    fixture = _load_fixture('valid_trigger_launches.json')[0]
+    snapshot = cast('dict[str, object]', fixture['agent_version_snapshot'])
+    snapshot['options'] = {'reasoning': level}
+
+    validated = validate_trigger_launch(fixture)
+
+    assert validated.agent_version_snapshot.options is not None
+    assert validated.agent_version_snapshot.options.reasoning == level

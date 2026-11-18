@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 AgentExecutionMode: TypeAlias = Literal['worker', 'webhook', 'hosted_only']
 ModelTier: TypeAlias = Literal['auto', 'fast', 'balanced', 'max', 'ultra']
 PlanningTier: TypeAlias = Literal['auto', 'standard', 'advanced', 'deep']
-ReasoningLevel: TypeAlias = Literal['minimal', 'low', 'medium', 'high']
+ReasoningLevel: TypeAlias = Literal['minimal', 'low', 'medium', 'high', 'xhigh', 'max']
 MemoryLevel: TypeAlias = Literal['none', 'glimpse', 'focus', 'clarity']
 MemoryPersistenceMode: TypeAlias = Literal[
     'persist_none',

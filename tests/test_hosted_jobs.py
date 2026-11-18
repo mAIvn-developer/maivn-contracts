@@ -2,11 +2,13 @@
 
 import json
 from pathlib import Path
+from typing import get_args
 
 import pytest
 from pydantic import ValidationError
 
 from maivn_contracts.jobs import HostedJobOptions, HostedJobStatus
+from maivn_contracts.jobs.model import JobTerminalReason
 
 
 @pytest.mark.parametrize(
@@ -70,3 +72,25 @@ def test_shared_binding_fixtures_agree_with_python(
     for value in json.loads((folder / f'invalid_{name}.json').read_text()):
         with pytest.raises(ValidationError):
             model.model_validate(value)
+
+
+def test_terminal_reasons_stay_the_released_list() -> None:
+    """A released client rejects a whole job status that carries a reason it never shipped with.
+
+    Adding a value here is a wire change, not an internal one. A reason that any job
+    can end with must reach clients as one of these; a new one is safe only when
+    nothing but a client that already knows it can cause it.
+    """
+    assert get_args(JobTerminalReason) == (
+        'completed',
+        'failed',
+        'cancelled',
+        'interrupted',
+        'execution_outcome_unknown',
+        'deadline_exceeded',
+        'idle_timeout',
+        'steps_exhausted',
+        'budget_exhausted',
+        'start_failed',
+        'authorization_revoked',
+    )

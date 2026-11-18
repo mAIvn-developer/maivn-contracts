@@ -2643,3 +2643,91 @@ def test_redaction_receipt_reaches_only_the_pause_of_its_own_tool() -> None:
     answers = [pause.detail.get('answer') for pause in _interrupts(trace.root)]
 
     assert answers == ['[REDACTED]', 'blue']
+
+
+def test_routing_detail_shows_substitution_preference_and_purpose() -> None:
+    """Why a route differs from its catalog cell, an unused preference and the purpose show."""
+    payload = {
+        'mode': 'deployment_default',
+        'purpose': 'deployment_default',
+        'model': 'gpt-6-sol',
+        'chain': ['openai/gpt-6-sol', 'anthropic/claude-sonnet-5-5'],
+        'route_substitution': ['reasoning_off_unsupported', 'backup_from_adjacent_cell'],
+        'substituted_routes': ['anthropic/claude-opus-5-5'],
+        'routing_preference_ignored': 'structured_run',
+        'reasoning': 'off',
+        'selector_reasoning_estimate': 'high',
+        'signals': {'deliverable': 1, 'constraints': 2, 'complexity_score': 7},
+    }
+    events = [
+        _event(1, 'assignment_received', payload={'stage': 'session_started'}),
+        _event(2, 'model_routing', payload=payload, ts='2026-07-13T22:00:01Z'),
+        _event(3, 'final', ts='2026-07-13T22:00:02Z'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+
+    routing = next(child for child in trace.root.children if child.kind == 'routing')
+    assert routing.detail is not None
+    for key in (
+        'route_substitution',
+        'substituted_routes',
+        'routing_preference_ignored',
+        'purpose',
+        'signals',
+    ):
+        assert routing.detail[key] == payload[key]
+    assert 'reasoning' not in routing.detail
+    assert 'selector_reasoning_estimate' not in routing.detail
+
+
+def test_routing_detail_names_the_model_that_served_a_provider_fallback() -> None:
+    """A caller who named one model sees that another answered, and that the provider chose it."""
+    payload = {
+        'mode': 'role_auto',
+        'requested_model': 'claude-fable-5-1',
+        'served_model': 'claude-opus-4-8',
+        'served_provider': 'anthropic',
+        'provider_fallback': True,
+    }
+    events = [
+        _event(1, 'assignment_received', payload={'stage': 'session_started'}),
+        _event(2, 'model_routing', payload=payload, ts='2026-11-15T22:00:01Z'),
+        _event(3, 'final', ts='2026-11-15T22:00:02Z'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+
+    routing = next(child for child in trace.root.children if child.kind == 'routing')
+    assert routing.detail is not None
+    assert routing.detail['served_model'] == 'claude-opus-4-8'
+    assert routing.detail['provider_fallback'] is True
+
+
+def test_routing_detail_shows_the_specialty_decision() -> None:
+    """The task area and what the cell's specialty policy did show; nothing else is added."""
+    specialty = {
+        'task_area': 'frontend',
+        'task_area_source': 'instruction',
+        'task_area_confidence': 'high',
+        'specialty_policy': 'shadow',
+        'specialty_outcome': 'would_reorder',
+        'specialty_order_before': [0, 1],
+        'specialty_order_after': [1, 0],
+        'specialty_lead_band': 'top',
+        'specialty_rating_basis': 'measured',
+        'specialty_rated_candidates': 2,
+    }
+    payload = {'mode': 'auto', 'model': 'gpt-6-sol', 'chain': ['openai/gpt-6-sol'], **specialty}
+    events = [
+        _event(1, 'assignment_received', payload={'stage': 'session_started'}),
+        _event(2, 'model_routing', payload=payload, ts='2026-07-13T22:00:01Z'),
+        _event(3, 'final', ts='2026-07-13T22:00:02Z'),
+    ]
+
+    trace = assemble_session_trace(events, session_id=_PARENT)
+
+    routing = next(child for child in trace.root.children if child.kind == 'routing')
+    assert routing.detail is not None
+    for key, value in specialty.items():
+        assert routing.detail[key] == value

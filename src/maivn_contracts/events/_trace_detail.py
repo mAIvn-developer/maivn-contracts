@@ -26,6 +26,10 @@ _ROUTING_DETAIL_KEYS = (
     'complexity',
     'model',
     'chain',
+    'route_substitution',
+    'substituted_routes',
+    'routing_preference_ignored',
+    'purpose',
     'selection_policy',
     'fallback_policy',
     'policy_origin',
@@ -47,6 +51,23 @@ _ROUTING_DETAIL_KEYS = (
     'elapsed_ms',
     'usage_status',
     'reasons',
+    'signals',
+    # The model that answered, and a flag when the provider itself switched to it from
+    # the requested model (server-side fallback). The record already carries both.
+    'served_model',
+    'provider_fallback',
+    # Specialty routing: what area the request was read as and what the cell's policy
+    # did with it. Closed labels and positions only.
+    'task_area',
+    'task_area_source',
+    'task_area_confidence',
+    'specialty_policy',
+    'specialty_outcome',
+    'specialty_order_before',
+    'specialty_order_after',
+    'specialty_lead_band',
+    'specialty_rating_basis',
+    'specialty_rated_candidates',
 )
 
 

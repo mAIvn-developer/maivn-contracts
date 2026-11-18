@@ -205,3 +205,34 @@ def test_validators_reject_invalid_golden_fixtures(
     for fixture in _load_fixture(fixture_name):
         with pytest.raises(ValidationError):
             validators[validator_name](fixture)
+
+
+@pytest.mark.parametrize('level', ['minimal', 'low', 'medium', 'high', 'xhigh', 'max'])
+def test_validate_agent_version_accepts_every_reasoning_level(level: str) -> None:
+    """Keep all six reasoning levels, including xhigh and max, on a stored agent version."""
+    fixture = _load_fixture('valid_agent_versions.json')[0]
+    fixture['options'] = {**fixture.get('options', {}), 'reasoning': level}
+
+    validated = validate_agent_version(fixture)
+
+    assert validated.options is not None
+    assert validated.options.reasoning == level
+    assert validated.model_dump(mode='json', exclude_none=True)['options']['reasoning'] == level
+
+
+def test_agent_version_schema_lists_the_six_reasoning_levels_in_order() -> None:
+    """Pin the schema enum so the two highest levels cannot silently drop out."""
+    schema = load_agent_version_schema()
+
+    enum = schema['$defs']['versionOptions']['properties']['reasoning']['enum']
+
+    assert enum == ['minimal', 'low', 'medium', 'high', 'xhigh', 'max']
+
+
+def test_validate_agent_version_rejects_an_unknown_reasoning_level() -> None:
+    """Reject a level outside the vocabulary."""
+    fixture = _load_fixture('valid_agent_versions.json')[0]
+    fixture['options'] = {**fixture.get('options', {}), 'reasoning': 'ultra'}
+
+    with pytest.raises(ValidationError):
+        validate_agent_version(fixture)

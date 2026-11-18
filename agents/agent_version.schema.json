@@ -754,7 +754,7 @@
       "properties": {
         "reasoning": {
           "type": "string",
-          "enum": ["minimal", "low", "medium", "high"]
+          "enum": ["minimal", "low", "medium", "high", "xhigh", "max"]
         },
         "stream_response": {
           "type": "boolean"

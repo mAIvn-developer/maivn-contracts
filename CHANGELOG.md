@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-11-17
+
+### Added
+- Reasoning levels `xhigh` and `max` for the deepest reasoning a model offers; a model that lacks the requested level runs at the nearest level it does offer.
+- Routing trace detail: which routes were substituted and why, the signals read from the request, the model that answered, whether the provider itself switched to it, and the specialty-routing labels and positions. Closed labels only.
+
 ## [0.1.5] - 2026-11-10
 
 ### Added
