@@ -173,10 +173,14 @@ def test_load_run_config_schema_exposes_v1_grounded_defaults() -> None:
         'plan_node_id',
         'decomposition_depth',
         'recursion_limit',
+        'max_cycles',
         'redaction_preview_id',
         'durability',
         'origin',
     }
+    assert schema['properties']['max_cycles']['minimum'] == 1
+    assert schema['properties']['max_cycles']['maximum'] == _RECURSION_LIMIT_MAX
+    assert 'default' not in schema['properties']['max_cycles']
     assert schema['properties']['recursion_limit']['default'] == _RECURSION_LIMIT_DEFAULT
     assert schema['properties']['recursion_limit']['minimum'] == 1
     assert schema['properties']['recursion_limit']['maximum'] == _RECURSION_LIMIT_MAX
@@ -205,6 +209,26 @@ def test_run_config_accepts_closed_system_model_choices() -> None:
         'compose_argument': {'tier': 'ultra'},
         'repl': {'model_id': 'gpt-5.6-luna'},
     }
+
+
+def test_run_config_carries_an_optional_caller_cycle_cap() -> None:
+    """A caller may lower the model-loop cap; unset stays absent from the payload."""
+    base = {'user_id': 'usr-cycles', 'thread_id': 'thr-cycles'}
+    capped = validate_run_config({**base, 'max_cycles': 3})
+    assert capped.max_cycles == 3  # noqa: PLR2004 - the value the caller set.
+    unset = validate_run_config(base)
+    assert unset.max_cycles is None
+    assert 'max_cycles' not in unset.model_dump(mode='json', exclude_none=True)
+
+
+@pytest.mark.parametrize('bad_cap', [0, 1001, True, 2.5])
+def test_run_config_rejects_cycle_caps_outside_the_closed_range(bad_cap: object) -> None:
+    """The cap is a strict integer from 1 to 1000, matching recursion_limit's bounds."""
+    payload = {'user_id': 'usr-cycles', 'thread_id': 'thr-cycles', 'max_cycles': bad_cap}
+    with pytest.raises(ValidationError):
+        validate_run_config(payload)
+    with pytest.raises((ValueError, TypeError)):
+        RunConfig.model_validate(payload)
 
 
 def test_load_command_schema_keeps_runtime_goto_internal() -> None:

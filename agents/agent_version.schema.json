@@ -843,6 +843,12 @@
           "type": "integer",
           "minimum": 32,
           "maximum": 12000
+        },
+        "minimum_similarity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Optional similarity floor for broadly recalled memory; explicitly bound resources stay available. Absent means the platform's default floor."
         }
       }
     },

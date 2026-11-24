@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-11-22
+
+### Added
+- `RunConfig.max_cycles`, an optional caller cap on a run's model-loop cycles (1 to 1000). The platform runs the smaller of this value and its own cap. Absent means the platform cap alone. Both fields are request fields that callers omit when unset, so older clients are unaffected.
+- `AgentMemoryRetrievalPolicy.minimum_similarity`, an optional similarity floor (0 to 1) for broadly recalled memory. Explicitly bound resources stay available. Absent means the platform's default floor.
+
 ## [0.1.6] - 2026-11-17
 
 ### Added

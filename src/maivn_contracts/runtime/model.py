@@ -243,6 +243,14 @@ class RunConfig(BaseModel):
         default=100,
         description='Runtime cycle guard; defaults to the v1 parity value of 100.',
     )
+    max_cycles: RecursionLimit | None = Field(
+        default=None,
+        description=(
+            "Optional caller cap on this run's model-loop cycles. The platform runs the "
+            'smaller of this value and its own cap; absent means the platform cap alone. '
+            'Not recursion_limit, which bounds delegation depth.'
+        ),
+    )
     durability: Durability = Field(
         default='exit',
         description='Checkpoint persistence mode; exit persists at run exit or interrupt.',
